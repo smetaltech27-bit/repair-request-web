@@ -8,7 +8,6 @@ import {
   Pencil,
   Plus,
   RefreshCw,
-  Search,
   ShieldAlert,
   UserRoundCheck,
   UserRoundX,
@@ -403,16 +402,15 @@ export function EmployeeManagement({
 
       <Card className="mt-5 p-4">
         <div className="grid gap-3 md:grid-cols-[1fr_auto_auto]">
-          <label className="relative block">
+          <label className="block">
             <span className="sr-only">ค้นหาพนักงาน</span>
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
             <input
               value={query}
               onChange={(event) => {
                 setQuery(event.target.value)
                 setCurrentPage(1)
               }}
-              className="form-control pl-11"
+              className="form-control"
               placeholder="ค้นหาชื่อ Username Email แผนก Role หรือ USER-xxx"
             />
           </label>
