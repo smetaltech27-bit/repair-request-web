@@ -1,36 +1,20 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Camera, FileCheck2, Info, Send, Wrench } from 'lucide-react'
+import { Camera, FileCheck2, Info, Send } from 'lucide-react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { z } from 'zod'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
-import { useDepartments } from '../hooks/useRepairData'
 import { compressRepairImage } from '../lib/imageProcessing'
+import { requestSchema, type RequestForm } from '../lib/newRequestValidation'
 import { createRepairRequest, removeRepairImage, uploadRepairImage } from '../lib/repairService'
-
-const MAX_SOURCE_FILE_SIZE = 20 * 1024 * 1024
-const acceptedImageTypes = ['image/jpeg', 'image/png', 'image/webp']
-
-const requestSchema = z.object({
-  department: z.string().min(1, 'กรุณาเลือกแผนก'),
-  machineId: z.string().trim().min(2, 'กรุณาระบุเครื่องจักรอย่างน้อย 2 ตัวอักษร'),
-  issueDetails: z.string().trim().min(10, 'กรุณาอธิบายปัญหาอย่างน้อย 10 ตัวอักษร').max(1000, 'รายละเอียดต้องไม่เกิน 1,000 ตัวอักษร'),
-  image: z
-    .custom<FileList>()
-    .optional()
-    .refine((files) => !files?.length || files[0].size <= MAX_SOURCE_FILE_SIZE, 'รูปต้นฉบับต้องมีขนาดไม่เกิน 20 MB')
-    .refine((files) => !files?.length || acceptedImageTypes.includes(files[0].type), 'รองรับเฉพาะ JPG, PNG และ WebP'),
-})
-
-type RequestForm = z.infer<typeof requestSchema>
 
 export function NewRequestPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const { departments, isLoading: isLoadingDepartments, error: departmentError } = useDepartments()
+  const [imagePreviewUrl, setImagePreviewUrl] = useState('')
   const {
     register,
     handleSubmit,
@@ -38,16 +22,29 @@ export function NewRequestPage() {
     formState: { errors, isSubmitting },
   } = useForm<RequestForm>({
     resolver: zodResolver(requestSchema),
-    defaultValues: { department: user?.departmentId ?? '' },
   })
   const detailsLength = useWatch({ control, name: 'issueDetails' })?.length ?? 0
   const selectedImage = useWatch({ control, name: 'image' })?.[0]
-  const selectableDepartments = user?.roleCode === 'factory_manager' || user?.roleCode === 'purchasing'
-    ? departments
-    : departments.filter((department) => department.id === user?.departmentId)
+  const imageRegistration = register('image')
+
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl)
+    }
+  }, [imagePreviewUrl])
+
+  function selectImage(event: ChangeEvent<HTMLInputElement>) {
+    void imageRegistration.onChange(event)
+    const file = event.target.files?.[0]
+    setImagePreviewUrl(file ? URL.createObjectURL(file) : '')
+  }
 
   async function onSubmit(values: RequestForm) {
     if (!user) return
+    if (!user.departmentId) {
+      toast.error('ส่งใบแจ้งซ่อมไม่สำเร็จ', { description: 'บัญชีผู้ใช้ยังไม่ได้กำหนดแผนก กรุณาติดต่อผู้ดูแลระบบ' })
+      return
+    }
     let uploadedPath = ''
     try {
       const sourceImage = values.image?.[0]
@@ -55,7 +52,7 @@ export function NewRequestPage() {
       if (compressedImage) uploadedPath = await uploadRepairImage(compressedImage, user.id, 'new')
 
       await createRepairRequest({
-        departmentId: values.department,
+        departmentId: user.departmentId,
         machineId: values.machineId,
         issueDetails: values.issueDetails,
         attachment: compressedImage && uploadedPath ? { path: uploadedPath, file: compressedImage } : undefined,
@@ -96,21 +93,8 @@ export function NewRequestPage() {
             </div>
 
             <div>
-              <label htmlFor="department" className="mb-2 block text-sm font-bold text-slate-700">แผนก <span className="text-red-500">*</span></label>
-              <select id="department" className="form-control" disabled={isLoadingDepartments} {...register('department')}>
-                <option value="">เลือกแผนก</option>
-                {selectableDepartments.map((department) => <option key={department.id} value={department.id}>{department.name}</option>)}
-              </select>
-              {errors.department && <p className="form-error">{errors.department.message}</p>}
-              {departmentError && <p className="form-error">{departmentError}</p>}
-            </div>
-
-            <div>
               <label htmlFor="machineId" className="mb-2 block text-sm font-bold text-slate-700">เครื่องจักร / รหัสเครื่อง <span className="text-red-500">*</span></label>
-              <div className="relative">
-                <Wrench className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
-                <input id="machineId" placeholder="เช่น CNC YAMASAKI 2" className="form-control pl-11" {...register('machineId')} />
-              </div>
+              <input id="machineId" placeholder="เช่น CNC YAMASAKI 2" className="form-control" {...register('machineId')} />
               {errors.machineId && <p className="form-error">{errors.machineId.message}</p>}
             </div>
 
@@ -125,19 +109,38 @@ export function NewRequestPage() {
 
             <div>
               <label htmlFor="image" className="mb-2 block text-sm font-bold text-slate-700">รูปภาพประกอบ</label>
-              <label htmlFor="image" className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-4 text-center transition hover:border-teal-400 hover:bg-teal-50/40">
-                <Camera className="size-8 text-teal-600" />
-                <span className="mt-2 text-sm font-bold text-slate-700">ถ่ายรูปหรือเลือกรูปภาพ</span>
-                <span className="mt-1 text-xs text-slate-500">JPG, PNG หรือ WebP · ระบบย่อรูปใหญ่ให้อัตโนมัติ</span>
+              <label htmlFor="image" className="flex min-h-36 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 text-center transition hover:border-teal-400 hover:bg-teal-50/40">
+                {imagePreviewUrl ? (
+                  <div className="relative w-full">
+                    <img src={imagePreviewUrl} alt="ตัวอย่างรูปภาพประกอบ" className="h-56 w-full bg-slate-100 object-contain" />
+                    <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-slate-950/70 px-4 py-3 text-sm font-bold text-white">
+                      <Camera className="size-4" /> แตะเพื่อเปลี่ยนรูป
+                    </span>
+                  </div>
+                ) : (
+                  <span className="flex flex-col items-center px-4">
+                    <Camera className="size-8 text-teal-600" />
+                    <span className="mt-2 text-sm font-bold text-slate-700">ถ่ายรูปหรือเลือกรูปภาพ</span>
+                    <span className="mt-1 text-xs text-slate-500">JPG, PNG หรือ WebP · ระบบย่อรูปใหญ่ให้อัตโนมัติ</span>
+                  </span>
+                )}
               </label>
-              <input id="image" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="sr-only" {...register('image')} />
+              <input
+                id="image"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                capture="environment"
+                className="sr-only"
+                {...imageRegistration}
+                onChange={selectImage}
+              />
               {errors.image && <p className="form-error">{errors.image.message}</p>}
               {selectedImage && <p className="mt-2 truncate text-xs font-semibold text-teal-700">เลือกแล้ว: {selectedImage.name}</p>}
             </div>
 
             <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
               <Button type="button" variant="secondary" onClick={() => navigate(-1)}>ยกเลิก</Button>
-              <Button type="submit" disabled={isSubmitting || isLoadingDepartments}><Send className="size-4" /> {isSubmitting ? 'กำลังบีบอัดและบันทึก…' : 'ส่งใบแจ้งซ่อม'}</Button>
+              <Button type="submit" disabled={isSubmitting}><Send className="size-4" /> {isSubmitting ? 'กำลังบีบอัดและบันทึก…' : 'ส่งใบแจ้งซ่อม'}</Button>
             </div>
           </form>
         </Card>
