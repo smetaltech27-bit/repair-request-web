@@ -39,8 +39,8 @@ export function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-svh bg-slate-950 lg:grid-cols-[1.15fr_0.85fr]">
-      <section className="relative hidden overflow-hidden bg-slate-950 p-12 text-white lg:flex lg:flex-col lg:justify-between">
+    <main className="grid min-h-svh bg-slate-950 lg:grid-cols-[minmax(22rem,28.75%)_1fr]">
+      <section className="relative hidden overflow-hidden bg-slate-950 p-8 text-white lg:flex lg:flex-col lg:justify-between xl:p-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(13,148,136,0.28),transparent_34%),radial-gradient(circle_at_80%_70%,rgba(14,165,233,0.18),transparent_34%)]" />
         <div className="absolute -bottom-44 -left-24 size-[32rem] rounded-full border border-teal-400/10" />
         <div className="absolute -bottom-28 -left-10 size-[24rem] rounded-full border border-teal-400/10" />
