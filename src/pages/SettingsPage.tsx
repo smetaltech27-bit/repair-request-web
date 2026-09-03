@@ -66,12 +66,11 @@ function PasswordField({ id, label, error, autoComplete, registration }: Passwor
     <div>
       <label htmlFor={id} className="mb-2 block text-sm font-bold text-slate-700">{label}</label>
       <div className="relative">
-        <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
         <input
           id={id}
           type={visible ? 'text' : 'password'}
           autoComplete={autoComplete}
-          className="form-control pl-11 pr-12"
+          className="form-control pr-12"
           {...registration}
         />
         <button
@@ -447,13 +446,12 @@ export function SettingsPage() {
               <div>
                 <label htmlFor="settings-unlock-password" className="mb-2 block text-sm font-bold text-slate-700">Settings Password</label>
                 <div className="relative">
-                  <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
                   <input
                     id="settings-unlock-password"
                     type={showUnlockPassword ? 'text' : 'password'}
                     autoComplete="off"
                     inputMode="text"
-                    className="form-control pl-11 pr-12"
+                    className="form-control pr-12"
                     placeholder="กรอก Settings Password"
                     {...register('password')}
                   />
