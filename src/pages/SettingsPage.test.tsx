@@ -3,10 +3,11 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SettingsPage } from './SettingsPage'
 
-const { unlockRepairSettings, listSettingsRepairRequests, listDepartments } = vi.hoisted(() => ({
+const { unlockRepairSettings, listSettingsRepairRequests, listDepartments, listSettingsEmployees } = vi.hoisted(() => ({
   unlockRepairSettings: vi.fn(),
   listSettingsRepairRequests: vi.fn(),
   listDepartments: vi.fn(),
+  listSettingsEmployees: vi.fn(),
 }))
 
 vi.mock('../auth/AuthContext', () => ({
@@ -30,6 +31,8 @@ vi.mock('../lib/repairService', () => ({
   updateSettingsRepairRequest: vi.fn(),
   softDeleteSettingsRepairRequest: vi.fn(),
   restoreSettingsRepairRequest: vi.fn(),
+  listSettingsEmployees,
+  saveSettingsEmployee: vi.fn(),
 }))
 
 describe('SettingsPage', () => {
@@ -53,6 +56,18 @@ describe('SettingsPage', () => {
       createdAt: '2026-09-03T00:00:00.000Z',
       updatedAt: '2026-09-03T00:00:00.000Z',
     }])
+    listSettingsEmployees.mockResolvedValue([{
+      id: '33333333-3333-4333-8333-333333333333',
+      legacyUid: 'USER-073',
+      username: 'sompol',
+      fullName: 'สมพล ว่องสิริชนน์',
+      departmentId: '11111111-1111-4111-8111-111111111111',
+      departmentName: 'Machine',
+      roleCode: 'employee',
+      isActive: true,
+      createdAt: '2026-09-03T00:00:00.000Z',
+      updatedAt: '2026-09-03T00:00:00.000Z',
+    }])
   })
 
   it('requires the separate settings password before showing management controls', async () => {
@@ -65,9 +80,25 @@ describe('SettingsPage', () => {
     await user.type(screen.getByLabelText('Settings Password'), '1234')
     await user.click(screen.getByRole('button', { name: /ปลดล็อก Settings/ }))
 
-    expect(await screen.findByRole('heading', { name: 'ตั้งค่าและจัดการรายการ' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'ตั้งค่าและจัดการระบบ' })).toBeInTheDocument()
     expect(screen.getByText('REQ-TEST-001')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'แก้ไข' })).toBeInTheDocument()
     expect(unlockRepairSettings).toHaveBeenCalledWith('1234')
+  })
+
+  it('loads employee administration only after its settings tab is selected', async () => {
+    const user = userEvent.setup()
+    render(<SettingsPage />)
+
+    await user.type(screen.getByLabelText('Settings Password'), '1234')
+    await user.click(screen.getByRole('button', { name: /ปลดล็อก Settings/ }))
+    await screen.findByText('REQ-TEST-001')
+
+    expect(listSettingsEmployees).not.toHaveBeenCalled()
+    await user.click(screen.getByRole('button', { name: /จัดการพนักงาน/ }))
+
+    expect(await screen.findByText('สมพล ว่องสิริชนน์')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /เพิ่มพนักงาน/ })).toBeInTheDocument()
+    expect(listSettingsEmployees).toHaveBeenCalledWith('test-session-token')
   })
 })

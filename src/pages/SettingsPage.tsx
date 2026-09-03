@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  ClipboardList,
   Clock3,
   Eye,
   EyeOff,
@@ -12,12 +13,14 @@ import {
   Settings2,
   ShieldCheck,
   Trash2,
+  Users,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useAuth } from '../auth/AuthContext'
 import { DataError, DataLoading } from '../components/DataState'
+import { EmployeeManagement } from '../components/settings/EmployeeManagement'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Modal } from '../components/ui/Modal'
@@ -306,6 +309,7 @@ export function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [loadError, setLoadError] = useState('')
   const [query, setQuery] = useState('')
+  const [settingsSection, setSettingsSection] = useState<'requests' | 'employees'>('requests')
   const [viewMode, setViewMode] = useState<'active' | 'trash'>('active')
   const [editingRequest, setEditingRequest] = useState<SettingsRepairRequest | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<SettingsRepairRequest | null>(null)
@@ -324,6 +328,7 @@ export function SettingsPage() {
     setSessionToken('')
     setSessionExpiresAt('')
     setRequests([])
+    setSettingsSection('requests')
     setEditingRequest(null)
     setDeleteTarget(null)
     setPasswordModalOpen(false)
@@ -490,18 +495,47 @@ export function SettingsPage() {
       <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div>
           <p className="text-sm font-semibold text-teal-600">Administration</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">ตั้งค่าและจัดการรายการ</h1>
-          <p className="mt-1 text-sm text-slate-500">แก้ไข ลบ และกู้คืนรายการแจ้งซ่อม พร้อมบันทึก Audit Log</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">ตั้งค่าและจัดการระบบ</h1>
+          <p className="mt-1 text-sm text-slate-500">จัดการรายการแจ้งซ่อมและบัญชีพนักงาน พร้อมบันทึก Audit Log</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" onClick={() => void loadSettingsData(sessionToken)} disabled={isLoading}>
-            <RefreshCw className={`size-4 ${isLoading ? 'animate-spin' : ''}`} /> รีเฟรช
-          </Button>
+          {settingsSection === 'requests' && (
+            <Button variant="secondary" onClick={() => void loadSettingsData(sessionToken)} disabled={isLoading}>
+              <RefreshCw className={`size-4 ${isLoading ? 'animate-spin' : ''}`} /> รีเฟรช
+            </Button>
+          )}
           <Button variant="secondary" onClick={() => setPasswordModalOpen(true)}><KeyRound className="size-4" /> เปลี่ยน Password</Button>
           <Button variant="ghost" onClick={lockSettings}><LockKeyhole className="size-4" /> ล็อก</Button>
         </div>
       </div>
 
+      <Card className="mt-5 p-1.5">
+        <div className="grid grid-cols-2 gap-1.5">
+          <button
+            type="button"
+            onClick={() => setSettingsSection('requests')}
+            className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition ${settingsSection === 'requests' ? 'bg-slate-950 text-white shadow-lg shadow-slate-950/15' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}
+          >
+            <ClipboardList className="size-4" /> จัดการรายการแจ้งซ่อม
+          </button>
+          <button
+            type="button"
+            onClick={() => setSettingsSection('employees')}
+            className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition ${settingsSection === 'employees' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/20' : 'text-slate-500 hover:bg-teal-50 hover:text-teal-800'}`}
+          >
+            <Users className="size-4" /> จัดการพนักงาน
+          </button>
+        </div>
+      </Card>
+
+      {settingsSection === 'employees' ? (
+        <EmployeeManagement
+          sessionToken={sessionToken}
+          departments={departments}
+          onSessionExpired={lockSettings}
+        />
+      ) : (
+      <>
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
         <Card className="p-4"><p className="text-xs font-bold text-slate-500">รายการใช้งาน</p><p className="mt-1 text-2xl font-bold text-slate-950">{activeCount}</p></Card>
         <Card className="p-4"><p className="text-xs font-bold text-slate-500">ในถังขยะ</p><p className="mt-1 text-2xl font-bold text-red-600">{trashCount}</p></Card>
@@ -561,6 +595,8 @@ export function SettingsPage() {
           </Card>
         )}
       </div>
+      </>
+      )}
 
       <EditRequestModal
         request={editingRequest}

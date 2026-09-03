@@ -47,6 +47,43 @@ export const settingsRequestSchema = z.object({
   }
 })
 
+export const employeeRoleCodes = [
+  'employee',
+  'supervisor',
+  'department_manager',
+  'factory_manager',
+  'purchasing',
+] as const
+
+const employeePasswordSchema = z.string().refine((value) => {
+  if (!value) return true
+  if (/^\d{4}$/.test(value)) return true
+  const characterLength = Array.from(value).length
+  const byteLength = new TextEncoder().encode(value).length
+  return characterLength >= 6 && byteLength <= 72
+}, 'ใช้ตัวเลข 4 หลัก หรือ Password ตั้งแต่ 6 ตัวอักษรและไม่เกิน 72 bytes')
+
+export const settingsEmployeeSchema = z.object({
+  username: z
+    .string()
+    .trim()
+    .min(1, 'กรุณากรอก Username')
+    .max(120, 'Username ต้องไม่เกิน 120 ตัวอักษร')
+    .regex(/^\S+$/, 'Username ต้องไม่มีช่องว่าง'),
+  password: employeePasswordSchema,
+  confirmPassword: z.string(),
+  fullName: z.string().trim().min(1, 'กรุณากรอกชื่อ–นามสกุล').max(200, 'ชื่อต้องไม่เกิน 200 ตัวอักษร'),
+  email: z.union([z.literal(''), z.string().trim().email('รูปแบบ Email ไม่ถูกต้อง')]),
+  departmentId: z.string().uuid('กรุณาเลือกแผนก'),
+  roleCode: z.enum(employeeRoleCodes),
+  isActive: z.boolean(),
+}).superRefine((values, context) => {
+  if (values.password !== values.confirmPassword) {
+    context.addIssue({ code: 'custom', path: ['confirmPassword'], message: 'Password ทั้งสองช่องไม่ตรงกัน' })
+  }
+})
+
 export type SettingsUnlockForm = z.infer<typeof settingsUnlockSchema>
 export type SettingsPasswordForm = z.infer<typeof settingsPasswordSchema>
 export type SettingsRequestForm = z.infer<typeof settingsRequestSchema>
+export type SettingsEmployeeForm = z.infer<typeof settingsEmployeeSchema>

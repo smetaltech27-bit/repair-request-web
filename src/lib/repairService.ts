@@ -9,6 +9,8 @@ import type {
   RepairStatus,
   RepairStatusCode,
   SettingsRepairRequest,
+  SettingsEmployee,
+  SettingsEmployeeInput,
   SettingsUnlockResult,
 } from '../types/repair'
 
@@ -394,4 +396,80 @@ export async function changeRepairSettingsPassword(input: {
     success: boolean
     code?: 'INVALID_CURRENT_PASSWORD' | 'INVALID_NEW_PASSWORD' | 'DEFAULT_PASSWORD_NOT_ALLOWED' | 'PASSWORD_UNCHANGED'
   }
+}
+
+interface RawSettingsEmployee {
+  id: string
+  legacy_uid: string | null
+  username: string
+  full_name: string
+  email: string | null
+  department_id: string | null
+  department_name: string | null
+  role: SettingsEmployee['roleCode']
+  is_active: boolean
+  avatar_path: string | null
+  avatar_url: string | null
+  created_at: string
+  updated_at: string
+}
+
+async function functionErrorText(error: unknown) {
+  if (error && typeof error === 'object' && 'context' in error) {
+    const context = (error as { context?: unknown }).context
+    if (context instanceof Response) {
+      try {
+        const payload = await context.clone().json() as { error?: string }
+        if (payload.error) return payload.error
+      } catch {
+        // Fall back to the SDK error below when the response is not JSON.
+      }
+    }
+  }
+  return error instanceof Error ? error.message : 'Supabase Edge Function ไม่สามารถดำเนินการได้'
+}
+
+function mapSettingsEmployee(row: RawSettingsEmployee): SettingsEmployee {
+  return {
+    id: row.id,
+    legacyUid: row.legacy_uid ?? undefined,
+    username: row.username,
+    fullName: row.full_name,
+    email: row.email ?? undefined,
+    departmentId: row.department_id ?? undefined,
+    departmentName: row.department_name ?? '-',
+    roleCode: row.role,
+    isActive: row.is_active,
+    avatarPath: row.avatar_path ?? undefined,
+    avatarUrl: row.avatar_url ?? undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }
+}
+
+export async function listSettingsEmployees(sessionToken: string) {
+  const client = requireSupabase()
+  const { data, error } = await client.functions.invoke('repair-admin-user', {
+    body: { action: 'list', sessionToken },
+  })
+  if (error) throw new Error(await functionErrorText(error))
+  if (data?.error) throw new Error(String(data.error))
+  return ((data?.employees ?? []) as RawSettingsEmployee[]).map(mapSettingsEmployee)
+}
+
+export async function saveSettingsEmployee(input: {
+  sessionToken: string
+  employee: SettingsEmployeeInput
+}) {
+  const client = requireSupabase()
+  const { data, error } = await client.functions.invoke('repair-admin-user', {
+    body: {
+      action: input.employee.id ? 'update' : 'create',
+      sessionToken: input.sessionToken,
+      employee: input.employee,
+    },
+  })
+  if (error) throw new Error(await functionErrorText(error))
+  if (data?.error) throw new Error(String(data.error))
+  return mapSettingsEmployee(data.employee as RawSettingsEmployee)
 }

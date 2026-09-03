@@ -113,6 +113,34 @@ export interface SettingsRepairRequest {
   deletedByName?: string
 }
 
+export interface SettingsEmployee {
+  id: string
+  legacyUid?: string
+  username: string
+  fullName: string
+  email?: string
+  departmentId?: string
+  departmentName: string
+  roleCode: UserRoleCode
+  isActive: boolean
+  avatarPath?: string
+  avatarUrl?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SettingsEmployeeInput {
+  id?: string
+  username: string
+  password?: string
+  fullName: string
+  email?: string
+  departmentId: string
+  roleCode: UserRoleCode
+  isActive: boolean
+  avatarDataUrl?: string
+}
+
 export type SettingsUnlockResult =
   | { success: true; token: string; expiresAt: string }
   | {
