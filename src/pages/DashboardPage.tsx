@@ -2,6 +2,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  CircleDollarSign,
   ClipboardClock,
   ClipboardList,
   Filter,
@@ -29,7 +30,12 @@ import type { PieLabelRenderProps } from 'recharts'
 import { DataError, DataLoading } from '../components/DataState'
 import { RequestDetails } from '../components/RequestDetails'
 import { useRepairRequests } from '../hooks/useRepairData'
-import { getDepartmentStats, getRepairStats } from '../lib/repairMetrics'
+import {
+  getDepartmentStats,
+  getRepairCostMonths,
+  getRepairStats,
+  getRepairTotalCost,
+} from '../lib/repairMetrics'
 import {
   filterRepairRequests,
   paginateRepairRequests,
@@ -57,6 +63,7 @@ const statColorClasses: Record<string, string> = {
   emerald: 'bg-emerald-50 text-emerald-600 ring-emerald-600/10',
   blue: 'bg-sky-50 text-sky-600 ring-sky-600/10',
   red: 'bg-red-50 text-red-600 ring-red-600/10',
+  violet: 'bg-violet-50 text-violet-600 ring-violet-600/10',
 }
 
 const RADIAN = Math.PI / 180
@@ -82,9 +89,12 @@ export function DashboardPage() {
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<RepairStatusFilter>('all')
   const [requestedPage, setRequestedPage] = useState(1)
+  const [costMonth, setCostMonth] = useState('all')
   const { requests, isLoading, error, refresh } = useRepairRequests()
   const stats = useMemo(() => getRepairStats(requests), [requests])
   const departmentData = useMemo(() => getDepartmentStats(requests), [requests])
+  const costMonths = useMemo(() => getRepairCostMonths(requests), [requests])
+  const totalCost = useMemo(() => getRepairTotalCost(requests, costMonth), [costMonth, requests])
   const pieData = useMemo(() => [
     { name: 'รออนุมัติ', value: stats.pending, color: '#f59e0b' },
     { name: 'กำลังดำเนินการ', value: stats.inProgress, color: '#10b981' },
@@ -116,7 +126,7 @@ export function DashboardPage() {
         </Button>
       </div>
 
-      <section className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+      <section className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         {statCards.map(({ key, label, icon: Icon, color }) => (
           <Card key={label} className="p-4 sm:p-5">
             <div className="flex items-start justify-between gap-3">
@@ -130,6 +140,30 @@ export function DashboardPage() {
             </div>
           </Card>
         ))}
+        <Card className="p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-slate-500 sm:text-sm">ค่าใช้จ่ายรวม (บาท)</p>
+              <p className="mt-2 whitespace-nowrap text-2xl font-bold tracking-tight text-slate-950 2xl:text-3xl">
+                {new Intl.NumberFormat('th-TH', { maximumFractionDigits: 2 }).format(totalCost)}
+              </p>
+            </div>
+            <span className={`grid size-10 shrink-0 place-items-center rounded-xl ring-1 ring-inset sm:size-11 ${statColorClasses.violet}`}>
+              <CircleDollarSign className="size-5" />
+            </span>
+          </div>
+          <label className="mt-3 block">
+            <span className="sr-only">กรองค่าใช้จ่ายตามเดือนที่ปิดงาน</span>
+            <select
+              value={costMonth}
+              onChange={(event) => setCostMonth(event.target.value)}
+              className="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs font-semibold text-slate-600 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-500/10"
+            >
+              <option value="all">ทุกเดือน</option>
+              {costMonths.map((month) => <option key={month.value} value={month.value}>{month.label}</option>)}
+            </select>
+          </label>
+        </Card>
       </section>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-2">

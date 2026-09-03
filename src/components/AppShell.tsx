@@ -240,8 +240,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               <PrivateProfileAvatar
                 avatarPath={user?.avatarPath}
                 fullName={user?.fullName}
-                className="size-9 rounded-xl"
-                fallbackClassName="bg-gradient-to-br from-teal-500 to-cyan-600 text-sm font-bold text-white"
+                className="size-12 rounded-2xl"
+                fallbackClassName="bg-gradient-to-br from-teal-500 to-cyan-600 text-base font-bold text-white"
               />
               <div className="hidden text-left sm:block">
                 <p className="max-w-36 truncate text-sm font-bold text-slate-900">{user?.fullName}</p>

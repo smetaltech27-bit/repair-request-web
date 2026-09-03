@@ -1,4 +1,10 @@
-import { getDepartmentStats, getRepairStats, getWeeklyTrend } from './repairMetrics'
+import {
+  getDepartmentStats,
+  getRepairCostMonths,
+  getRepairStats,
+  getRepairTotalCost,
+  getWeeklyTrend,
+} from './repairMetrics'
 import { repairStatusLabels } from './repairService'
 import type { RepairRequest, RepairStatusCode } from '../types/repair'
 
@@ -57,5 +63,19 @@ describe('repair metrics', () => {
       { department: 'ไม่ระบุแผนก', total: 1 },
       { department: 'Welding', total: 1 },
     ])
+  })
+
+  it('summarizes recorded completion costs by Bangkok closing month', () => {
+    const requests = [
+      { ...request('1', 'completed'), totalCost: 100.25, closedAt: '2026-09-02T18:00:00.000Z' },
+      { ...request('2', 'completed'), totalCost: 200, closedAt: '2026-09-20T02:00:00.000Z' },
+      { ...request('3', 'completed'), totalCost: 50, updatedAt: '2026-08-15T02:00:00.000Z' },
+      { ...request('4', 'pending_supervisor'), totalCost: 999, closedAt: '2026-09-03T02:00:00.000Z' },
+    ]
+
+    expect(getRepairTotalCost(requests)).toBe(350.25)
+    expect(getRepairTotalCost(requests, '2026-09')).toBe(300.25)
+    expect(getRepairTotalCost(requests, '2026-08')).toBe(50)
+    expect(getRepairCostMonths(requests).map((month) => month.value)).toEqual(['2026-09', '2026-08'])
   })
 })

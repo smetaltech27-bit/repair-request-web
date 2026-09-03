@@ -38,6 +38,39 @@ function bangkokDateKey(value: Date | string) {
   }).format(new Date(value))
 }
 
+function repairCostMonthKey(request: RepairRequest) {
+  return bangkokDateKey(request.closedAt ?? request.updatedAt).slice(0, 7)
+}
+
+function hasRecordedCost(request: RepairRequest) {
+  return request.statusCode === 'completed' && request.totalCost !== undefined && Number.isFinite(request.totalCost)
+}
+
+export function getRepairTotalCost(requests: RepairRequest[], month = 'all') {
+  return requests
+    .filter((request) => hasRecordedCost(request) && (month === 'all' || repairCostMonthKey(request) === month))
+    .reduce((total, request) => total + (request.totalCost ?? 0), 0)
+}
+
+export function getRepairCostMonths(requests: RepairRequest[]) {
+  const months = new Set(
+    requests
+      .filter(hasRecordedCost)
+      .map(repairCostMonthKey),
+  )
+
+  return Array.from(months)
+    .sort((left, right) => right.localeCompare(left))
+    .map((value) => ({
+      value,
+      label: new Intl.DateTimeFormat('th-TH', {
+        timeZone: 'Asia/Bangkok',
+        month: 'long',
+        year: 'numeric',
+      }).format(new Date(`${value}-15T12:00:00+07:00`)),
+    }))
+}
+
 export function getWeeklyTrend(requests: RepairRequest[], now = new Date()) {
   return Array.from({ length: 7 }, (_, index) => {
     const date = new Date(now.getTime() - (6 - index) * 24 * 60 * 60 * 1000)
