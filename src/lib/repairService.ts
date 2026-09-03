@@ -287,7 +287,7 @@ function throwSettingsError(error: { message?: string } | null) {
   if (error.message?.includes('SETTINGS_SESSION_EXPIRED')) {
     throw new Error('Settings Session หมดอายุ กรุณากรอก Password อีกครั้ง')
   }
-  throw error
+  throw new Error(error.message || 'Supabase ไม่สามารถดำเนินการได้')
 }
 
 export async function unlockRepairSettings(password: string): Promise<SettingsUnlockResult> {
