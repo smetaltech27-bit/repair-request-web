@@ -1,0 +1,15 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.local
+*.log
+scripts/legacy-*.json
+!scripts/legacy-users.example.json
+scripts/*credentials*.json
+.tmp-spreadsheet-analysis/
+supabase/.temp/
+.DS_Store
+Thumbs.db

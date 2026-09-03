@@ -1,0 +1,12 @@
+[
+  {
+    "legacy_uid": "EXAMPLE-001",
+    "username": "example.user",
+    "password": "REPLACE_ONLY_IN_UNTRACKED_MIGRATION_INPUT",
+    "full_name": "ผู้ใช้ตัวอย่าง",
+    "email": "example@company.invalid",
+    "department_code": "machine",
+    "role": "employee",
+    "is_active": true
+  }
+]
