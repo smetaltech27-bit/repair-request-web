@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "migration:validate-users": "node scripts/import-legacy-users.mjs",
     "migration:validate-repairs": "node scripts/import-legacy-repairs.mjs",
-    "migration:images": "node scripts/import-legacy-images.mjs"
+    "migration:images": "node scripts/import-legacy-images.mjs",
+    "migration:avatars": "node scripts/import-legacy-profile-avatars.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

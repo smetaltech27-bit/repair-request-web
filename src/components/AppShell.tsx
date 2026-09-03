@@ -21,6 +21,7 @@ import { useAuth } from '../auth/AuthContext'
 import { getUnreadNotificationCount, listNotifications, markNotificationRead } from '../lib/repairService'
 import { cn, timeAgo } from '../lib/utils'
 import type { RepairNotification } from '../types/repair'
+import { PrivateProfileAvatar } from './PrivateProfileAvatar'
 import { Button } from './ui/Button'
 
 const desktopNavigation = [
@@ -236,9 +237,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
             <div className="hidden h-8 w-px bg-slate-200 sm:block" />
             <button className="flex items-center gap-3 rounded-xl p-1.5 transition hover:bg-slate-100">
-              <div className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-sm font-bold text-white">
-                {user?.fullName.charAt(0)}
-              </div>
+              <PrivateProfileAvatar
+                avatarPath={user?.avatarPath}
+                fullName={user?.fullName}
+                className="size-9 rounded-xl"
+                fallbackClassName="bg-gradient-to-br from-teal-500 to-cyan-600 text-sm font-bold text-white"
+              />
               <div className="hidden text-left sm:block">
                 <p className="max-w-36 truncate text-sm font-bold text-slate-900">{user?.fullName}</p>
                 <p className="text-xs text-slate-500">{user?.role}</p>

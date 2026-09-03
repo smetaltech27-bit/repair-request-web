@@ -42,6 +42,15 @@
 Department ที่ตรวจพบจริงทั้งใน `Sheet2` และ `USER` มี 9 ค่า: Accounting, Engineering,
 Grinding/QC/Delivery, HR, Laser&Punching&Bending, Machine, Planning, Sheet Metal และ Welding
 
+## Sheet2 employee pictures
+
+- `Email` -> จับคู่ `repair_profiles.legacy_username` ก่อน และใช้ `repair_profiles.email` เป็นทางสำรอง
+- `Fullname` -> ตรวจยืนยันว่าชื่อตรงกับ Profile ก่อนอัปโหลด ป้องกันรูปสลับคน
+- `Picture` -> ย้ายเข้า Private Bucket `repair-avatars`
+- Storage path -> `repair_profiles.avatar_path` โดยโฟลเดอร์แรกต้องเป็น UUID ของ Profile
+- ข้อมูลวันที่ 2026-09-03 จับคู่และย้ายสำเร็จ 71 รูป รวม 3.82 MiB
+- บัญชี `po2` และ `wisanu.mon.sa2534@gmail.com` ไม่มีรูปใน `Sheet2` เวอร์ชันที่นำเข้า จึงแสดงอักษรแรกเป็น Fallback
+
 ## Reconciliation baseline
 
 - ใบแจ้งซ่อมทั้งหมด 32 รายการ

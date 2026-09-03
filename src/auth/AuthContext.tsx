@@ -20,6 +20,7 @@ interface ProfileQueryRow {
   full_name: string
   role: string
   department_id: string | null
+  avatar_path: string | null
   repair_departments: { id: string; name: string } | { id: string; name: string }[] | null
 }
 
@@ -43,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) return null
     const { data, error } = await supabase
       .from('repair_profiles')
-      .select('id, legacy_username, full_name, role, department_id, repair_departments(id, name)')
+      .select('id, legacy_username, full_name, role, department_id, avatar_path, repair_departments(id, name)')
       .eq('id', authUserId)
       .eq('is_active', true)
       .single()
@@ -68,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       roleCode: profile.role as UserRoleCode,
       department: department ?? '-',
       departmentId: profile.department_id ?? undefined,
+      avatarPath: profile.avatar_path ?? undefined,
     } satisfies AppUser
   }, [])
 

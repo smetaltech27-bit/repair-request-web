@@ -1,6 +1,7 @@
 import { Building2, LogOut, Settings2, ShieldCheck, UserRound } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { PrivateProfileAvatar } from '../components/PrivateProfileAvatar'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 
@@ -21,7 +22,12 @@ export function ProfilePage() {
       </div>
       <Card className="mt-6 overflow-hidden">
         <div className="bg-gradient-to-br from-slate-950 to-slate-800 p-6 text-white sm:p-8">
-          <div className="grid size-16 place-items-center rounded-2xl bg-teal-500 text-2xl font-bold shadow-lg shadow-teal-500/20">{user?.fullName.charAt(0)}</div>
+          <PrivateProfileAvatar
+            avatarPath={user?.avatarPath}
+            fullName={user?.fullName}
+            className="size-20 rounded-2xl shadow-lg shadow-teal-500/20 sm:size-24"
+            fallbackClassName="bg-teal-500 text-2xl font-bold text-white"
+          />
           <h2 className="mt-4 text-xl font-bold">{user?.fullName}</h2>
           <p className="mt-1 text-sm text-slate-300">@{user?.username}</p>
         </div>

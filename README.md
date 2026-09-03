@@ -5,7 +5,7 @@
 ## สถานะปัจจุบัน
 
 - UI ใช้ Industrial Clarity ตามแบบที่อนุมัติ
-- เชื่อม Supabase Auth, Postgres และ Private Storage แล้ว
+- เชื่อม Supabase Auth, Postgres และ Private Storage แล้ว รวมถึงรูปโปรไฟล์พนักงานแบบ Private
 - Dashboard, รายการงาน, รายละเอียด, การอนุมัติ, Settings และ In-app Notification ใช้ข้อมูลจริงตาม RLS
 - นำเข้าบัญชีผู้ใช้ 73 บัญชี, ประวัติผู้ใช้ inactive 6 แถว และใบแจ้งซ่อม 32 รายการแล้ว
 - ย้ายรูปเดิม 53 ไฟล์เข้า Private Storage โดยเก็บลิงก์ Google Drive เดิมไว้

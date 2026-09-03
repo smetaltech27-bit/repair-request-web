@@ -94,6 +94,7 @@ export interface AppUser {
   roleCode: UserRoleCode
   department: string
   departmentId?: string
+  avatarPath?: string
 }
 
 export interface SettingsRepairRequest {

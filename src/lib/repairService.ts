@@ -13,6 +13,7 @@ import type {
 } from '../types/repair'
 
 const bucketName = 'repair-images'
+const avatarBucketName = 'repair-avatars'
 
 export const repairStatusLabels: Record<RepairStatusCode, RepairStatus> = {
   pending_supervisor: 'รอหัวหน้างานอนุมัติ',
@@ -215,6 +216,13 @@ export async function removeRepairImage(path: string) {
 export async function downloadRepairImage(path: string) {
   const client = requireSupabase()
   const { data, error } = await client.storage.from(bucketName).download(path)
+  if (error) throw error
+  return data
+}
+
+export async function downloadProfileAvatar(path: string) {
+  const client = requireSupabase()
+  const { data, error } = await client.storage.from(avatarBucketName).download(path)
   if (error) throw error
   return data
 }
