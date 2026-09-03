@@ -95,3 +95,28 @@ export interface AppUser {
   department: string
   departmentId?: string
 }
+
+export interface SettingsRepairRequest {
+  id: string
+  jobId: string
+  requesterName: string
+  departmentId: string
+  departmentName: string
+  machineId: string
+  issueDetails: string
+  statusCode: RepairStatusCode
+  totalCost?: number
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+  deletedByName?: string
+}
+
+export type SettingsUnlockResult =
+  | { success: true; token: string; expiresAt: string }
+  | {
+      success: false
+      code: 'AUTH_REQUIRED' | 'INVALID_PASSWORD' | 'TOO_MANY_ATTEMPTS'
+      remainingAttempts?: number
+      retryAfterSeconds?: number
+    }

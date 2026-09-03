@@ -8,6 +8,8 @@ import type {
   RepairRequestAction,
   RepairStatus,
   RepairStatusCode,
+  SettingsRepairRequest,
+  SettingsUnlockResult,
 } from '../types/repair'
 
 const bucketName = 'repair-images'
@@ -253,4 +255,135 @@ export async function markNotificationRead(notificationId: string) {
     p_notification_id: notificationId,
   })
   if (error) throw error
+}
+
+interface RawSettingsRequestRow {
+  id: string
+  job_id: string
+  requester_name: string
+  department_id: string
+  department_name: string
+  machine_id: string
+  issue_details: string
+  status: RepairStatusCode
+  total_cost: number | string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+  deleted_by_name: string | null
+}
+
+interface RawSettingsUnlockResult {
+  success: boolean
+  code?: SettingsUnlockResult extends { success: false; code: infer TCode } ? TCode : never
+  token?: string
+  expires_at?: string
+  remaining_attempts?: number
+  retry_after_seconds?: number
+}
+
+function throwSettingsError(error: { message?: string } | null) {
+  if (!error) return
+  if (error.message?.includes('SETTINGS_SESSION_EXPIRED')) {
+    throw new Error('Settings Session หมดอายุ กรุณากรอก Password อีกครั้ง')
+  }
+  throw error
+}
+
+export async function unlockRepairSettings(password: string): Promise<SettingsUnlockResult> {
+  const client = requireSupabase()
+  const { data, error } = await client.rpc('unlock_repair_settings', { p_password: password })
+  if (error) throw error
+  const result = data as RawSettingsUnlockResult
+  if (result.success && result.token && result.expires_at) {
+    return { success: true, token: result.token, expiresAt: result.expires_at }
+  }
+  return {
+    success: false,
+    code: result.code ?? 'INVALID_PASSWORD',
+    remainingAttempts: result.remaining_attempts,
+    retryAfterSeconds: result.retry_after_seconds,
+  }
+}
+
+export async function listSettingsRepairRequests(sessionToken: string) {
+  const client = requireSupabase()
+  const { data, error } = await client.rpc('list_repair_settings_requests', {
+    p_session_token: sessionToken,
+    p_include_deleted: true,
+  })
+  throwSettingsError(error)
+  return (data as RawSettingsRequestRow[]).map((row): SettingsRepairRequest => ({
+    id: row.id,
+    jobId: row.job_id,
+    requesterName: row.requester_name,
+    departmentId: row.department_id,
+    departmentName: row.department_name,
+    machineId: row.machine_id,
+    issueDetails: row.issue_details,
+    statusCode: row.status,
+    totalCost: row.total_cost === null ? undefined : Number(row.total_cost),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    deletedAt: row.deleted_at ?? undefined,
+    deletedByName: row.deleted_by_name ?? undefined,
+  }))
+}
+
+export async function updateSettingsRepairRequest(input: {
+  sessionToken: string
+  requestId: string
+  departmentId: string
+  machineId: string
+  issueDetails: string
+  statusCode: RepairStatusCode
+  totalCost?: number
+}) {
+  const client = requireSupabase()
+  const { error } = await client.rpc('update_repair_settings_request', {
+    p_session_token: input.sessionToken,
+    p_request_id: input.requestId,
+    p_department_id: input.departmentId,
+    p_machine_id: input.machineId,
+    p_issue_details: input.issueDetails,
+    p_status: input.statusCode,
+    p_total_cost: input.totalCost ?? null,
+  })
+  throwSettingsError(error)
+}
+
+export async function softDeleteSettingsRepairRequest(sessionToken: string, requestId: string) {
+  const client = requireSupabase()
+  const { error } = await client.rpc('soft_delete_repair_settings_request', {
+    p_session_token: sessionToken,
+    p_request_id: requestId,
+  })
+  throwSettingsError(error)
+}
+
+export async function restoreSettingsRepairRequest(sessionToken: string, requestId: string) {
+  const client = requireSupabase()
+  const { error } = await client.rpc('restore_repair_settings_request', {
+    p_session_token: sessionToken,
+    p_request_id: requestId,
+  })
+  throwSettingsError(error)
+}
+
+export async function changeRepairSettingsPassword(input: {
+  sessionToken: string
+  currentPassword: string
+  newPassword: string
+}) {
+  const client = requireSupabase()
+  const { data, error } = await client.rpc('change_repair_settings_password', {
+    p_session_token: input.sessionToken,
+    p_current_password: input.currentPassword,
+    p_new_password: input.newPassword,
+  })
+  throwSettingsError(error)
+  return data as {
+    success: boolean
+    code?: 'INVALID_CURRENT_PASSWORD' | 'INVALID_NEW_PASSWORD' | 'DEFAULT_PASSWORD_NOT_ALLOWED' | 'PASSWORD_UNCHANGED'
+  }
 }

@@ -10,6 +10,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ def
 const NewRequestPage = lazy(() => import('./pages/NewRequestPage').then((module) => ({ default: module.NewRequestPage })))
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then((module) => ({ default: module.ProfilePage })))
 const RequestsPage = lazy(() => import('./pages/RequestsPage').then((module) => ({ default: module.RequestsPage })))
+const SettingsPage = lazy(() => import('./pages/SettingsPage').then((module) => ({ default: module.SettingsPage })))
 
 function PageLoader() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="requests/new" element={<NewRequestPage />} />
             <Route path="approvals" element={<ApprovalsPage />} />
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

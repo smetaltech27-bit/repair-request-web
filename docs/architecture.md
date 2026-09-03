@@ -24,6 +24,7 @@ Production Build ปิด Development Login โดยอัตโนมัต�
 - Frontend ใช้เฉพาะ Publishable Key
 - Service Role ใช้เฉพาะ Migration Script หรือ Server-side Function และห้ามใส่ใน GitHub
 - Client ไม่มีสิทธิ์เปลี่ยนสถานะงานโดยตรง ต้องเรียก Database Function ที่ตรวจ Role และสถานะปัจจุบัน
+- Settings Administration ใช้ Shared Password Hash ฝั่ง Database และ Token ชั่วคราวที่ผูกกับผู้ใช้ Supabase Auth
 
 ## Zero-cost guardrail
 
@@ -51,4 +52,6 @@ Production Build ปิด Development Login โดยอัตโนมัต�
 - เปิด RLS ทุก Table ที่ Browser เข้าถึง และให้การเปลี่ยน Workflow สำคัญผ่าน RPC ที่ตรวจ Role/State ใน Database
 - รูปก่อนและหลังซ่อมอยู่ใน Private Bucket และเปิดด้วยสิทธิ์ของผู้ใช้
 - ทุกการเปลี่ยนสถานะบันทึก Actor, Role, From/To Status, Note และเวลา
+- ทุกการแก้ไข ลบแบบ Soft Delete กู้คืน และเปลี่ยน Settings Password บันทึก Actor, Before/After Data และเวลาใน Private Audit Table
+- รายการที่อยู่ในถังขยะถูก RLS ซ่อนจากหน้าปกติและไม่สามารถเดิน Workflow ต่อได้จนกว่าจะกู้คืน
 - Dashboard และข้อมูลค่าใช้จ่ายไม่เปิดแบบ Anonymous

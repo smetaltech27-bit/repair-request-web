@@ -6,11 +6,20 @@
 
 - UI ใช้ Industrial Clarity ตามแบบที่อนุมัติ
 - เชื่อม Supabase Auth, Postgres และ Private Storage แล้ว
-- Dashboard, รายการงาน, รายละเอียด, การอนุมัติ และ In-app Notification ใช้ข้อมูลจริงตาม RLS
+- Dashboard, รายการงาน, รายละเอียด, การอนุมัติ, Settings และ In-app Notification ใช้ข้อมูลจริงตาม RLS
 - นำเข้าบัญชีผู้ใช้ 73 บัญชี, ประวัติผู้ใช้ inactive 6 แถว และใบแจ้งซ่อม 32 รายการแล้ว
 - ย้ายรูปเดิม 53 ไฟล์เข้า Private Storage โดยเก็บลิงก์ Google Drive เดิมไว้
 - รูปใหม่ถูกย่อด้านยาวไม่เกิน 1,920 px และบีบอัดก่อน Upload เมื่อจำเป็น
-- ยังไม่ Deploy
+- Deploy ที่ `https://smetaltech27-bit.github.io/repair-request-web/`
+
+## Settings administration
+
+- เมนู Settings ใช้ Password แยกจาก Password ที่ใช้ Login และตรวจรหัสฝั่ง Supabase เท่านั้น
+- ค่าเริ่มต้นครั้งแรกคือ `1234` ต้องเปลี่ยนทันทีหลัง Deploy; รหัสใหม่ต้องมี 6–64 ตัวอักษรและไม่สามารถใช้ `1234` ซ้ำได้
+- Password จัดเก็บเป็น bcrypt hash และไม่ถูกส่งกลับมายัง Frontend
+- Unlock Session มีอายุ 15 นาที, ไม่เก็บใน Browser Storage และจำกัดการลองผิด 5 ครั้งต่อ 15 นาที
+- การแก้ไข ลบแบบย้ายเข้าถังขยะ กู้คืน และเปลี่ยน Password ผ่าน Security Definer RPC พร้อม Audit Log
+- การลบไม่ลดหรือ Reset เลข Job และยังเก็บประวัติ/รูปภาพไว้สำหรับการกู้คืน
 
 ## เริ่มพัฒนา
 

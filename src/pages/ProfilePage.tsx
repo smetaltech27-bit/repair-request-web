@@ -1,4 +1,4 @@
-import { Building2, LogOut, ShieldCheck, UserRound } from 'lucide-react'
+import { Building2, LogOut, Settings2, ShieldCheck, UserRound } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/ui/Button'
@@ -29,6 +29,7 @@ export function ProfilePage() {
           <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4"><UserRound className="size-5 text-teal-600" /><div><p className="text-xs text-slate-500">ตำแหน่ง</p><p className="font-bold text-slate-900">{user?.role}</p></div></div>
           <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4"><Building2 className="size-5 text-teal-600" /><div><p className="text-xs text-slate-500">แผนก</p><p className="font-bold text-slate-900">{user?.department}</p></div></div>
           <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4"><ShieldCheck className="size-5 text-teal-600" /><div><p className="text-xs text-slate-500">สิทธิ์การใช้งาน</p><p className="font-bold text-slate-900">Active</p></div></div>
+          <Button variant="secondary" className="w-full" onClick={() => navigate('/settings')}><Settings2 className="size-4" /> ตั้งค่าและจัดการรายการ</Button>
           <Button variant="secondary" className="w-full" onClick={handleLogout}><LogOut className="size-4" /> ออกจากระบบ</Button>
         </div>
       </Card>
