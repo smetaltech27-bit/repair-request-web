@@ -476,9 +476,6 @@ export function SettingsPage() {
               </Button>
             </form>
           )}
-          <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-900">
-            <strong>ครั้งแรกใช้รหัส 1234</strong> และควรเปลี่ยนเป็นรหัสใหม่ทันทีหลังปลดล็อก
-          </div>
         </Card>
       </div>
     )
