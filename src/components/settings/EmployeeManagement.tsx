@@ -1,6 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Camera,
+  ChevronLeft,
+  ChevronRight,
   Eye,
   EyeOff,
   Pencil,
@@ -34,6 +36,22 @@ const roleLabels: Record<UserRoleCode, string> = {
   department_manager: 'ผู้จัดการฝ่าย',
   factory_manager: 'ผู้จัดการโรงงาน',
   purchasing: 'จัดซื้อ',
+}
+
+const employeesPerPage = 20
+
+function employeeSequence(employee: SettingsEmployee) {
+  const match = /^USER-(\d+)$/i.exec(employee.legacyUid ?? '')
+  return match ? Number(match[1]) : Number.POSITIVE_INFINITY
+}
+
+function compareEmployees(left: SettingsEmployee, right: SettingsEmployee) {
+  const sequenceDifference = employeeSequence(left) - employeeSequence(right)
+  if (Number.isFinite(sequenceDifference) && sequenceDifference !== 0) return sequenceDifference
+  if (Number.isFinite(employeeSequence(left)) !== Number.isFinite(employeeSequence(right))) {
+    return Number.isFinite(employeeSequence(left)) ? -1 : 1
+  }
+  return left.username.localeCompare(right.username, 'th', { numeric: true, sensitivity: 'base' })
 }
 
 function errorText(error: unknown) {
@@ -304,6 +322,7 @@ export function EmployeeManagement({
 }) {
   const [employees, setEmployees] = useState<SettingsEmployee[]>([])
   const [query, setQuery] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [editingEmployee, setEditingEmployee] = useState<SettingsEmployee | null>(null)
@@ -343,15 +362,20 @@ export function EmployeeManagement({
 
   const filteredEmployees = useMemo(() => {
     const normalized = query.trim().toLowerCase()
-    if (!normalized) return employees
-    return employees.filter((employee) => [
+    return employees.filter((employee) => !normalized || [
       employee.username,
       employee.fullName,
       employee.email,
       employee.departmentName,
       roleLabels[employee.roleCode],
-    ].filter(Boolean).join(' ').toLowerCase().includes(normalized))
+      employee.legacyUid,
+    ].filter(Boolean).join(' ').toLowerCase().includes(normalized)).sort(compareEmployees)
   }, [employees, query])
+
+  const totalPages = Math.max(1, Math.ceil(filteredEmployees.length / employeesPerPage))
+  const visiblePage = Math.min(currentPage, totalPages)
+  const pageStart = (visiblePage - 1) * employeesPerPage
+  const paginatedEmployees = filteredEmployees.slice(pageStart, pageStart + employeesPerPage)
 
   const activeCount = employees.filter((employee) => employee.isActive).length
   const inactiveCount = employees.length - activeCount
@@ -382,7 +406,15 @@ export function EmployeeManagement({
           <label className="relative block">
             <span className="sr-only">ค้นหาพนักงาน</span>
             <Search className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} className="form-control pl-11" placeholder="ค้นหาชื่อ Username Email แผนก หรือ Role" />
+            <input
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value)
+                setCurrentPage(1)
+              }}
+              className="form-control pl-11"
+              placeholder="ค้นหาชื่อ Username Email แผนก Role หรือ USER-xxx"
+            />
           </label>
           <Button variant="secondary" onClick={() => void loadEmployees()} disabled={isLoading}>
             <RefreshCw className={`size-4 ${isLoading ? 'animate-spin' : ''}`} /> รีเฟรช
@@ -392,7 +424,7 @@ export function EmployeeManagement({
       </Card>
 
       <div className="mt-4 grid gap-3">
-        {filteredEmployees.map((employee) => (
+        {paginatedEmployees.map((employee) => (
           <Card key={employee.id} className={!employee.isActive ? 'border-slate-200 bg-slate-50/70' : ''}>
             <div className="grid gap-4 p-4 sm:p-5 lg:grid-cols-[1fr_auto] lg:items-center">
               <div className="flex min-w-0 items-center gap-4">
@@ -425,6 +457,35 @@ export function EmployeeManagement({
           </Card>
         )}
       </div>
+
+      {filteredEmployees.length > 0 && (
+        <nav aria-label="แบ่งหน้ารายชื่อพนักงาน" className="mt-6 flex flex-col items-center justify-center gap-3 pb-2">
+          <p className="text-xs font-medium text-slate-500">
+            แสดง {pageStart + 1}–{Math.min(pageStart + employeesPerPage, filteredEmployees.length)} จาก {filteredEmployees.length} รายชื่อ
+          </p>
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={visiblePage <= 1}
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            >
+              <ChevronLeft className="size-4" /> ย้อนกลับ
+            </Button>
+            <span className="min-w-24 rounded-xl bg-slate-950 px-4 py-3 text-center text-sm font-bold text-white">
+              หน้า {visiblePage} / {totalPages}
+            </span>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={visiblePage >= totalPages}
+              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+            >
+              ถัดไป <ChevronRight className="size-4" />
+            </Button>
+          </div>
+        </nav>
+      )}
 
       {modalOpen && (
         <EmployeeModal

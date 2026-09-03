@@ -101,4 +101,40 @@ describe('SettingsPage', () => {
     expect(screen.getByRole('button', { name: /เพิ่มพนักงาน/ })).toBeInTheDocument()
     expect(listSettingsEmployees).toHaveBeenCalledWith('test-session-token')
   })
+
+  it('sorts employees by USER number and shows twenty employees per page', async () => {
+    listSettingsEmployees.mockResolvedValueOnce(Array.from({ length: 21 }, (_, index) => {
+      const userNumber = 21 - index
+      const paddedNumber = String(userNumber).padStart(3, '0')
+      return {
+        id: `${paddedNumber.padStart(8, '0')}-3333-4333-8333-333333333333`,
+        legacyUid: `USER-${paddedNumber}`,
+        username: `user${paddedNumber}`,
+        fullName: `พนักงาน ${paddedNumber}`,
+        departmentId: '11111111-1111-4111-8111-111111111111',
+        departmentName: 'Machine',
+        roleCode: 'employee',
+        isActive: true,
+        createdAt: '2026-09-03T00:00:00.000Z',
+        updatedAt: '2026-09-03T00:00:00.000Z',
+      }
+    }))
+
+    const user = userEvent.setup()
+    render(<SettingsPage />)
+    await user.type(screen.getByLabelText('Settings Password'), '1234')
+    await user.click(screen.getByRole('button', { name: /ปลดล็อก Settings/ }))
+    await screen.findByText('REQ-TEST-001')
+    await user.click(screen.getByRole('button', { name: /จัดการพนักงาน/ }))
+
+    expect(await screen.findByText('พนักงาน 001')).toBeInTheDocument()
+    expect(screen.getByText('พนักงาน 020')).toBeInTheDocument()
+    expect(screen.queryByText('พนักงาน 021')).not.toBeInTheDocument()
+    expect(screen.getByText('หน้า 1 / 2')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /ถัดไป/ }))
+    expect(await screen.findByText('พนักงาน 021')).toBeInTheDocument()
+    expect(screen.queryByText('พนักงาน 001')).not.toBeInTheDocument()
+    expect(screen.getByText('หน้า 2 / 2')).toBeInTheDocument()
+  })
 })
