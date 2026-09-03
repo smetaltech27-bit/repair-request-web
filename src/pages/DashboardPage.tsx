@@ -10,11 +10,11 @@ import {
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
+  Bar,
+  BarChart,
   CartesianGrid,
   Cell,
-  Legend,
-  Line,
-  LineChart,
+  LabelList,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -22,10 +22,11 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import type { PieLabelRenderProps } from 'recharts'
 import { DataError, DataLoading } from '../components/DataState'
 import { RequestDetails } from '../components/RequestDetails'
 import { useRepairRequests } from '../hooks/useRepairData'
-import { getRepairStats, getWeeklyTrend } from '../lib/repairMetrics'
+import { getDepartmentStats, getRepairStats } from '../lib/repairMetrics'
 import { formatThaiDate } from '../lib/utils'
 import type { RepairRequest } from '../types/repair'
 import { Button } from '../components/ui/Button'
@@ -49,11 +50,28 @@ const statColorClasses: Record<string, string> = {
   red: 'bg-red-50 text-red-600 ring-red-600/10',
 }
 
+const RADIAN = Math.PI / 180
+
+function renderPieValueLabel({ cx, cy, midAngle, innerRadius, outerRadius, value }: PieLabelRenderProps) {
+  const count = Number(value)
+  if (!count) return null
+
+  const radius = Number(innerRadius) + (Number(outerRadius) - Number(innerRadius)) * 0.54
+  const x = Number(cx) + radius * Math.cos(-Number(midAngle) * RADIAN)
+  const y = Number(cy) + radius * Math.sin(-Number(midAngle) * RADIAN)
+
+  return (
+    <text x={x} y={y} fill="#ffffff" textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight={700}>
+      {count}
+    </text>
+  )
+}
+
 export function DashboardPage() {
   const [selectedRequest, setSelectedRequest] = useState<RepairRequest | null>(null)
   const { requests, isLoading, error, refresh } = useRepairRequests()
   const stats = useMemo(() => getRepairStats(requests), [requests])
-  const weeklyTrend = useMemo(() => getWeeklyTrend(requests), [requests])
+  const departmentData = useMemo(() => getDepartmentStats(requests), [requests])
   const pieData = useMemo(() => [
     { name: 'รออนุมัติ', value: stats.pending, color: '#f59e0b' },
     { name: 'กำลังดำเนินการ', value: stats.inProgress, color: '#10b981' },
@@ -93,42 +111,62 @@ export function DashboardPage() {
         ))}
       </section>
 
-      <section className="mt-5 grid gap-5 xl:grid-cols-[0.8fr_1.2fr]">
+      <section className="mt-5 grid gap-5 xl:grid-cols-2">
         <Card className="p-5">
           <div>
             <h2 className="font-bold text-slate-950">สัดส่วนสถานะงาน</h2>
             <p className="mt-1 text-xs text-slate-500">ข้อมูลที่คุณมีสิทธิ์เข้าถึงทั้งหมด {requests.length} งาน</p>
           </div>
-          <div className="mt-3 h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={54} outerRadius={82} paddingAngle={3}>
-                  {pieData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
-                </Pie>
-                <Tooltip />
-                <Legend verticalAlign="bottom" iconType="circle" iconSize={8} />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="mt-3 grid items-center gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+            <div className="h-64 min-w-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={58}
+                    outerRadius={94}
+                    paddingAngle={2}
+                    labelLine={false}
+                    label={renderPieValueLabel}
+                  >
+                    {pieData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 sm:grid sm:min-w-40 sm:justify-stretch sm:gap-2">
+              {pieData.map((entry) => (
+                <div key={entry.name} className="flex items-center gap-2 text-xs text-slate-600">
+                  <span className="h-2.5 w-5 shrink-0 rounded-sm" style={{ backgroundColor: entry.color }} />
+                  <span>{entry.name}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </Card>
 
         <Card className="p-5">
           <div>
-            <h2 className="font-bold text-slate-950">แนวโน้มงานซ่อม</h2>
-            <p className="mt-1 text-xs text-slate-500">ภาพรวม 7 วันล่าสุด</p>
+            <h2 className="font-bold text-slate-950">สถิติแจ้งซ่อมแยกตามแผนก</h2>
+            <p className="mt-1 text-xs text-slate-500">จำนวนรายการที่คุณมีสิทธิ์เข้าถึงในแต่ละแผนก</p>
           </div>
-          <div className="mt-4 h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={weeklyTrend} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
-                <CartesianGrid stroke="#e2e8f0" strokeDasharray="4 4" vertical={false} />
-                <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                <Tooltip />
-                <Line type="monotone" dataKey="total" name="งานทั้งหมด" stroke="#0891b2" strokeWidth={3} dot={false} />
-                <Line type="monotone" dataKey="completed" name="ปิดงานแล้ว" stroke="#0f766e" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="pending" name="รออนุมัติ" stroke="#f59e0b" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="mt-4 overflow-x-auto pb-1">
+            <div className="h-64" style={{ minWidth: `${Math.max(520, departmentData.length * 120)}px` }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={departmentData} margin={{ top: 22, right: 8, left: -24, bottom: 8 }}>
+                  <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                  <XAxis dataKey="department" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} interval={0} />
+                  <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <Tooltip formatter={(value) => [`${value} งาน`, 'จำนวนงาน']} />
+                  <Bar dataKey="total" name="จำนวนงาน" fill="#0ea5a4" radius={[5, 5, 0, 0]} maxBarSize={84}>
+                    <LabelList dataKey="total" position="top" fill="#0f766e" fontSize={12} fontWeight={700} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </Card>
       </section>

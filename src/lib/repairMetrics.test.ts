@@ -1,4 +1,4 @@
-import { getRepairStats, getWeeklyTrend } from './repairMetrics'
+import { getDepartmentStats, getRepairStats, getWeeklyTrend } from './repairMetrics'
 import { repairStatusLabels } from './repairService'
 import type { RepairRequest, RepairStatusCode } from '../types/repair'
 
@@ -42,5 +42,20 @@ describe('repair metrics', () => {
 
     expect(trend).toHaveLength(7)
     expect(trend.at(-1)).toMatchObject({ total: 1, completed: 1, pending: 0 })
+  })
+
+  it('groups departments and sorts them by request count', () => {
+    const requests = [
+      { ...request('1', 'completed'), department: 'Welding' },
+      { ...request('2', 'pending_supervisor'), department: 'Machine' },
+      { ...request('3', 'rejected'), department: 'Machine' },
+      { ...request('4', 'completed'), department: '  ' },
+    ]
+
+    expect(getDepartmentStats(requests)).toEqual([
+      { department: 'Machine', total: 2 },
+      { department: 'ไม่ระบุแผนก', total: 1 },
+      { department: 'Welding', total: 1 },
+    ])
   })
 })

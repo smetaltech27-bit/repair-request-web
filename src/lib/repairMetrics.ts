@@ -17,6 +17,18 @@ export function getRepairStats(requests: RepairRequest[]) {
   }
 }
 
+export function getDepartmentStats(requests: RepairRequest[]) {
+  const totals = new Map<string, number>()
+
+  requests.forEach((request) => {
+    const department = request.department.trim() || 'ไม่ระบุแผนก'
+    totals.set(department, (totals.get(department) ?? 0) + 1)
+  })
+
+  return Array.from(totals, ([department, total]) => ({ department, total }))
+    .sort((left, right) => right.total - left.total || left.department.localeCompare(right.department, 'th'))
+}
+
 function bangkokDateKey(value: Date | string) {
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Bangkok',
