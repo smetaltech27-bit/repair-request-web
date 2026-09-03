@@ -155,7 +155,7 @@ export function ApprovalsPage() {
                 </div>
                 <div>
                   <label htmlFor="after-image" className="mb-2 block text-sm font-bold text-slate-700">รูปหลังซ่อม</label>
-                  <input id="after-image" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={(event) => setAfterImage(event.target.files?.[0] ?? null)} className="block w-full text-xs text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-white file:px-3 file:py-2 file:font-bold file:text-teal-700" />
+                  <input id="after-image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setAfterImage(event.target.files?.[0] ?? null)} className="block w-full text-xs text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-white file:px-3 file:py-2 file:font-bold file:text-teal-700" />
                 </div>
               </div>
             )}

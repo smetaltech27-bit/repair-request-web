@@ -129,7 +129,6 @@ export function NewRequestPage() {
                 id="image"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
-                capture="environment"
                 className="sr-only"
                 {...imageRegistration}
                 onChange={selectImage}
