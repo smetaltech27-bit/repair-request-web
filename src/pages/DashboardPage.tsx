@@ -1,10 +1,13 @@
 import {
   CheckCircle2,
+  ChevronLeft,
   ChevronRight,
   ClipboardClock,
   ClipboardList,
+  Filter,
   Plus,
   RotateCcw,
+  Search,
   Wrench,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -27,6 +30,12 @@ import { DataError, DataLoading } from '../components/DataState'
 import { RequestDetails } from '../components/RequestDetails'
 import { useRepairRequests } from '../hooks/useRepairData'
 import { getDepartmentStats, getRepairStats } from '../lib/repairMetrics'
+import {
+  filterRepairRequests,
+  paginateRepairRequests,
+  repairStatusFilters,
+  type RepairStatusFilter,
+} from '../lib/repairList'
 import { formatThaiDate } from '../lib/utils'
 import type { RepairRequest } from '../types/repair'
 import { Button } from '../components/ui/Button'
@@ -51,6 +60,7 @@ const statColorClasses: Record<string, string> = {
 }
 
 const RADIAN = Math.PI / 180
+const DASHBOARD_PAGE_SIZE = 20
 
 function renderPieValueLabel({ cx, cy, midAngle, innerRadius, outerRadius, value }: PieLabelRenderProps) {
   const count = Number(value)
@@ -69,6 +79,9 @@ function renderPieValueLabel({ cx, cy, midAngle, innerRadius, outerRadius, value
 
 export function DashboardPage() {
   const [selectedRequest, setSelectedRequest] = useState<RepairRequest | null>(null)
+  const [query, setQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<RepairStatusFilter>('all')
+  const [requestedPage, setRequestedPage] = useState(1)
   const { requests, isLoading, error, refresh } = useRepairRequests()
   const stats = useMemo(() => getRepairStats(requests), [requests])
   const departmentData = useMemo(() => getDepartmentStats(requests), [requests])
@@ -78,6 +91,14 @@ export function DashboardPage() {
     { name: 'ปิดงานแล้ว', value: stats.completed, color: '#0ea5a4' },
     { name: 'ตีกลับ', value: stats.rejected, color: '#ef4444' },
   ], [stats])
+  const filteredRequests = useMemo(
+    () => filterRepairRequests(requests, query, statusFilter),
+    [query, requests, statusFilter],
+  )
+  const paginatedRequests = useMemo(
+    () => paginateRepairRequests(filteredRequests, requestedPage, DASHBOARD_PAGE_SIZE),
+    [filteredRequests, requestedPage],
+  )
 
   if (isLoading) return <DataLoading label="กำลังโหลดภาพรวมงานซ่อม…" />
   if (error) return <DataError message={error} onRetry={refresh} />
@@ -88,7 +109,7 @@ export function DashboardPage() {
         <div>
           <p className="text-sm font-semibold text-teal-600">Maintenance overview</p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">ภาพรวมงานซ่อม</h1>
-          <p className="mt-1 text-sm text-slate-500">ติดตามสถานะและแนวโน้มงานซ่อมล่าสุดในที่เดียว</p>
+          <p className="mt-1 text-sm text-slate-500">ติดตามสถานะและภาพรวมงานซ่อมทั้งบริษัทในที่เดียว</p>
         </div>
         <Button asChild size="lg" className="hidden sm:inline-flex">
           <Link to="/requests/new"><Plus className="size-5" /> แจ้งซ่อมใหม่</Link>
@@ -115,7 +136,7 @@ export function DashboardPage() {
         <Card className="p-5">
           <div>
             <h2 className="font-bold text-slate-950">สัดส่วนสถานะงาน</h2>
-            <p className="mt-1 text-xs text-slate-500">ข้อมูลที่คุณมีสิทธิ์เข้าถึงทั้งหมด {requests.length} งาน</p>
+            <p className="mt-1 text-xs text-slate-500">ข้อมูลใบแจ้งซ่อมทั้งบริษัททั้งหมด {requests.length} งาน</p>
           </div>
           <div className="mt-3 grid items-center gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
             <div className="h-64 min-w-0">
@@ -151,7 +172,7 @@ export function DashboardPage() {
         <Card className="p-5">
           <div>
             <h2 className="font-bold text-slate-950">สถิติแจ้งซ่อมแยกตามแผนก</h2>
-            <p className="mt-1 text-xs text-slate-500">จำนวนรายการที่คุณมีสิทธิ์เข้าถึงในแต่ละแผนก</p>
+            <p className="mt-1 text-xs text-slate-500">จำนวนรายการใบแจ้งซ่อมทั้งบริษัทในแต่ละแผนก</p>
           </div>
           <div className="mt-4 overflow-x-auto pb-1">
             <div className="h-64" style={{ minWidth: `${Math.max(520, departmentData.length * 120)}px` }}>
@@ -172,14 +193,49 @@ export function DashboardPage() {
       </section>
 
       <Card className="mt-5 overflow-hidden">
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div className="border-b border-slate-100 px-5 py-4">
           <div>
-            <h2 className="font-bold text-slate-950">รายการล่าสุด</h2>
-            <p className="mt-0.5 text-xs text-slate-500">อัปเดตสถานะงานล่าสุด</p>
+            <h2 className="font-bold text-slate-950">รายการแจ้งซ่อมทั้งหมด</h2>
+            <p className="mt-0.5 text-xs text-slate-500">พบ {filteredRequests.length} จากทั้งหมด {requests.length} รายการ</p>
           </div>
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/requests">ดูทั้งหมด <ChevronRight className="size-4" /></Link>
-          </Button>
+        </div>
+
+        <div className="border-b border-slate-100 p-4">
+          <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
+            <label className="relative block">
+              <span className="sr-only">ค้นหารายการ</span>
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
+              <input
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value)
+                  setRequestedPage(1)
+                }}
+                placeholder="ค้นหารหัสงาน ผู้แจ้ง แผนก หรือเครื่องจักร"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
+              />
+            </label>
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
+              <Filter className="size-4 shrink-0 text-slate-400" />
+              {repairStatusFilters.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    setStatusFilter(option.value)
+                    setRequestedPage(1)
+                  }}
+                  className={`shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition ${
+                    statusFilter === option.value
+                      ? 'bg-slate-900 text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="hidden overflow-x-auto md:block">
@@ -195,7 +251,7 @@ export function DashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {requests.slice(0, 5).map((request) => (
+              {paginatedRequests.items.map((request) => (
                 <tr key={request.id} className="transition hover:bg-slate-50/80">
                   <td className="px-5 py-3.5 font-bold text-slate-900">{request.jobId}</td>
                   <td className="px-5 py-3.5 text-slate-600">{request.department}</td>
@@ -212,7 +268,7 @@ export function DashboardPage() {
         </div>
 
         <div className="divide-y divide-slate-100 md:hidden">
-          {requests.slice(0, 5).map((request) => (
+          {paginatedRequests.items.map((request) => (
             <button key={request.id} onClick={() => setSelectedRequest(request)} className="flex w-full items-start gap-3 p-4 text-left transition hover:bg-slate-50">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -226,6 +282,38 @@ export function DashboardPage() {
             </button>
           ))}
         </div>
+
+        {filteredRequests.length === 0 ? (
+          <div className="border-t border-slate-100 p-10 text-center">
+            <Search className="mx-auto size-10 text-slate-300" />
+            <h3 className="mt-3 font-bold text-slate-900">ไม่พบรายการ</h3>
+            <p className="mt-1 text-sm text-slate-500">ลองเปลี่ยนคำค้นหาหรือตัวกรองสถานะ</p>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-3 border-t border-slate-100 px-4 py-4">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              disabled={paginatedRequests.page <= 1}
+              onClick={() => setRequestedPage(paginatedRequests.page - 1)}
+            >
+              <ChevronLeft className="size-4" /> ย้อนกลับ
+            </Button>
+            <span className="min-w-20 text-center text-xs font-semibold text-slate-500">
+              หน้า {paginatedRequests.page} / {paginatedRequests.totalPages}
+            </span>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              disabled={paginatedRequests.page >= paginatedRequests.totalPages}
+              onClick={() => setRequestedPage(paginatedRequests.page + 1)}
+            >
+              ถัดไป <ChevronRight className="size-4" />
+            </Button>
+          </div>
+        )}
       </Card>
 
       <Button asChild size="lg" className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-20 rounded-2xl shadow-xl sm:hidden">
