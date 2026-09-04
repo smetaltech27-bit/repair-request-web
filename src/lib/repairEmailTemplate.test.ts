@@ -34,8 +34,8 @@ describe('repair email template', () => {
       actorName: 'หัวหน้างาน',
       actionNote: 'ทดสอบแล้ว',
       actionCreatedAt: '2026-08-17T01:29:00.000Z',
-      hasBeforeImage: true,
-      hasAfterImage: true,
+      beforeImageUrl: 'https://example.com/signed/before.jpg?token=before',
+      afterImageUrl: 'https://example.com/signed/after.jpg?token=after',
       actions: [
         { action: 'approve', actorName: 'หัวหน้า A', actorRole: 'supervisor', note: 'อนุมัติ' },
         { action: 'approve', actorName: 'ผู้จัดการ A', actorRole: 'department_manager', note: 'เปลี่ยนอะไหล่' },
@@ -50,6 +50,9 @@ describe('repair email template', () => {
     expect(email.textBody).toContain('ฝ่ายจัดซื้อ: จัดซื้อ A (รับทราบรายการ)')
     expect(email.textBody).toContain('รูปภาพตอนแจ้ง (Before)')
     expect(email.textBody).toContain('รูปภาพหลังซ่อม (After)')
+    expect(email.htmlBody).toContain('https://example.com/signed/before.jpg?token=before')
+    expect(email.htmlBody).toContain('https://example.com/signed/after.jpg?token=after')
+    expect(email.htmlBody).toContain('เปิดดูได้โดยไม่ต้องเข้าสู่ระบบ')
     expect(email.htmlBody).toContain('ทดสอบแล้ว')
   })
 

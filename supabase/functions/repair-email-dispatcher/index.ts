@@ -31,6 +31,14 @@ interface RepairActionRow {
 interface RepairAttachmentRow {
   request_id: string;
   kind: 'before' | 'after';
+  storage_path: string | null;
+  legacy_drive_url: string | null;
+  created_at: string;
+}
+
+interface RepairAttachmentLinks {
+  before?: string;
+  after?: string;
 }
 
 type RecipientRole = 'employee' | 'supervisor' | 'department_manager' | 'factory_manager' | 'purchasing';
@@ -153,7 +161,7 @@ Deno.serve(async (request) => {
   const claimed = (data ?? []) as ClaimedEmail[];
   const requestIds = [...new Set(claimed.map((item) => item.request_id))];
   const actionsByRequest = new Map<string, RepairEmailAction[]>();
-  const attachmentKindsByRequest = new Map<string, Set<'before' | 'after'>>();
+  const attachmentLinksByRequest = new Map<string, RepairAttachmentLinks>();
   const recipientProfilesByEmail = new Map<string, RecipientProfileRow>();
   let supplementalError = '';
 
@@ -167,8 +175,9 @@ Deno.serve(async (request) => {
         .order('created_at', { ascending: true }),
       admin
         .from('repair_request_attachments')
-        .select('request_id,kind')
-        .in('request_id', requestIds),
+        .select('request_id,kind,storage_path,legacy_drive_url,created_at')
+        .in('request_id', requestIds)
+        .order('created_at', { ascending: true }),
       admin
         .from('repair_profiles')
         .select('email,role')
@@ -191,9 +200,22 @@ Deno.serve(async (request) => {
       actionsByRequest.set(row.request_id, actions);
     }
     for (const row of (attachmentsResult.data ?? []) as RepairAttachmentRow[]) {
-      const kinds = attachmentKindsByRequest.get(row.request_id) ?? new Set<'before' | 'after'>();
-      kinds.add(row.kind);
-      attachmentKindsByRequest.set(row.request_id, kinds);
+      let imageUrl = row.legacy_drive_url?.trim() ?? '';
+      if (!imageUrl && row.storage_path) {
+        const { data: signed, error: signedError } = await admin.storage
+          .from('repair-images')
+          .createSignedUrl(row.storage_path, 60 * 60 * 24 * 30);
+        if (signedError || !signed?.signedUrl) {
+          supplementalError ||= signedError?.message || 'Unable to create a signed image URL';
+          continue;
+        }
+        imageUrl = signed.signedUrl;
+      }
+      if (imageUrl) {
+        const links = attachmentLinksByRequest.get(row.request_id) ?? {};
+        links[row.kind] = imageUrl;
+        attachmentLinksByRequest.set(row.request_id, links);
+      }
     }
     for (const row of (recipientsResult.data ?? []) as RecipientProfileRow[]) {
       if (row.email) recipientProfilesByEmail.set(row.email.toLowerCase(), row);
@@ -210,7 +232,7 @@ Deno.serve(async (request) => {
       if (supplementalError) throw new Error(`Unable to load email details: ${supplementalError}`);
       const actions = actionsByRequest.get(item.request_id) ?? [];
       const currentAction = actions.at(-1);
-      const attachmentKinds = attachmentKindsByRequest.get(item.request_id) ?? new Set<'before' | 'after'>();
+      const attachmentLinks = attachmentLinksByRequest.get(item.request_id) ?? {};
       const recipientProfile = recipientProfilesByEmail.get(item.recipient_email.toLowerCase());
       if (!recipientProfile) throw new Error('Unable to resolve the intended email recipient profile');
       const recipientEmail = testMode
@@ -231,8 +253,8 @@ Deno.serve(async (request) => {
         actionNote: item.action_note,
         actionCreatedAt: currentAction?.createdAt,
         actions,
-        hasBeforeImage: attachmentKinds.has('before'),
-        hasAfterImage: attachmentKinds.has('after'),
+        beforeImageUrl: attachmentLinks.before,
+        afterImageUrl: attachmentLinks.after,
         isRequesterReceipt: item.email_subject.startsWith('รับรายการแจ้งซ่อม'),
       });
       const timestamp = Date.now().toString();

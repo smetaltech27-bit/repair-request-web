@@ -21,8 +21,8 @@ export interface RepairEmailTemplateInput {
   actionNote?: string | null;
   actionCreatedAt?: string | null;
   actions?: RepairEmailAction[];
-  hasBeforeImage?: boolean;
-  hasAfterImage?: boolean;
+  beforeImageUrl?: string | null;
+  afterImageUrl?: string | null;
   isRequesterReceipt?: boolean;
 }
 
@@ -171,7 +171,6 @@ export function buildRepairEmail(input: RepairEmailTemplateInput) {
   const normalizedBase = input.appUrl.replace(/\/+$/, '');
   const encodedJobId = encodeURIComponent(input.jobId);
   const actionUrl = `${normalizedBase}/#/${stage.route}?job=${encodedJobId}`;
-  const detailUrl = `${normalizedBase}/#/requests?job=${encodedJobId}`;
   const cost = displayCost(input.totalCost);
   const actions = relevantHistory(input.actions ?? []);
 
@@ -202,11 +201,11 @@ export function buildRepairEmail(input: RepairEmailTemplateInput) {
     plainLines.push(`วันที่/เวลา: ${displayDateTime(input.actionCreatedAt)}`);
     plainLines.push(`ค่าใช้จ่ายในการซ่อม: ${cost || '0'} บาท`);
   }
-  if (input.hasBeforeImage) {
-    plainLines.push(`${input.repairStatus === 'completed' ? 'รูปภาพตอนแจ้ง (Before)' : 'รูปภาพประกอบ'}: ${detailUrl}`);
+  if (input.beforeImageUrl) {
+    plainLines.push(`${input.repairStatus === 'completed' ? 'รูปภาพตอนแจ้ง (Before)' : 'รูปภาพประกอบ'}: ${input.beforeImageUrl}`);
   }
-  if (input.repairStatus === 'completed' && input.hasAfterImage) {
-    plainLines.push(`รูปภาพหลังซ่อม (After): ${detailUrl}`);
+  if (input.repairStatus === 'completed' && input.afterImageUrl) {
+    plainLines.push(`รูปภาพหลังซ่อม (After): ${input.afterImageUrl}`);
   }
   plainLines.push(`สถานะปัจจุบัน: ${statusLabel}`);
   plainLines.push(`เปิดระบบ: ${actionUrl}`);
@@ -232,8 +231,8 @@ export function buildRepairEmail(input: RepairEmailTemplateInput) {
     </div>` : '';
 
   const imageLinks = [
-    input.hasBeforeImage ? `<div style="margin-top:10px"><strong>📷 ${input.repairStatus === 'completed' ? 'รูปภาพตอนแจ้ง (Before)' : 'รูปภาพประกอบ'}:</strong> <a href="${escapeEmailHtml(detailUrl)}" style="color:#2563eb;font-weight:700">${input.repairStatus === 'completed' ? 'คลิกรูป' : 'คลิกเพื่อดูรูปภาพ'}</a></div>` : '',
-    input.repairStatus === 'completed' && input.hasAfterImage ? `<div style="margin-top:10px"><strong>✅ รูปภาพหลังซ่อม (After):</strong> <a href="${escapeEmailHtml(detailUrl)}" style="color:#16a34a;font-weight:700">คลิกเพื่อดูรูปภาพงานที่เสร็จแล้ว</a></div>` : '',
+    input.beforeImageUrl ? `<div style="margin-top:10px"><strong>📷 ${input.repairStatus === 'completed' ? 'รูปภาพตอนแจ้ง (Before)' : 'รูปภาพประกอบ'}:</strong> <a href="${escapeEmailHtml(input.beforeImageUrl)}" style="color:#2563eb;font-weight:700">${input.repairStatus === 'completed' ? 'คลิกรูป' : 'คลิกเพื่อดูรูปภาพ'}</a></div>` : '',
+    input.repairStatus === 'completed' && input.afterImageUrl ? `<div style="margin-top:10px"><strong>✅ รูปภาพหลังซ่อม (After):</strong> <a href="${escapeEmailHtml(input.afterImageUrl)}" style="color:#16a34a;font-weight:700">คลิกเพื่อดูรูปภาพงานที่เสร็จแล้ว</a></div>` : '',
   ].join('');
 
   const htmlBody = `
@@ -262,7 +261,7 @@ export function buildRepairEmail(input: RepairEmailTemplateInput) {
             <a href="${escapeEmailHtml(actionUrl)}" style="display:inline-block;background:${stage.accent};color:#ffffff;text-decoration:none;padding:11px 17px;border-radius:9px;font-size:14px;font-weight:700">👉 ${escapeEmailHtml(stage.ctaLabel)}</a>
           </div>
           <div style="margin-top:18px;padding-top:15px;border-top:1px solid #e2e8f0;font-size:13px;font-weight:700;color:${stage.accent}">สถานะปัจจุบัน: ${escapeEmailHtml(statusLabel)}</div>
-          <p style="margin:8px 0 0;color:#64748b;font-size:11px">กรุณาเข้าสู่ระบบเพื่อดูรายละเอียดและรูปภาพ ซึ่งจัดเก็บแบบ Private</p>
+          <p style="margin:8px 0 0;color:#64748b;font-size:11px">ลิงก์รูปภาพเปิดดูได้โดยไม่ต้องเข้าสู่ระบบและจะหมดอายุภายใน 30 วัน ส่วนรายละเอียดงานยังต้องเข้าสู่ระบบ</p>
         </div>
       </div>
     </div>`;

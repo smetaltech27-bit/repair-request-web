@@ -24,7 +24,7 @@
 - The six main workflow messages preserve the legacy Repair Request wording for new requests, department-manager approval, factory-manager approval, purchasing handoff, purchasing acknowledgement, and job closure.
 - Each message contains the request code, department, requester, machine/location, issue, and the approval or acknowledgement history available at that stage.
 - Closure messages also contain the closer, closure note and time, repair cost, and Before/After image links when attachments exist.
-- Email buttons and image links deep-link to the matching request after login. Attachments remain private and are never converted to public URLs for email delivery.
+- Email buttons deep-link to the matching request after login. Image links use 30-day Supabase signed URLs (or an existing legacy Drive URL), so recipients can open the image directly without making the private bucket public.
 
 ### Temporary test routing
 
