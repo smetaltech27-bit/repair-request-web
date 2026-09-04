@@ -37,6 +37,18 @@ npm run dev
 
 คัดลอก `.env.example` เป็น `.env.local` แล้วกรอกค่า Publishable Key เมื่อได้รับอนุมัติให้เชื่อม Supabase ห้ามนำ Service Role Key หรือ Password ใส่ใน Frontend และห้าม Commit ไฟล์ `.env*`
 
+## Email notification delivery
+
+- Database Function สร้าง In-app Notification และ Email Outbox ใน Transaction เดียวกับ Workflow
+- Email ส่งเฉพาะผู้แจ้ง ผู้รับผิดชอบขั้นถัดไปหนึ่งคน และผู้ที่เคยดำเนินการใน Job นั้น ไม่ Broadcast ทั้งแผนก
+- Edge Function `repair-email-dispatcher` Claim งานค้างแล้วส่ง Payload ที่ลงลายเซ็น HMAC ไปยัง Google Apps Script `EmailAdapter.js`
+- Apps Script ใช้ `MailApp`, ตรวจโควตาก่อนส่ง และกันการส่งซ้ำระยะสั้นด้วย Notification ID
+- Dispatcher ต้องตั้ง Secrets: `REPAIR_EMAIL_DISPATCH_SECRET`, `REPAIR_EMAIL_GAS_URL`, `REPAIR_EMAIL_SHARED_SECRET` และ `REPAIR_APP_URL`
+- Apps Script ต้องตั้ง Script Property `REPAIR_EMAIL_SHARED_SECRET` ให้ตรงกับ Secret ของ Dispatcher
+- Database Trigger เรียก Dispatcher ทันทีผ่าน `pg_net` โดยอ่าน Dispatch Secret จาก Supabase Vault และ Supabase Cron เรียกซ้ำทุก 5 นาทีเพื่อเก็บ `pending`/`failed`
+- Migration แรกจะตั้ง Email Outbox เก่าที่ไม่มี `event_action_id` เป็น `skipped` เพื่อไม่ให้ส่ง Email ย้อนหลังจำนวนมาก และ Migration ถัดไปติดตั้ง Secure Dispatch Trigger
+- ขั้นตอนเปิดใช้งานและ Test matrix อยู่ที่ `docs/email-delivery.md`
+
 ## GitHub Pages
 
 Repository นี้เตรียม GitHub Actions ไว้ที่ `.github/workflows/deploy.yml` เมื่อ Push เข้า `main` ระบบจะรัน Lint, Test, Production Build และ Deploy เฉพาะผลลัพธ์ใน `dist` ไป GitHub Pages

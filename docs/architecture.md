@@ -31,7 +31,10 @@ Production Build ปิด Development Login โดยอัตโนมัต�
 - ใช้ Supabase Free Plan และตรวจโควตา Database, Storage, Egress และ Function
 - ไม่เปิด Add-on, Custom Compute หรือบริการที่ต้องผูกบัตร
 - Notification หลักเป็น In-app Notification
-- Email ใช้ Notification Outbox และ Zero-cost Adapter ที่อนุมัติภายหลัง เช่น Google Apps Script MailApp ภายใต้โควตาเดิม
+- Email ใช้ Notification Outbox, Supabase Edge Function dispatcher และ Google Apps Script MailApp adapter ภายใต้โควตาเดิม
+- Secure Database Trigger เรียก Dispatcher ทันทีผ่าน `pg_net` โดยอ่าน Credential จาก Supabase Vault และมี Cron ทุก 5 นาทีเป็น Recovery path
+- ผู้รับ Email เป็นผู้แจ้ง ผู้อนุมัติคนถัดไปหนึ่งคน และผู้ที่เคยดำเนินการใน Job นั้นเท่านั้น ไม่ Broadcast ให้ทุกคนในแผนก
+- แต่ละขั้นอนุมัติต้องมีผู้ใช้ Active ที่ตรง Role/แผนกเพียงหนึ่งคน หากไม่พบหรือพบซ้ำ ระบบจะปฏิเสธ Transition พร้อม Configuration Error แทนการสุ่มผู้รับ
 - หากเกิน Free Tier ให้ระบบหยุด/แจ้งเตือนแทนการอัปเกรดอัตโนมัติ
 
 ## Hosting decision
