@@ -1,5 +1,5 @@
-import { ChevronRight, Flag } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { Camera, ChevronRight, Flag } from 'lucide-react'
+import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAuth } from '../auth/AuthContext'
@@ -25,6 +25,7 @@ export function CompletionPage() {
   const [note, setNote] = useState('')
   const [totalCost, setTotalCost] = useState('')
   const [afterImage, setAfterImage] = useState<File | null>(null)
+  const [afterImagePreviewUrl, setAfterImagePreviewUrl] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const completableRequests = useMemo(
     () => user ? requests.filter((request) => canCompleteRequest(request, user)) : [],
@@ -35,11 +36,24 @@ export function CompletionPage() {
     : null
   const selectedRequest = selectedRequestState ?? linkedRequest
 
+  useEffect(() => {
+    return () => {
+      if (afterImagePreviewUrl) URL.revokeObjectURL(afterImagePreviewUrl)
+    }
+  }, [afterImagePreviewUrl])
+
+  function selectAfterImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null
+    setAfterImage(file)
+    setAfterImagePreviewUrl(file ? URL.createObjectURL(file) : '')
+  }
+
   function closeModal() {
     setSelectedRequest(null)
     setNote('')
     setTotalCost('')
     setAfterImage(null)
+    setAfterImagePreviewUrl('')
     if (requestedJobId) {
       const nextParams = new URLSearchParams(searchParams)
       nextParams.delete('job')
@@ -148,8 +162,25 @@ export function CompletionPage() {
                 <input id="completion-total-cost" type="number" min="0" step="0.01" value={totalCost} onChange={(event) => setTotalCost(event.target.value)} className="form-control" placeholder="หากไม่มีค่าใช้จ่ายให้ใส่ 0" />
               </div>
               <div>
-                <label htmlFor="completion-after-image" className="mb-2 block text-sm font-bold text-slate-700">รูปหลังซ่อม</label>
-                <input id="completion-after-image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setAfterImage(event.target.files?.[0] ?? null)} className="block w-full text-xs text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-white file:px-3 file:py-2 file:font-bold file:text-teal-700" />
+                <p className="mb-2 text-sm font-bold text-slate-700">รูปหลังซ่อม</p>
+                <label htmlFor="completion-after-image" className="flex min-h-32 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-teal-200 bg-white text-center transition hover:border-teal-400 hover:bg-teal-50/50">
+                  {afterImagePreviewUrl ? (
+                    <div className="relative w-full">
+                      <img src={afterImagePreviewUrl} alt="ตัวอย่างรูปหลังซ่อม" className="h-44 w-full bg-slate-100 object-contain" />
+                      <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-slate-950/70 px-3 py-2 text-xs font-bold text-white">
+                        <Camera className="size-4" /> แตะเพื่อเปลี่ยนรูป
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="flex flex-col items-center px-3 py-4">
+                      <Camera className="size-7 text-teal-600" />
+                      <span className="mt-2 text-sm font-bold text-slate-700">ถ่ายรูปหรือเลือกรูปภาพ</span>
+                      <span className="mt-1 text-xs text-slate-500">JPG, PNG หรือ WebP</span>
+                    </span>
+                  )}
+                </label>
+                <input id="completion-after-image" aria-label="รูปหลังซ่อม" type="file" accept="image/jpeg,image/png,image/webp" onChange={selectAfterImage} className="sr-only" />
+                {afterImage && <p className="mt-2 truncate text-xs font-semibold text-teal-700">เลือกแล้ว: {afterImage.name}</p>}
               </div>
             </div>
             <div>

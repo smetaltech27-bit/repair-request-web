@@ -46,6 +46,8 @@ function request(id: string, statusCode: RepairRequest['statusCode']): RepairReq
 
 describe('CompletionPage', () => {
   beforeEach(() => {
+    URL.createObjectURL = vi.fn(() => 'blob:after-image-preview')
+    URL.revokeObjectURL = vi.fn()
     useRepairRequests.mockReturnValue({
       requests: [request('READY', 'purchasing_in_progress'), request('WAITING', 'pending_purchasing')],
       isLoading: false,
@@ -66,5 +68,17 @@ describe('CompletionPage', () => {
     expect(screen.getByLabelText(/ค่าใช้จ่ายทั้งหมด/)).toBeInTheDocument()
     expect(screen.getByLabelText(/หมายเหตุการปิดงาน/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /ยืนยันปิดงาน/ })).toBeInTheDocument()
+  })
+
+  it('shows a preview after selecting an after-repair image', async () => {
+    const user = userEvent.setup()
+    render(<HashRouter><CompletionPage /></HashRouter>)
+    await user.click(screen.getByText('REQ-READY'))
+
+    const file = new File(['after repair'], 'after-repair.jpg', { type: 'image/jpeg' })
+    await user.upload(screen.getByLabelText('รูปหลังซ่อม'), file)
+
+    expect(screen.getByAltText('ตัวอย่างรูปหลังซ่อม')).toHaveAttribute('src', 'blob:after-image-preview')
+    expect(screen.getByText('เลือกแล้ว: after-repair.jpg')).toBeInTheDocument()
   })
 })
