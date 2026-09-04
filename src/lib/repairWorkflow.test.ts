@@ -1,4 +1,4 @@
-import { getAvailableActions } from './repairWorkflow'
+import { canCompleteRequest, getApprovalActions, getAvailableActions } from './repairWorkflow'
 import { repairStatusLabels } from './repairService'
 import type { AppUser, RepairRequest, RepairStatusCode, UserRoleCode } from '../types/repair'
 
@@ -45,5 +45,14 @@ describe('repair workflow actions', () => {
   it('uses purchasing acknowledgement and completion actions', () => {
     expect(getAvailableActions(request('pending_purchasing'), user('purchasing'))).toEqual(['reject', 'acknowledge'])
     expect(getAvailableActions(request('purchasing_in_progress'), user('department_manager'))).toEqual(['complete'])
+  })
+
+  it('separates approval work from jobs waiting to be closed', () => {
+    const waitingToClose = request('purchasing_in_progress')
+
+    expect(getApprovalActions(waitingToClose, user('department_manager'))).toEqual([])
+    expect(canCompleteRequest(waitingToClose, user('department_manager'))).toBe(true)
+    expect(canCompleteRequest(waitingToClose, user('supervisor', 'requester'))).toBe(true)
+    expect(canCompleteRequest(waitingToClose, user('employee'))).toBe(false)
   })
 })

@@ -104,6 +104,23 @@ describe('repair email template', () => {
     expect(email.textBody).not.toContain('ฝ่ายจัดซื้อได้รับทราบและกำลังดำเนินการสั่งซื้อ/ออก PO')
   })
 
+  it('links the purchasing acknowledgement email to the completion inbox', () => {
+    const email = buildRepairEmail({
+      appUrl: 'https://example.com/repair',
+      notificationBody: 'จัดซื้อรับทราบแล้ว',
+      jobId: 'REQ-260711-020',
+      requesterName: 'จันทิมา สิทธิสินธุ์',
+      departmentName: 'Machine',
+      machineId: '# okk4',
+      issueDetails: 'เครื่องจักรคีบขณะรับงาน',
+      repairStatus: 'purchasing_in_progress',
+    })
+
+    expect(email.textBody).toContain(
+      'เปิดระบบ: https://example.com/repair/#/completion?job=REQ-260711-020',
+    )
+  })
+
   it('escapes all HTML-sensitive characters', () => {
     expect(escapeEmailHtml(`&<>"'`)).toBe('&amp;&lt;&gt;&quot;&#39;')
   })

@@ -5,6 +5,7 @@ import { useAuth } from './auth/AuthContext'
 import { AppShell } from './components/AppShell'
 
 const ApprovalsPage = lazy(() => import('./pages/ApprovalsPage').then((module) => ({ default: module.ApprovalsPage })))
+const CompletionPage = lazy(() => import('./pages/CompletionPage').then((module) => ({ default: module.CompletionPage })))
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then((module) => ({ default: module.DashboardPage })))
 const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ default: module.LoginPage })))
 const NewRequestPage = lazy(() => import('./pages/NewRequestPage').then((module) => ({ default: module.NewRequestPage })))
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="requests" element={<RequestsPage />} />
             <Route path="requests/new" element={<NewRequestPage />} />
             <Route path="approvals" element={<ApprovalsPage />} />
+            <Route path="completion" element={<CompletionPage />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>

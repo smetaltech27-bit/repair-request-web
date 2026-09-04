@@ -1,6 +1,7 @@
 import type { AppUser, RepairActionCode, RepairRequest } from '../types/repair'
 
 export type WorkflowAction = Exclude<RepairActionCode, 'create' | 'import'>
+export type ApprovalAction = Exclude<WorkflowAction, 'complete'>
 
 export function getAvailableActions(request: RepairRequest, user: AppUser): WorkflowAction[] {
   const sameDepartment = Boolean(user.departmentId && user.departmentId === request.departmentId)
@@ -28,4 +29,14 @@ export function getAvailableActions(request: RepairRequest, user: AppUser): Work
     return canComplete ? ['complete'] : []
   }
   return []
+}
+
+export function getApprovalActions(request: RepairRequest, user: AppUser): ApprovalAction[] {
+  return getAvailableActions(request, user).filter(
+    (action): action is ApprovalAction => action !== 'complete',
+  )
+}
+
+export function canCompleteRequest(request: RepairRequest, user: AppUser) {
+  return getAvailableActions(request, user).includes('complete')
 }

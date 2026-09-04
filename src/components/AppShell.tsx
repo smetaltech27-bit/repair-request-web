@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   ClipboardList,
   Gauge,
+  Flag,
   LogOut,
   LoaderCircle,
   Menu,
@@ -30,6 +31,7 @@ const desktopNavigation = [
   { label: 'รายการงาน', to: '/requests', icon: ClipboardList },
   { label: 'รออนุมัติ', to: '/approvals', icon: ClipboardCheck },
   { label: 'กำลังดำเนินการ', to: '/requests?status=in-progress', icon: Wrench },
+  { label: 'ปิดงาน', to: '/completion', icon: Flag },
   { label: 'ปิดงานแล้ว', to: '/requests?status=completed', icon: CheckCircle2 },
   { label: 'ตั้งค่า', to: '/settings', icon: Settings2 },
 ]
@@ -39,6 +41,7 @@ const mobileNavigation = [
   { label: 'งานของฉัน', to: '/requests', icon: ClipboardList },
   { label: 'แจ้งซ่อม', to: '/requests/new', icon: Plus, primary: true },
   { label: 'อนุมัติ', to: '/approvals', icon: ClipboardCheck },
+  { label: 'ปิดงาน', to: '/completion', icon: Flag },
   { label: 'โปรไฟล์', to: '/profile', icon: UserRound },
 ]
 
@@ -51,6 +54,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<RepairNotification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [notificationsLoading, setNotificationsLoading] = useState(false)
+  const canAccessCompletion = Boolean(user && user.roleCode !== 'employee')
+  const visibleDesktopNavigation = desktopNavigation.filter(({ to }) => to !== '/completion' || canAccessCompletion)
+  const visibleMobileNavigation = mobileNavigation.filter(({ to }) => to !== '/completion' || canAccessCompletion)
 
   useEffect(() => {
     if (!user || isDemoMode) return
@@ -126,7 +132,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6">
           <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">เมนูหลัก</p>
-          {desktopNavigation.map(({ label, to, icon: Icon }) => (
+          {visibleDesktopNavigation.map(({ label, to, icon: Icon }) => (
             <NavLink
               key={label}
               to={to}
@@ -256,8 +262,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl lg:hidden">
-        <div className="grid h-16 grid-cols-5 items-center px-2">
-          {mobileNavigation.map(({ label, to, icon: Icon, primary }) => (
+        <div className={cn('grid h-16 items-center px-1', canAccessCompletion ? 'grid-cols-6' : 'grid-cols-5')}>
+          {visibleMobileNavigation.map(({ label, to, icon: Icon, primary }) => (
             <NavLink
               key={label}
               to={to}

@@ -34,7 +34,7 @@ interface StageContent {
   greeting: string;
   intro: string;
   ctaLabel: string;
-  route: 'approvals' | 'requests';
+  route: 'approvals' | 'completion' | 'requests';
 }
 
 const statusLabels: Record<string, string> = {
@@ -129,7 +129,7 @@ function getStageContent(input: RepairEmailTemplateInput): StageContent {
       subject: `✅ จัดซื้อรับทราบแล้ว: ${input.jobId}`,
       greeting: 'เรียน ผู้บริหารและผู้เกี่ยวข้อง',
       intro: 'ฝ่ายจัดซื้อได้รับทราบและกำลังดำเนินการสั่งซื้อ/ออก PO สำหรับรายการแจ้งซ่อมนี้เรียบร้อยแล้วค่ะ',
-      ctaLabel: 'คลิกเข้าสู่ระบบเพื่อดูรายการ', route: 'requests',
+      ctaLabel: 'คลิกเข้าสู่หน้าปิดงาน', route: 'completion',
     },
     completed: {
       accent: '#16a34a', accentSoft: '#f0fdf4', badge: 'ปิดงานแล้ว',
