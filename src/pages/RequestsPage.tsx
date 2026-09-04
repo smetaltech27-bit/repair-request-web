@@ -1,4 +1,4 @@
-import { ChevronRight, Filter, Plus, Search } from 'lucide-react'
+import { Eye, Filter, Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
@@ -66,7 +66,7 @@ export function RequestsPage() {
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <p className="text-sm font-semibold text-teal-600">Repair requests</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">รายการงานซ่อม</h1>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">รายการซ่อม/ปรับปรุง</h1>
           <p className="mt-1 text-sm text-slate-500">ค้นหา กรอง และติดตามรายการแจ้งซ่อม</p>
         </div>
         <Button asChild size="lg"><Link to="/requests/new"><Plus className="size-5" /> แจ้งซ่อมใหม่</Link></Button>
@@ -103,38 +103,68 @@ export function RequestsPage() {
         </div>
       </Card>
 
-      <div className="mt-5 grid gap-3">
-        {filteredRequests.map((request) => (
-          <Card key={request.id} className="group overflow-hidden transition hover:border-teal-200 hover:shadow-md">
-            <button onClick={() => setSelectedRequest(request)} className="flex w-full items-start gap-4 p-4 text-left sm:p-5">
-              <div className="hidden size-12 shrink-0 place-items-center rounded-2xl bg-slate-100 text-sm font-bold text-slate-500 sm:grid">
-                {request.department.slice(0, 2).toUpperCase()}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="font-bold text-slate-950">{request.jobId}</h2>
-                  <StatusBadge status={request.status} />
-                </div>
-                <p className="mt-1 truncate font-semibold text-slate-700">{request.machineId}</p>
-                <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-500">{request.issueDetails}</p>
-                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                  <span>{request.department}</span>
-                  <span>{request.requesterName}</span>
-                  <span>{formatThaiDate(request.createdAt)}</span>
-                </div>
-              </div>
-              <ChevronRight className="mt-2 size-5 shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-teal-600" />
-            </button>
-          </Card>
-        ))}
-        {filteredRequests.length === 0 && (
-          <Card className="p-10 text-center">
+      <Card className="mt-5 overflow-hidden">
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-5">
+          <p className="text-sm font-bold text-slate-800">รายการทั้งหมด</p>
+          <p className="text-xs font-semibold text-slate-500">พบ {filteredRequests.length} จาก {requests.length} รายการ</p>
+        </div>
+
+        {filteredRequests.length > 0 ? (
+          <>
+            <p className="border-b border-slate-100 bg-slate-50/70 px-4 py-2 text-[11px] font-medium text-slate-500 sm:hidden">
+              เลื่อนซ้าย–ขวาเพื่อดูข้อมูลทุกคอลัมน์
+            </p>
+            <div className="overflow-x-auto overscroll-x-contain">
+              <table className="w-full min-w-[1280px] table-fixed text-left text-sm">
+                <thead className="bg-slate-50 text-xs font-bold text-slate-500">
+                  <tr>
+                    <th scope="col" className="w-16 px-4 py-3 text-center">ลำดับ</th>
+                    <th scope="col" className="w-40 px-4 py-3">รหัสแจ้งซ่อม</th>
+                    <th scope="col" className="w-40 px-4 py-3">วันที่แจ้ง</th>
+                    <th scope="col" className="w-32 px-4 py-3">แผนก</th>
+                    <th scope="col" className="w-44 px-4 py-3">เครื่องจักร/สถานที่</th>
+                    <th scope="col" className="w-64 px-4 py-3">อาการเสีย</th>
+                    <th scope="col" className="w-44 px-4 py-3">ผู้แจ้ง</th>
+                    <th scope="col" className="w-44 px-4 py-3">สถานะ</th>
+                    <th scope="col" className="w-40 px-4 py-3 text-center">การดำเนินการ</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredRequests.map((request, index) => (
+                    <tr key={request.id} className="transition hover:bg-teal-50/40">
+                      <td className="px-4 py-3.5 text-center font-semibold text-slate-500">{index + 1}</td>
+                      <td className="px-4 py-3.5 font-bold text-slate-950">{request.jobId}</td>
+                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-500">{formatThaiDate(request.createdAt)}</td>
+                      <td className="px-4 py-3.5"><p className="truncate text-slate-600" title={request.department}>{request.department}</p></td>
+                      <td className="px-4 py-3.5"><p className="truncate font-semibold text-slate-700" title={request.machineId}>{request.machineId}</p></td>
+                      <td className="px-4 py-3.5"><p className="truncate text-slate-600" title={request.issueDetails}>{request.issueDetails}</p></td>
+                      <td className="px-4 py-3.5"><p className="truncate text-slate-600" title={request.requesterName}>{request.requesterName}</p></td>
+                      <td className="px-4 py-3.5"><StatusBadge status={request.status} className="whitespace-nowrap" /></td>
+                      <td className="px-4 py-3.5 text-center">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setSelectedRequest(request)}
+                          aria-label={`ดูรายละเอียด ${request.jobId}`}
+                        >
+                          <Eye className="size-4" /> ดูรายละเอียด
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        ) : (
+          <div className="p-10 text-center">
             <Search className="mx-auto size-10 text-slate-300" />
             <h2 className="mt-3 font-bold text-slate-900">ไม่พบรายการ</h2>
             <p className="mt-1 text-sm text-slate-500">ลองเปลี่ยนคำค้นหาหรือตัวกรองสถานะ</p>
-          </Card>
+          </div>
         )}
-      </div>
+      </Card>
 
       <Modal
         open={Boolean(selectedRequest)}

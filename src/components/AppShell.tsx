@@ -1,7 +1,6 @@
 import {
   Bell,
   BellOff,
-  CheckCircle2,
   ChevronDown,
   ClipboardCheck,
   ClipboardList,
@@ -28,10 +27,9 @@ import { Button } from './ui/Button'
 const desktopNavigation = [
   { label: 'แดชบอร์ด', to: '/', icon: Gauge },
   { label: 'แจ้งซ่อมใหม่', to: '/requests/new', icon: Plus },
-  { label: 'รายการงาน', to: '/requests', icon: ClipboardList },
   { label: 'รออนุมัติ', to: '/approvals', icon: ClipboardCheck },
   { label: 'ปิดงาน', to: '/completion', icon: Flag },
-  { label: 'ปิดงานแล้ว', to: '/requests?status=completed', icon: CheckCircle2 },
+  { label: 'รายการซ่อม/ปรับปรุง', to: '/requests', icon: ClipboardList },
   { label: 'ตั้งค่า', to: '/settings', icon: Settings2 },
 ]
 
