@@ -30,7 +30,6 @@ const desktopNavigation = [
   { label: 'แจ้งซ่อมใหม่', to: '/requests/new', icon: Plus },
   { label: 'รายการงาน', to: '/requests', icon: ClipboardList },
   { label: 'รออนุมัติ', to: '/approvals', icon: ClipboardCheck },
-  { label: 'กำลังดำเนินการ', to: '/requests?status=in-progress', icon: Wrench },
   { label: 'ปิดงาน', to: '/completion', icon: Flag },
   { label: 'ปิดงานแล้ว', to: '/requests?status=completed', icon: CheckCircle2 },
   { label: 'ตั้งค่า', to: '/settings', icon: Settings2 },
