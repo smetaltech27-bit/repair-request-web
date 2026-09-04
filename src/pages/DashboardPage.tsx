@@ -2,7 +2,6 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  CircleDollarSign,
   ClipboardClock,
   ClipboardList,
   Filter,
@@ -149,7 +148,7 @@ export function DashboardPage() {
               </p>
             </div>
             <span className={`grid size-10 shrink-0 place-items-center rounded-xl ring-1 ring-inset sm:size-11 ${statColorClasses.violet}`}>
-              <CircleDollarSign className="size-5" />
+              <span aria-hidden="true" className="grid size-6 place-items-center rounded-full border-2 border-current text-sm font-extrabold leading-none">฿</span>
             </span>
           </div>
           <label className="mt-3 block">

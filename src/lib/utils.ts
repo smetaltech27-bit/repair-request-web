@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatThaiDate(value: string | Date) {
-  return format(new Date(value), 'd MMM yyyy HH:mm', { locale: th })
+  return format(new Date(value), 'd/M/yyyy HH:mm')
 }
 
 export function timeAgo(value: string | Date) {

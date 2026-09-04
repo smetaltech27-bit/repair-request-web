@@ -47,7 +47,7 @@ describe('repair metrics', () => {
     )
 
     expect(trend).toHaveLength(7)
-    expect(trend.at(-1)).toMatchObject({ total: 1, completed: 1, pending: 0 })
+    expect(trend.at(-1)).toMatchObject({ day: '3/9', total: 1, completed: 1, pending: 0 })
   })
 
   it('groups departments and sorts them by request count', () => {
@@ -76,6 +76,9 @@ describe('repair metrics', () => {
     expect(getRepairTotalCost(requests)).toBe(350.25)
     expect(getRepairTotalCost(requests, '2026-09')).toBe(300.25)
     expect(getRepairTotalCost(requests, '2026-08')).toBe(50)
-    expect(getRepairCostMonths(requests).map((month) => month.value)).toEqual(['2026-09', '2026-08'])
+    expect(getRepairCostMonths(requests)).toEqual([
+      { value: '2026-09', label: '9/2026' },
+      { value: '2026-08', label: '8/2026' },
+    ])
   })
 })

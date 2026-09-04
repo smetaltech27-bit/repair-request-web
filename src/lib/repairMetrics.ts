@@ -61,27 +61,20 @@ export function getRepairCostMonths(requests: RepairRequest[]) {
 
   return Array.from(months)
     .sort((left, right) => right.localeCompare(left))
-    .map((value) => ({
-      value,
-      label: new Intl.DateTimeFormat('th-TH', {
-        timeZone: 'Asia/Bangkok',
-        month: 'long',
-        year: 'numeric',
-      }).format(new Date(`${value}-15T12:00:00+07:00`)),
-    }))
+    .map((value) => {
+      const [year, month] = value.split('-')
+      return { value, label: `${Number(month)}/${year}` }
+    })
 }
 
 export function getWeeklyTrend(requests: RepairRequest[], now = new Date()) {
   return Array.from({ length: 7 }, (_, index) => {
     const date = new Date(now.getTime() - (6 - index) * 24 * 60 * 60 * 1000)
     const key = bangkokDateKey(date)
+    const [, month, day] = key.split('-')
     const daily = requests.filter((request) => bangkokDateKey(request.createdAt) === key)
     return {
-      day: new Intl.DateTimeFormat('th-TH', {
-        timeZone: 'Asia/Bangkok',
-        day: 'numeric',
-        month: 'short',
-      }).format(date),
+      day: `${Number(day)}/${Number(month)}`,
       total: daily.length,
       pending: daily.filter((request) => pendingStatuses.has(request.statusCode)).length,
       completed: daily.filter((request) => request.statusCode === 'completed').length,
