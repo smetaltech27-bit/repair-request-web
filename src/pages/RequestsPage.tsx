@@ -25,10 +25,15 @@ const statusOptions: { value: string; label: string; statuses?: RepairStatus[] }
 
 export function RequestsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [query, setQuery] = useState('')
-  const [selectedRequest, setSelectedRequest] = useState<RepairRequest | null>(null)
+  const requestedJobId = searchParams.get('job')
+  const [query, setQuery] = useState(requestedJobId ?? '')
+  const [selectedRequestState, setSelectedRequest] = useState<RepairRequest | null>(null)
   const activeStatus = searchParams.get('status') ?? 'all'
   const { requests, isLoading, error, refresh } = useRepairRequests()
+  const linkedRequest = requestedJobId
+    ? requests.find((request) => request.jobId === requestedJobId) ?? null
+    : null
+  const selectedRequest = selectedRequestState ?? linkedRequest
 
   const filteredRequests = useMemo(() => {
     const option = statusOptions.find((item) => item.value === activeStatus)
@@ -44,6 +49,14 @@ export function RequestsPage() {
       return matchesStatus && matchesQuery
     })
   }, [activeStatus, query, requests])
+
+  function closeSelectedRequest() {
+    setSelectedRequest(null)
+    if (!requestedJobId) return
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.delete('job')
+    setSearchParams(nextParams, { replace: true })
+  }
 
   if (isLoading) return <DataLoading label="กำลังโหลดรายการงานซ่อม…" />
   if (error) return <DataError message={error} onRetry={refresh} />
@@ -125,10 +138,10 @@ export function RequestsPage() {
 
       <Modal
         open={Boolean(selectedRequest)}
-        onOpenChange={(open) => !open && setSelectedRequest(null)}
+        onOpenChange={(open) => !open && closeSelectedRequest()}
         title={selectedRequest?.jobId ?? 'รายละเอียดงาน'}
         description={selectedRequest?.machineId}
-        footer={<Button className="w-full" onClick={() => setSelectedRequest(null)}>ปิดหน้าต่าง</Button>}
+        footer={<Button className="w-full" onClick={closeSelectedRequest}>ปิดหน้าต่าง</Button>}
       >
         {selectedRequest && (
           <RequestDetails request={selectedRequest} />

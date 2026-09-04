@@ -33,11 +33,54 @@ describe('repair email template', () => {
       totalCost: 1250.5,
       actorName: 'หัวหน้างาน',
       actionNote: 'ทดสอบแล้ว',
+      actionCreatedAt: '2026-08-17T01:29:00.000Z',
+      hasBeforeImage: true,
+      hasAfterImage: true,
+      actions: [
+        { action: 'approve', actorName: 'หัวหน้า A', actorRole: 'supervisor', note: 'อนุมัติ' },
+        { action: 'approve', actorName: 'ผู้จัดการ A', actorRole: 'department_manager', note: 'เปลี่ยนอะไหล่' },
+        { action: 'acknowledge', actorName: 'จัดซื้อ A', actorRole: 'purchasing', note: 'รับทราบค่ะ' },
+      ],
     })
 
-    expect(email.textBody).toContain('ค่าใช้จ่าย: 1,250.5 บาท')
-    expect(email.textBody).toContain('เปิดระบบ: https://example.com/repair/#/requests')
+    expect(email.subject).toBe('🛠️ [CLOSE JOB] แจ้งซ่อมเสร็จเรียบร้อย: REQ-260904-002')
+    expect(email.textBody).toContain('ค่าใช้จ่ายในการซ่อม: 1,250.5 บาท')
+    expect(email.textBody).toContain('เปิดระบบ: https://example.com/repair/#/requests?job=REQ-260904-002')
+    expect(email.textBody).toContain('หัวหน้างาน: หัวหน้า A (อนุมัติ)')
+    expect(email.textBody).toContain('ฝ่ายจัดซื้อ: จัดซื้อ A (รับทราบรายการ)')
+    expect(email.textBody).toContain('รูปภาพตอนแจ้ง (Before)')
+    expect(email.textBody).toContain('รูปภาพหลังซ่อม (After)')
     expect(email.htmlBody).toContain('ทดสอบแล้ว')
+  })
+
+  it.each([
+    ['pending_supervisor', '🔔 มีรายการแจ้งซ่อมใหม่รอดำเนินการ:', 'เรียน หัวหน้างานแผนก Machine'],
+    ['pending_department_manager', '🔔 รออนุมัติ (ผู้จัดการฝ่าย):', 'เรียน ผู้จัดการฝ่าย MA'],
+    ['pending_factory_manager', '🔔 รออนุมัติ (ผู้จัดการโรงงาน):', 'เรียน ผู้จัดการโรงงาน'],
+    ['pending_purchasing', '⏳ รอดำเนินการ (ฝ่ายจัดซื้อ):', 'เรียน ผู้บริหารและผู้เกี่ยวข้อง'],
+    ['purchasing_in_progress', '✅ จัดซื้อรับทราบแล้ว:', 'เรียน ผู้บริหารและผู้เกี่ยวข้อง'],
+    ['completed', '🛠️ [CLOSE JOB] แจ้งซ่อมเสร็จเรียบร้อย:', 'เรียน ทีมบริหารและผู้เกี่ยวข้องทุกท่าน'],
+  ])('preserves the legacy email wording for %s', (repairStatus, subjectPrefix, greeting) => {
+    const email = buildRepairEmail({
+      appUrl: 'https://example.com/repair',
+      notificationBody: 'อัปเดตงานซ่อม',
+      jobId: 'REQ-260711-020',
+      requesterName: 'จันทิมา สิทธิสินธุ์',
+      departmentName: 'Machine',
+      machineId: '# okk4',
+      issueDetails: 'เครื่องจักรคีบขณะรับงาน',
+      repairStatus,
+      totalCost: 143190,
+      actorName: 'ช่างซ่อม A',
+      actionNote: 'ดำเนินการเปลี่ยน servo module เรียบร้อยแล้ว',
+      actionCreatedAt: '2026-08-17T01:29:00.000Z',
+    })
+
+    expect(email.subject).toContain(subjectPrefix)
+    expect(email.textBody).toContain(greeting)
+    expect(email.textBody).toContain('รหัสแจ้งซ่อม: REQ-260711-020')
+    expect(email.textBody).toContain('เครื่องจักร/สถานที่: # okk4')
+    expect(email.textBody).toContain('อาการเสีย: เครื่องจักรคีบขณะรับงาน')
   })
 
   it('escapes all HTML-sensitive characters', () => {

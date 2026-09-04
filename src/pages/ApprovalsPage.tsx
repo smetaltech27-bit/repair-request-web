@@ -1,5 +1,6 @@
 import { Check, ChevronRight, ClipboardCheck, RotateCcw } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAuth } from '../auth/AuthContext'
 import { DataEmpty, DataError, DataLoading } from '../components/DataState'
@@ -17,8 +18,10 @@ import type { RepairRequest } from '../types/repair'
 
 export function ApprovalsPage() {
   const { user } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestedJobId = searchParams.get('job')
   const { requests, isLoading, error, refresh } = useRepairRequests()
-  const [selectedRequest, setSelectedRequest] = useState<RepairRequest | null>(null)
+  const [selectedRequestState, setSelectedRequest] = useState<RepairRequest | null>(null)
   const [note, setNote] = useState('')
   const [totalCost, setTotalCost] = useState('')
   const [afterImage, setAfterImage] = useState<File | null>(null)
@@ -27,6 +30,10 @@ export function ApprovalsPage() {
     () => user ? requests.filter((request) => getAvailableActions(request, user).length > 0) : [],
     [requests, user],
   )
+  const linkedRequest = requestedJobId
+    ? actionableRequests.find((request) => request.jobId === requestedJobId) ?? null
+    : null
+  const selectedRequest = selectedRequestState ?? linkedRequest
   const selectedActions = selectedRequest && user ? getAvailableActions(selectedRequest, user) : []
   const isCompletion = selectedActions.includes('complete')
 
@@ -35,6 +42,11 @@ export function ApprovalsPage() {
     setNote('')
     setTotalCost('')
     setAfterImage(null)
+    if (requestedJobId) {
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.delete('job')
+      setSearchParams(nextParams, { replace: true })
+    }
   }
 
   async function submitAction(action: WorkflowAction) {

@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { buildRepairEmail } from "../_shared/repairEmailTemplate.ts";
+import { buildRepairEmail, type RepairEmailAction } from "../_shared/repairEmailTemplate.ts";
 
 interface ClaimedEmail {
   notification_id: string;
@@ -19,6 +19,36 @@ interface ClaimedEmail {
   action_note: string | null;
 }
 
+interface RepairActionRow {
+  request_id: string;
+  action: RepairEmailAction['action'];
+  actor_name_snapshot: string;
+  actor_role_snapshot: RepairEmailAction['actorRole'];
+  note: string | null;
+  created_at: string;
+}
+
+interface RepairAttachmentRow {
+  request_id: string;
+  kind: 'before' | 'after';
+}
+
+type RecipientRole = 'employee' | 'supervisor' | 'department_manager' | 'factory_manager' | 'purchasing';
+
+interface RecipientProfileRow {
+  email: string | null;
+  role: RecipientRole;
+}
+
+interface TestEmailRouting {
+  employee_machine: string;
+  employee_other: string;
+  supervisor: string;
+  department_manager: string;
+  factory_manager: string;
+  purchasing: string;
+}
+
 function env(name: string) {
   return Deno.env.get(name)?.trim() ?? "";
 }
@@ -30,6 +60,41 @@ function safeEqual(left: string, right: string) {
     difference |= left.charCodeAt(index) ^ right.charCodeAt(index);
   }
   return difference === 0;
+}
+
+function parseTestEmailRouting(value: string): TestEmailRouting | null {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(value) as Partial<TestEmailRouting>;
+    const requiredKeys: Array<keyof TestEmailRouting> = [
+      'employee_machine',
+      'employee_other',
+      'supervisor',
+      'department_manager',
+      'factory_manager',
+      'purchasing',
+    ];
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (requiredKeys.some((key) => !emailPattern.test(String(parsed[key] ?? '').trim()))) return null;
+    return Object.fromEntries(
+      requiredKeys.map((key) => [key, String(parsed[key]).trim().toLowerCase()]),
+    ) as unknown as TestEmailRouting;
+  } catch {
+    return null;
+  }
+}
+
+function resolveTestRecipient(
+  routing: TestEmailRouting,
+  role: RecipientRole,
+  requestDepartment: string,
+) {
+  if (role === 'employee') {
+    return requestDepartment.trim().toLowerCase() === 'machine'
+      ? routing.employee_machine
+      : routing.employee_other;
+  }
+  return routing[role];
 }
 
 function json(body: unknown, status = 200) {
@@ -68,8 +133,13 @@ Deno.serve(async (request) => {
   const gasUrl = env("REPAIR_EMAIL_GAS_URL");
   const sharedSecret = env("REPAIR_EMAIL_SHARED_SECRET");
   const appUrl = env("REPAIR_APP_URL") || "https://smetaltech27-bit.github.io/repair-request-web";
+  const testMode = env('REPAIR_EMAIL_TEST_MODE').toLowerCase() === 'true';
+  const testRouting = testMode ? parseTestEmailRouting(env('REPAIR_EMAIL_TEST_ROUTING')) : null;
   if (!supabaseUrl || !adminKey || !gasUrl || !sharedSecret) {
     return json({ error: "Email dispatcher is not configured" }, 500);
+  }
+  if (testMode && !testRouting) {
+    return json({ error: 'Email dispatcher test routing is invalid' }, 500);
   }
 
   const admin = createClient(supabaseUrl, adminKey, {
@@ -81,6 +151,55 @@ Deno.serve(async (request) => {
   if (claimError) return json({ error: "Unable to claim email notifications", detail: claimError.message }, 500);
 
   const claimed = (data ?? []) as ClaimedEmail[];
+  const requestIds = [...new Set(claimed.map((item) => item.request_id))];
+  const actionsByRequest = new Map<string, RepairEmailAction[]>();
+  const attachmentKindsByRequest = new Map<string, Set<'before' | 'after'>>();
+  const recipientProfilesByEmail = new Map<string, RecipientProfileRow>();
+  let supplementalError = '';
+
+  if (requestIds.length > 0) {
+    const recipientEmails = [...new Set(claimed.map((item) => item.recipient_email.toLowerCase()))];
+    const [actionsResult, attachmentsResult, recipientsResult] = await Promise.all([
+      admin
+        .from('repair_request_actions')
+        .select('request_id,action,actor_name_snapshot,actor_role_snapshot,note,created_at')
+        .in('request_id', requestIds)
+        .order('created_at', { ascending: true }),
+      admin
+        .from('repair_request_attachments')
+        .select('request_id,kind')
+        .in('request_id', requestIds),
+      admin
+        .from('repair_profiles')
+        .select('email,role')
+        .in('email', recipientEmails),
+    ]);
+
+    supplementalError = actionsResult.error?.message
+      || attachmentsResult.error?.message
+      || recipientsResult.error?.message
+      || '';
+    for (const row of (actionsResult.data ?? []) as RepairActionRow[]) {
+      const actions = actionsByRequest.get(row.request_id) ?? [];
+      actions.push({
+        action: row.action,
+        actorName: row.actor_name_snapshot,
+        actorRole: row.actor_role_snapshot,
+        note: row.note,
+        createdAt: row.created_at,
+      });
+      actionsByRequest.set(row.request_id, actions);
+    }
+    for (const row of (attachmentsResult.data ?? []) as RepairAttachmentRow[]) {
+      const kinds = attachmentKindsByRequest.get(row.request_id) ?? new Set<'before' | 'after'>();
+      kinds.add(row.kind);
+      attachmentKindsByRequest.set(row.request_id, kinds);
+    }
+    for (const row of (recipientsResult.data ?? []) as RecipientProfileRow[]) {
+      if (row.email) recipientProfilesByEmail.set(row.email.toLowerCase(), row);
+    }
+  }
+
   let sent = 0;
   let failed = 0;
   const errors: Array<{ notificationId: string; message: string }> = [];
@@ -88,7 +207,16 @@ Deno.serve(async (request) => {
   for (const item of claimed) {
     let adapterAccepted = false;
     try {
-      const { htmlBody, textBody } = buildRepairEmail({
+      if (supplementalError) throw new Error(`Unable to load email details: ${supplementalError}`);
+      const actions = actionsByRequest.get(item.request_id) ?? [];
+      const currentAction = actions.at(-1);
+      const attachmentKinds = attachmentKindsByRequest.get(item.request_id) ?? new Set<'before' | 'after'>();
+      const recipientProfile = recipientProfilesByEmail.get(item.recipient_email.toLowerCase());
+      if (!recipientProfile) throw new Error('Unable to resolve the intended email recipient profile');
+      const recipientEmail = testMode
+        ? resolveTestRecipient(testRouting as TestEmailRouting, recipientProfile.role, item.department_name)
+        : item.recipient_email;
+      const { subject, htmlBody, textBody } = buildRepairEmail({
         appUrl,
         notificationBody: item.notification_body,
         jobId: item.job_id,
@@ -98,11 +226,17 @@ Deno.serve(async (request) => {
         issueDetails: item.issue_details,
         repairStatus: item.repair_status,
         totalCost: item.total_cost,
+        actionCode: item.action_code,
         actorName: item.actor_name,
         actionNote: item.action_note,
+        actionCreatedAt: currentAction?.createdAt,
+        actions,
+        hasBeforeImage: attachmentKinds.has('before'),
+        hasAfterImage: attachmentKinds.has('after'),
+        isRequesterReceipt: item.email_subject.startsWith('รับรายการแจ้งซ่อม'),
       });
       const timestamp = Date.now().toString();
-      const canonical = [timestamp, item.notification_id, item.recipient_email, item.email_subject, htmlBody].join("\n");
+      const canonical = [timestamp, item.notification_id, recipientEmail, subject, htmlBody].join("\n");
       const signature = await hmacHex(sharedSecret, canonical);
       const response = await fetch(gasUrl, {
         method: "POST",
@@ -110,8 +244,8 @@ Deno.serve(async (request) => {
         body: JSON.stringify({
           timestamp,
           notificationId: item.notification_id,
-          to: item.recipient_email,
-          subject: item.email_subject,
+          to: recipientEmail,
+          subject,
           textBody,
           htmlBody,
           signature,
@@ -145,5 +279,5 @@ Deno.serve(async (request) => {
     }
   }
 
-  return json({ claimed: claimed.length, sent, failed, errors });
+  return json({ claimed: claimed.length, sent, failed, testMode, errors });
 });

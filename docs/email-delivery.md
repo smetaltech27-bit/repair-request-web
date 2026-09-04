@@ -19,6 +19,20 @@
 6. `EmailAdapter.js` verifies the signature, checks `MailApp` quota, prevents short-term duplicate delivery by Notification ID, and sends the message.
 7. The dispatcher records `sent` or `failed`. Failed attempts use 1, 5, 15, and 60-minute delays and stop after five claims. Quota failures wait six hours.
 
+## Email content
+
+- The six main workflow messages preserve the legacy Repair Request wording for new requests, department-manager approval, factory-manager approval, purchasing handoff, purchasing acknowledgement, and job closure.
+- Each message contains the request code, department, requester, machine/location, issue, and the approval or acknowledgement history available at that stage.
+- Closure messages also contain the closer, closure note and time, repair cost, and Before/After image links when attachments exist.
+- Email buttons and image links deep-link to the matching request after login. Attachments remain private and are never converted to public URLs for email delivery.
+
+### Temporary test routing
+
+- Set `REPAIR_EMAIL_TEST_MODE=true` together with a complete `REPAIR_EMAIL_TEST_ROUTING` JSON object to redirect every outgoing message to controlled test mailboxes without changing `repair_profiles.email`.
+- Required routing keys are `employee_machine`, `employee_other`, `supervisor`, `department_manager`, `factory_manager`, and `purchasing`.
+- Test mode fails closed when the routing JSON or intended recipient profile cannot be resolved; it never falls back to a production recipient.
+- Clear the two test settings after acceptance testing so delivery resumes from each active profile's configured notification email.
+
 ## Production activation checklist
 
 Production activation changes external systems and must be approved separately before running these steps.
