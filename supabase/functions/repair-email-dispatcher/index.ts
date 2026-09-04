@@ -51,7 +51,8 @@ interface RecipientProfileRow {
 interface TestEmailRouting {
   employee_machine: string;
   employee_other: string;
-  supervisor: string;
+  supervisor_machine: string;
+  supervisor_other: string;
   department_manager: string;
   factory_manager: string;
   purchasing: string;
@@ -77,7 +78,8 @@ function parseTestEmailRouting(value: string): TestEmailRouting | null {
     const requiredKeys: Array<keyof TestEmailRouting> = [
       'employee_machine',
       'employee_other',
-      'supervisor',
+      'supervisor_machine',
+      'supervisor_other',
       'department_manager',
       'factory_manager',
       'purchasing',
@@ -101,6 +103,11 @@ function resolveTestRecipient(
     return requestDepartment.trim().toLowerCase() === 'machine'
       ? routing.employee_machine
       : routing.employee_other;
+  }
+  if (role === 'supervisor') {
+    return requestDepartment.trim().toLowerCase() === 'machine'
+      ? routing.supervisor_machine
+      : routing.supervisor_other;
   }
   return routing[role];
 }

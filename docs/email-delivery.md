@@ -29,7 +29,7 @@
 ### Temporary test routing
 
 - Set `REPAIR_EMAIL_TEST_MODE=true` together with a complete `REPAIR_EMAIL_TEST_ROUTING` JSON object to redirect every outgoing message to controlled test mailboxes without changing `repair_profiles.email`.
-- Required routing keys are `employee_machine`, `employee_other`, `supervisor`, `department_manager`, `factory_manager`, and `purchasing`.
+- Required routing keys are `employee_machine`, `employee_other`, `supervisor_machine`, `supervisor_other`, `department_manager`, `factory_manager`, and `purchasing`.
 - Test mode fails closed when the routing JSON or intended recipient profile cannot be resolved; it never falls back to a production recipient.
 - Clear the two test settings after acceptance testing so delivery resumes from each active profile's configured notification email.
 
