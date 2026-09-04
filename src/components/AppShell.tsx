@@ -28,7 +28,7 @@ const desktopNavigation = [
   { label: 'แดชบอร์ด', to: '/', icon: Gauge },
   { label: 'แจ้งซ่อมใหม่', to: '/requests/new', icon: Plus },
   { label: 'รออนุมัติ', to: '/approvals', icon: ClipboardCheck },
-  { label: 'ปิดงาน', to: '/completion', icon: Flag },
+  { label: 'รอปิดงาน', to: '/completion', icon: Flag },
   { label: 'รายการซ่อม/ปรับปรุง', to: '/requests', icon: ClipboardList },
   { label: 'ตั้งค่า', to: '/settings', icon: Settings2 },
 ]
@@ -38,7 +38,7 @@ const mobileNavigation = [
   { label: 'งานของฉัน', to: '/requests', icon: ClipboardList },
   { label: 'แจ้งซ่อม', to: '/requests/new', icon: Plus, primary: true },
   { label: 'อนุมัติ', to: '/approvals', icon: ClipboardCheck },
-  { label: 'ปิดงาน', to: '/completion', icon: Flag },
+  { label: 'รอปิดงาน', to: '/completion', icon: Flag },
   { label: 'โปรไฟล์', to: '/profile', icon: UserRound },
 ]
 
