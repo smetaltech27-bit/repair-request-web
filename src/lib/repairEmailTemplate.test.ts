@@ -60,7 +60,7 @@ describe('repair email template', () => {
     ['pending_supervisor', '🔔 มีรายการแจ้งซ่อมใหม่รอดำเนินการ:', 'เรียน หัวหน้างานแผนก Machine'],
     ['pending_department_manager', '🔔 รออนุมัติ (ผู้จัดการฝ่าย):', 'เรียน ผู้จัดการฝ่าย MA'],
     ['pending_factory_manager', '🔔 รออนุมัติ (ผู้จัดการโรงงาน):', 'เรียน ผู้จัดการโรงงาน'],
-    ['pending_purchasing', '⏳ รอดำเนินการ (ฝ่ายจัดซื้อ):', 'เรียน ผู้บริหารและผู้เกี่ยวข้อง'],
+    ['pending_purchasing', '🔔 รอดำเนินการ (ฝ่ายจัดซื้อ) :', 'เรียนฝ่ายจัดซื้อ'],
     ['purchasing_in_progress', '✅ จัดซื้อรับทราบแล้ว:', 'เรียน ผู้บริหารและผู้เกี่ยวข้อง'],
     ['completed', '🛠️ [CLOSE JOB] แจ้งซ่อมเสร็จเรียบร้อย:', 'เรียน ทีมบริหารและผู้เกี่ยวข้องทุกท่าน'],
   ])('preserves the legacy email wording for %s', (repairStatus, subjectPrefix, greeting) => {
@@ -84,6 +84,24 @@ describe('repair email template', () => {
     expect(email.textBody).toContain('รหัสแจ้งซ่อม: REQ-260711-020')
     expect(email.textBody).toContain('เครื่องจักร/สถานที่: # okk4')
     expect(email.textBody).toContain('อาการเสีย: เครื่องจักรคีบขณะรับงาน')
+  })
+
+  it('asks purchasing to proceed only after the factory manager approval', () => {
+    const email = buildRepairEmail({
+      appUrl: 'https://example.com/repair',
+      notificationBody: 'อัปเดตงานซ่อม',
+      jobId: 'REQ-260711-020',
+      requesterName: 'จันทิมา สิทธิสินธุ์',
+      departmentName: 'Machine',
+      machineId: '# okk4',
+      issueDetails: 'เครื่องจักรคีบขณะรับงาน',
+      repairStatus: 'pending_purchasing',
+    })
+
+    expect(email.textBody).toContain(
+      'รายการแจ้งซ่อมผ่านการอนุมัติจากผู้จัดการโรงงานแล้ว รอดำเนินการจากท่านค่ะ:',
+    )
+    expect(email.textBody).not.toContain('ฝ่ายจัดซื้อได้รับทราบและกำลังดำเนินการสั่งซื้อ/ออก PO')
   })
 
   it('escapes all HTML-sensitive characters', () => {

@@ -118,10 +118,10 @@ function getStageContent(input: RepairEmailTemplateInput): StageContent {
       ctaLabel: 'คลิกเข้าสู่ระบบ (เฉพาะผู้อนุมัติ)', route: 'approvals',
     },
     pending_purchasing: {
-      accent: '#7c3aed', accentSoft: '#faf5ff', badge: 'รอจัดซื้อดำเนินการ',
-      subject: `⏳ รอดำเนินการ (ฝ่ายจัดซื้อ): ${input.jobId}`,
-      greeting: 'เรียน ผู้บริหารและผู้เกี่ยวข้อง',
-      intro: 'ฝ่ายจัดซื้อได้รับทราบและกำลังดำเนินการสั่งซื้อ/ออก PO สำหรับรายการแจ้งซ่อมนี้เรียบร้อยแล้วค่ะ',
+      accent: '#7c3aed', accentSoft: '#faf5ff', badge: 'รอดำเนินการ',
+      subject: `🔔 รอดำเนินการ (ฝ่ายจัดซื้อ) : ${input.jobId}`,
+      greeting: 'เรียนฝ่ายจัดซื้อ',
+      intro: 'รายการแจ้งซ่อมผ่านการอนุมัติจากผู้จัดการโรงงานแล้ว รอดำเนินการจากท่านค่ะ:',
       ctaLabel: 'คลิกเข้าสู่ระบบ (เฉพาะผู้อนุมัติ)', route: 'approvals',
     },
     purchasing_in_progress: {
