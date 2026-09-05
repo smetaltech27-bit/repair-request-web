@@ -15,10 +15,11 @@ import {
   Wrench,
   X,
 } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { getUnreadNotificationCount, listNotifications, markNotificationRead } from '../lib/repairService'
+import { NotificationReadContext } from '../lib/NotificationReadContext'
+import { getUnreadNotificationCount, listNotifications, markNotificationRead, markRequestNotificationsRead } from '../lib/repairService'
 import { cn, timeAgo } from '../lib/utils'
 import type { RepairNotification } from '../types/repair'
 import { PrivateProfileAvatar } from './PrivateProfileAvatar'
@@ -49,6 +50,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [notifications, setNotifications] = useState<RepairNotification[]>([])
+  const notificationsRef = useRef<RepairNotification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [notificationsLoading, setNotificationsLoading] = useState(false)
   const canAccessCompletion = Boolean(user && user.roleCode !== 'employee')
@@ -61,11 +63,15 @@ export function AppShell({ children }: { children: ReactNode }) {
     Promise.all([listNotifications(), getUnreadNotificationCount()])
       .then(([items, count]) => {
         if (!active) return
+        notificationsRef.current = items
         setNotifications(items)
         setUnreadCount(count)
       })
       .catch(() => {
-        if (active) setNotifications([])
+        if (active) {
+          notificationsRef.current = []
+          setNotifications([])
+        }
       })
       .finally(() => active && setNotificationsLoading(false))
     return () => {
@@ -78,18 +84,53 @@ export function AppShell({ children }: { children: ReactNode }) {
     navigate('/login')
   }
 
-  async function handleNotification(notification: RepairNotification) {
-    if (!notification.readAt) {
-      try {
-        await markNotificationRead(notification.id)
-        setNotifications((items) => items.map((item) => item.id === notification.id ? { ...item, readAt: new Date().toISOString() } : item))
-        setUnreadCount((count) => Math.max(0, count - 1))
-      } catch {
-        // Navigation is still useful if the read receipt cannot be saved.
-      }
+  const refreshNotificationState = useCallback(async () => {
+    const [items, count] = await Promise.all([listNotifications(), getUnreadNotificationCount()])
+    notificationsRef.current = items
+    setNotifications(items)
+    setUnreadCount(count)
+  }, [])
+
+  const handleRequestRead = useCallback((requestId: string) => {
+    if (!user || isDemoMode) return
+
+    const readAt = new Date().toISOString()
+    const unreadForRequest = notificationsRef.current.filter(
+      (notification) => notification.requestId === requestId && !notification.readAt,
+    )
+    if (unreadForRequest.length > 0) {
+      const nextNotifications = notificationsRef.current.map((notification) => (
+        notification.requestId === requestId && !notification.readAt
+          ? { ...notification, readAt }
+          : notification
+      ))
+      notificationsRef.current = nextNotifications
+      setNotifications(nextNotifications)
+      setUnreadCount((count) => Math.max(0, count - unreadForRequest.length))
     }
+
+    void markRequestNotificationsRead(requestId)
+      .then(() => getUnreadNotificationCount())
+      .then((count) => setUnreadCount(count))
+      .catch(() => void refreshNotificationState().catch(() => undefined))
+  }, [isDemoMode, refreshNotificationState, user])
+
+  function handleNotification(notification: RepairNotification) {
+    if (notification.requestId) {
+      handleRequestRead(notification.requestId)
+    } else if (!notification.readAt) {
+      const readAt = new Date().toISOString()
+      const nextNotifications = notificationsRef.current.map((item) => (
+        item.id === notification.id ? { ...item, readAt } : item
+      ))
+      notificationsRef.current = nextNotifications
+      setNotifications(nextNotifications)
+      setUnreadCount((count) => Math.max(0, count - 1))
+      void markNotificationRead(notification.id).catch(() => void refreshNotificationState().catch(() => undefined))
+    }
+
     setNotificationOpen(false)
-    navigate('/requests')
+    navigate(notification.requestId ? `/requests?request=${encodeURIComponent(notification.requestId)}` : '/requests')
   }
 
   return (
@@ -255,7 +296,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1600px] px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1600px] px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-8">
+          <NotificationReadContext.Provider value={handleRequestRead}>
+            {children}
+          </NotificationReadContext.Provider>
+        </main>
       </div>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl lg:hidden">

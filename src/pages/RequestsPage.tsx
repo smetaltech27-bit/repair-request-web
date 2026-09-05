@@ -26,13 +26,16 @@ const statusOptions: { value: string; label: string; statuses?: RepairStatus[] }
 export function RequestsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const requestedJobId = searchParams.get('job')
+  const requestedRequestId = searchParams.get('request')
   const [query, setQuery] = useState(requestedJobId ?? '')
   const [selectedRequestState, setSelectedRequest] = useState<RepairRequest | null>(null)
   const activeStatus = searchParams.get('status') ?? 'all'
   const { requests, isLoading, error, refresh } = useRepairRequests()
-  const linkedRequest = requestedJobId
-    ? requests.find((request) => request.jobId === requestedJobId) ?? null
-    : null
+  const linkedRequest = requestedRequestId
+    ? requests.find((request) => request.id === requestedRequestId) ?? null
+    : requestedJobId
+      ? requests.find((request) => request.jobId === requestedJobId) ?? null
+      : null
   const selectedRequest = selectedRequestState ?? linkedRequest
 
   const filteredRequests = useMemo(() => {
@@ -52,9 +55,10 @@ export function RequestsPage() {
 
   function closeSelectedRequest() {
     setSelectedRequest(null)
-    if (!requestedJobId) return
+    if (!requestedJobId && !requestedRequestId) return
     const nextParams = new URLSearchParams(searchParams)
     nextParams.delete('job')
+    nextParams.delete('request')
     setSearchParams(nextParams, { replace: true })
   }
 

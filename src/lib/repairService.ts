@@ -269,6 +269,21 @@ export async function markNotificationRead(notificationId: string) {
   if (error) throw error
 }
 
+export async function markRequestNotificationsRead(requestId: string) {
+  const client = requireSupabase()
+  const { data, error } = await client
+    .from('repair_notifications')
+    .select('id')
+    .eq('request_id', requestId)
+    .eq('channel', 'in_app')
+    .is('read_at', null)
+  if (error) throw error
+
+  const notificationIds = (data ?? []).map((row) => row.id)
+  await Promise.all(notificationIds.map((notificationId) => markNotificationRead(notificationId)))
+  return notificationIds
+}
+
 interface RawSettingsRequestRow {
   id: string
   job_id: string

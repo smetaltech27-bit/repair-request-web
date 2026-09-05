@@ -1,13 +1,15 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { HashRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { NotificationReadContext } from '../lib/NotificationReadContext'
 import type { RepairRequest } from '../types/repair'
 import { RequestsPage } from './RequestsPage'
 
 const { useRepairRequests } = vi.hoisted(() => ({
   useRepairRequests: vi.fn(),
 }))
+const markRequestRead = vi.fn()
 
 vi.mock('../hooks/useRepairData', () => ({ useRepairRequests }))
 
@@ -30,8 +32,19 @@ function request(id: string, department: string): RepairRequest {
   }
 }
 
+function renderPage(entry = '/requests') {
+  return render(
+    <MemoryRouter initialEntries={[entry]}>
+      <NotificationReadContext.Provider value={markRequestRead}>
+        <RequestsPage />
+      </NotificationReadContext.Provider>
+    </MemoryRouter>,
+  )
+}
+
 describe('RequestsPage', () => {
   beforeEach(() => {
+    markRequestRead.mockReset()
     useRepairRequests.mockReturnValue({
       requests: [request('001', 'Machine'), request('002', 'Accounting')],
       isLoading: false,
@@ -41,7 +54,7 @@ describe('RequestsPage', () => {
   })
 
   it('renders one repair per table row with report columns', () => {
-    render(<HashRouter><RequestsPage /></HashRouter>)
+    renderPage()
 
     expect(screen.getByRole('heading', { name: 'รายการซ่อม/ปรับปรุง' })).toBeInTheDocument()
     expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
@@ -64,12 +77,21 @@ describe('RequestsPage', () => {
 
   it('opens the existing details modal from the row action', async () => {
     const user = userEvent.setup()
-    render(<HashRouter><RequestsPage /></HashRouter>)
+    renderPage()
 
     await user.click(screen.getByRole('button', { name: 'ดูรายละเอียด REQ-001' }))
 
     const dialog = screen.getByRole('dialog')
     expect(within(dialog).getByRole('heading', { name: 'REQ-001' })).toBeInTheDocument()
     expect(within(dialog).getByText('รายละเอียดอาการเสีย 001')).toBeInTheDocument()
+    expect(markRequestRead).toHaveBeenCalledWith('001')
+  })
+
+  it('opens the matching details modal from a notification request link', () => {
+    renderPage('/requests?request=002')
+
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByRole('heading', { name: 'REQ-002' })).toBeInTheDocument()
+    expect(within(dialog).getByText('รายละเอียดอาการเสีย 002')).toBeInTheDocument()
   })
 })

@@ -1,4 +1,6 @@
 import { ImageIcon } from 'lucide-react'
+import { useEffect } from 'react'
+import { useNotificationRead } from '../lib/NotificationReadContext'
 import { formatCurrency, formatThaiDate } from '../lib/utils'
 import { repairActionLabels } from '../lib/repairService'
 import type { RepairRequest } from '../types/repair'
@@ -6,6 +8,12 @@ import { PrivateRepairImage } from './PrivateRepairImage'
 import { StatusBadge } from './ui/StatusBadge'
 
 export function RequestDetails({ request }: { request: RepairRequest }) {
+  const markRequestRead = useNotificationRead()
+
+  useEffect(() => {
+    markRequestRead(request.id)
+  }, [markRequestRead, request.id])
+
   return (
     <div className="space-y-5 text-sm">
       <StatusBadge status={request.status} />
