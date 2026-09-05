@@ -11,7 +11,6 @@ import {
   Menu,
   Plus,
   Settings2,
-  UserRound,
   Wrench,
   X,
 } from 'lucide-react'
@@ -32,7 +31,6 @@ const desktopNavigation = [
   { label: 'รอปิดงาน', to: '/completion', icon: Flag },
   { label: 'รายการซ่อม/ปรับปรุง', to: '/requests', icon: ClipboardList },
   { label: 'ตั้งค่า', to: '/settings', icon: Settings2 },
-  { label: 'โปรไฟล์', to: '/profile', icon: UserRound, mobileOnly: true },
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -165,7 +163,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6">
           <p className="mb-3 px-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">เมนูหลัก</p>
-          {visibleDesktopNavigation.map(({ label, to, icon: Icon, mobileOnly }) => (
+          {visibleDesktopNavigation.map(({ label, to, icon: Icon }) => (
             <NavLink
               key={label}
               to={to}
@@ -173,7 +171,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               className={({ isActive }) =>
                 cn(
                   'group flex items-center gap-3 rounded-xl px-3 py-3.5 text-base font-semibold text-slate-300 transition',
-                  mobileOnly && 'lg:hidden',
                   isActive
                     ? 'bg-teal-500/15 text-teal-300 ring-1 ring-inset ring-teal-400/10'
                     : 'hover:bg-white/5 hover:text-white',

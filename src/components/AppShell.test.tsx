@@ -117,7 +117,7 @@ describe('AppShell notifications', () => {
     expect(scrollToMock).toHaveBeenLastCalledWith({ top: 0, left: 0, behavior: 'auto' })
   })
 
-  it('does not render the removed mobile bottom navigation', async () => {
+  it('does not render removed mobile-only navigation items', async () => {
     renderShell()
 
     await screen.findByRole('button', { name: 'การแจ้งเตือนที่ยังไม่อ่าน 2 รายการ' })
@@ -125,6 +125,6 @@ describe('AppShell notifications', () => {
     expect(screen.getByRole('link', { name: 'หน้าแรก' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'แดชบอร์ด' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'งานของฉัน' })).not.toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'โปรไฟล์' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'โปรไฟล์' })).not.toBeInTheDocument()
   })
 })
