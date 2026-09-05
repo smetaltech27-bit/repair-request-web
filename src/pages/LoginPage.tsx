@@ -15,16 +15,26 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>
 
+const REMEMBERED_USERNAME_KEY = 'mrs-remembered-username'
+
 export function LoginPage() {
   const { user, login, isDemoMode, isLoading } = useAuth()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberPassword, setRememberPassword] = useState(() => Boolean(localStorage.getItem(REMEMBERED_USERNAME_KEY)))
+  const [showForgotPasswordMessage, setShowForgotPasswordMessage] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) })
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: localStorage.getItem(REMEMBERED_USERNAME_KEY) ?? '',
+      password: '',
+    },
+  })
 
   if (isLoading) return <div className="grid min-h-svh place-items-center text-sm text-slate-500">กำลังตรวจสอบ Session…</div>
   if (user) return <Navigate to="/" replace />
@@ -33,6 +43,8 @@ export function LoginPage() {
     setSubmitError('')
     try {
       await login(values.username, values.password)
+      if (rememberPassword) localStorage.setItem(REMEMBERED_USERNAME_KEY, values.username.trim())
+      else localStorage.removeItem(REMEMBERED_USERNAME_KEY)
       navigate('/', { replace: true })
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'เข้าสู่ระบบไม่สำเร็จ')
@@ -87,9 +99,7 @@ export function LoginPage() {
             </div>
 
             <div className="mt-7 text-center sm:mt-8">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-600">Welcome back</p>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">เข้าสู่ระบบ</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-500">ใช้บัญชีพนักงานเดิมเพื่อเข้าสู่ระบบ</p>
+              <h2 className="text-3xl font-bold tracking-tight text-slate-950">เข้าสู่ระบบ</h2>
             </div>
 
             {isDemoMode && (
@@ -137,6 +147,37 @@ export function LoginPage() {
                 </div>
                 {errors.password && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.password.message}</p>}
               </div>
+
+              <div className="-mt-1 flex items-center justify-between gap-3">
+                <label htmlFor="remember-password" className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600">
+                  <input
+                    id="remember-password"
+                    type="checkbox"
+                    className="peer sr-only"
+                    checked={rememberPassword}
+                    onChange={(event) => {
+                      const checked = event.target.checked
+                      setRememberPassword(checked)
+                      if (!checked) localStorage.removeItem(REMEMBERED_USERNAME_KEY)
+                    }}
+                  />
+                  <span className="relative h-5 w-9 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-teal-600 peer-focus-visible:ring-4 peer-focus-visible:ring-teal-500/20 after:absolute after:left-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-4" />
+                  <span>จดจำรหัสผ่าน</span>
+                </label>
+                <button
+                  type="button"
+                  className="shrink-0 text-sm font-semibold text-teal-600 transition hover:text-teal-700 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-500/20"
+                  onClick={() => setShowForgotPasswordMessage(true)}
+                >
+                  ลืมรหัสผ่าน?
+                </button>
+              </div>
+
+              {showForgotPasswordMessage && (
+                <p role="status" className="rounded-xl border border-teal-200 bg-teal-50 px-3 py-2.5 text-sm font-semibold text-teal-800">
+                  กรุณาติดต่อฝ่ายบุคคล
+                </p>
+              )}
 
               {submitError && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-700">{submitError}</p>}
 
