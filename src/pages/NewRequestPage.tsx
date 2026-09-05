@@ -144,12 +144,24 @@ export function NewRequestPage() {
           </form>
         </Card>
 
-        <aside className="space-y-4">
-          <Card className="border-teal-200 bg-teal-50/70 p-4">
-            <div className="flex gap-3"><Info className="mt-0.5 size-5 shrink-0 text-teal-700" /><div><h2 className="font-bold text-teal-900 lg:text-lg">ก่อนส่งรายการ</h2><p className="mt-1 text-sm leading-6 text-teal-800 lg:text-base">ตรวจชื่อเครื่องและอธิบายอาการให้ชัดเจน เพื่อช่วยให้ผู้อนุมัติพิจารณาได้เร็วขึ้น</p></div></div>
+        <aside className="space-y-3 sm:space-y-4">
+          <Card className="border-teal-200 bg-teal-50/70 p-3 sm:p-4">
+            <div className="flex gap-2 sm:gap-3">
+              <Info className="mt-0.5 size-4 shrink-0 text-teal-700 sm:size-5" />
+              <div>
+                <h2 className="text-sm font-bold text-teal-900 sm:text-base lg:text-lg">ก่อนส่งรายการ</h2>
+                <p className="mt-0.5 text-xs leading-5 text-teal-800 sm:mt-1 sm:text-sm sm:leading-6 lg:text-base">ตรวจชื่อเครื่องและอธิบายอาการให้ชัดเจน เพื่อช่วยให้ผู้อนุมัติพิจารณาได้เร็วขึ้น</p>
+              </div>
+            </div>
           </Card>
-          <Card className="p-4">
-            <div className="flex gap-3"><FileCheck2 className="mt-0.5 size-5 shrink-0 text-slate-500" /><div><h2 className="font-bold text-slate-900 lg:text-lg">ขั้นตอนถัดไป</h2><p className="mt-1 text-sm leading-6 text-slate-500 lg:text-base">ระบบจะส่งรายการไปยังผู้อนุมัติตามตำแหน่งและแผนกของผู้แจ้งโดยอัตโนมัติ</p></div></div>
+          <Card className="p-3 sm:p-4">
+            <div className="flex gap-2 sm:gap-3">
+              <FileCheck2 className="mt-0.5 size-4 shrink-0 text-slate-500 sm:size-5" />
+              <div>
+                <h2 className="text-sm font-bold text-slate-900 sm:text-base lg:text-lg">ขั้นตอนถัดไป</h2>
+                <p className="mt-0.5 text-xs leading-5 text-slate-500 sm:mt-1 sm:text-sm sm:leading-6 lg:text-base">ระบบจะส่งรายการไปยังผู้อนุมัติตามตำแหน่งและแผนกของผู้แจ้งโดยอัตโนมัติ</p>
+              </div>
+            </div>
           </Card>
         </aside>
       </div>
