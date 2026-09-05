@@ -57,6 +57,7 @@ describe('RequestsPage', () => {
     renderPage()
 
     expect(screen.getByRole('heading', { name: 'รายการซ่อม/ปรับปรุง' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'แจ้งซ่อมใหม่' })).not.toBeInTheDocument()
     expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
       'ลำดับ',
       'รหัสแจ้งซ่อม',

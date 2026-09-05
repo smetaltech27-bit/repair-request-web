@@ -1,6 +1,6 @@
-import { Eye, Filter, Plus, Search } from 'lucide-react'
+import { Eye, Filter, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Modal } from '../components/ui/Modal'
@@ -67,34 +67,33 @@ export function RequestsPage() {
 
   return (
     <>
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      <div>
         <div>
           <p className="text-sm font-semibold text-teal-600">Maintenance requests</p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">รายการซ่อม/ปรับปรุง</h1>
           <p className="mt-1 text-sm text-slate-500">ค้นหา กรอง และติดตามรายการแจ้งซ่อม</p>
         </div>
-        <Button asChild size="lg"><Link to="/requests/new"><Plus className="size-5" /> แจ้งซ่อมใหม่</Link></Button>
       </div>
 
       <Card className="mt-6 p-4">
         <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
           <label className="relative block">
             <span className="sr-only">ค้นหารายการ</span>
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 sm:left-3.5 sm:size-5" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="ค้นหารหัสงาน ผู้แจ้ง แผนก หรือเครื่องจักร"
-              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
+              className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-2.5 text-[11px] outline-none transition placeholder:text-[10px] focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10 sm:h-11 sm:rounded-xl sm:pl-11 sm:pr-4 sm:text-sm sm:placeholder:text-sm"
             />
           </label>
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
-            <Filter className="size-4 shrink-0 text-slate-400" />
+          <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:gap-2 lg:pb-0">
+            <Filter className="size-3.5 shrink-0 text-slate-400 sm:size-4" />
             {statusOptions.map((option) => (
               <button
                 key={option.value}
                 onClick={() => setSearchParams(option.value === 'all' ? {} : { status: option.value })}
-                className={`shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition ${
+                className={`shrink-0 rounded-lg px-2 py-1.5 text-[10px] font-bold transition sm:rounded-xl sm:px-3.5 sm:py-2 sm:text-xs ${
                   activeStatus === option.value
                     ? 'bg-slate-900 text-white shadow-sm'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'

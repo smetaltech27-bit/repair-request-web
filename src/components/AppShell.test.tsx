@@ -49,6 +49,7 @@ const notifications = [
     createdAt: '2026-09-05T02:00:00.000Z',
   },
 ]
+const scrollToMock = vi.fn()
 
 function RequestReadButton() {
   const markRequestRead = useNotificationRead()
@@ -73,6 +74,8 @@ function renderShell() {
 
 describe('AppShell notifications', () => {
   beforeEach(() => {
+    scrollToMock.mockReset()
+    vi.stubGlobal('scrollTo', scrollToMock)
     serviceMocks.listNotifications.mockReset().mockResolvedValue(notifications)
     serviceMocks.getUnreadNotificationCount.mockReset().mockResolvedValueOnce(2).mockResolvedValue(1)
     serviceMocks.markNotificationRead.mockReset().mockResolvedValue(undefined)
@@ -101,11 +104,26 @@ describe('AppShell notifications', () => {
     expect(serviceMocks.markRequestNotificationsRead).toHaveBeenCalledWith('request-1')
   })
 
+  it('scrolls to the top after navigating to another page', async () => {
+    const user = userEvent.setup()
+    renderShell()
+
+    await screen.findByRole('button', { name: 'การแจ้งเตือนที่ยังไม่อ่าน 2 รายการ' })
+    const initialScrollCalls = scrollToMock.mock.calls.length
+    await user.click(screen.getByRole('link', { name: 'แจ้งซ่อมใหม่' }))
+
+    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/requests/new'))
+    expect(scrollToMock).toHaveBeenCalledTimes(initialScrollCalls + 1)
+    expect(scrollToMock).toHaveBeenLastCalledWith({ top: 0, left: 0, behavior: 'auto' })
+  })
+
   it('does not render the removed mobile bottom navigation', async () => {
     renderShell()
 
     await screen.findByRole('button', { name: 'การแจ้งเตือนที่ยังไม่อ่าน 2 รายการ' })
     expect(screen.getAllByRole('navigation')).toHaveLength(1)
+    expect(screen.getByRole('link', { name: 'หน้าแรก' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'แดชบอร์ด' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'งานของฉัน' })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'โปรไฟล์' })).toBeInTheDocument()
   })

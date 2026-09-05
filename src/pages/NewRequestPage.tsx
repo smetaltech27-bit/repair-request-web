@@ -58,7 +58,7 @@ export function NewRequestPage() {
         attachment: compressedImage && uploadedPath ? { path: uploadedPath, file: compressedImage } : undefined,
       })
       toast.success('ส่งใบแจ้งซ่อมเรียบร้อยแล้ว', { description: 'ระบบส่งรายการเข้าสู่ขั้นตอนอนุมัติตามสิทธิ์แล้ว' })
-      navigate('/requests')
+      navigate('/', { replace: true })
     } catch (error) {
       if (uploadedPath) {
         try {

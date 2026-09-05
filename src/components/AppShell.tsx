@@ -26,7 +26,7 @@ import { PrivateProfileAvatar } from './PrivateProfileAvatar'
 import { Button } from './ui/Button'
 
 const desktopNavigation = [
-  { label: 'แดชบอร์ด', to: '/', icon: Gauge },
+  { label: 'หน้าแรก', to: '/', icon: Gauge },
   { label: 'แจ้งซ่อมใหม่', to: '/requests/new', icon: Plus },
   { label: 'รออนุมัติ', to: '/approvals', icon: ClipboardCheck },
   { label: 'รอปิดงาน', to: '/completion', icon: Flag },
@@ -47,6 +47,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [notificationsLoading, setNotificationsLoading] = useState(false)
   const canAccessCompletion = Boolean(user && user.roleCode !== 'employee')
   const visibleDesktopNavigation = desktopNavigation.filter(({ to }) => to !== '/completion' || canAccessCompletion)
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [location.pathname])
 
   useEffect(() => {
     if (!user || isDemoMode) return
