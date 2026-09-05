@@ -134,7 +134,7 @@ export function ApprovalsPage() {
       >
         {selectedRequest && (
           <div className="space-y-6">
-            <RequestDetails request={selectedRequest} desktopReadable />
+            <RequestDetails request={selectedRequest} desktopReadable enableImagePreview />
             <div>
               <label htmlFor="approval-note" className="mb-2 block text-sm font-bold text-slate-700 lg:text-base">หมายเหตุการพิจารณา <span className="text-red-500">*</span></label>
               <textarea id="approval-note" rows={5} value={note} onChange={(event) => setNote(event.target.value)} placeholder="ระบุเหตุผลหรือรายละเอียดประกอบการอนุมัติ" className="form-control min-h-32 resize-y py-3 lg:!text-base" />

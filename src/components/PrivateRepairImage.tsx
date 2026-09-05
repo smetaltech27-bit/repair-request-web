@@ -1,4 +1,4 @@
-import { ExternalLink, ImageOff, LoaderCircle } from 'lucide-react'
+import { ExternalLink, ImageOff, LoaderCircle, Maximize2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { downloadRepairImage } from '../lib/repairService'
 
@@ -6,9 +6,10 @@ interface PrivateRepairImageProps {
   storagePath?: string
   legacyDriveUrl?: string
   alt: string
+  onPreview?: (src: string) => void
 }
 
-export function PrivateRepairImage({ storagePath, legacyDriveUrl, alt }: PrivateRepairImageProps) {
+export function PrivateRepairImage({ storagePath, legacyDriveUrl, alt, onPreview }: PrivateRepairImageProps) {
   const [objectUrl, setObjectUrl] = useState('')
   const [isLoading, setIsLoading] = useState(Boolean(storagePath))
   const [hasError, setHasError] = useState(false)
@@ -40,7 +41,7 @@ export function PrivateRepairImage({ storagePath, legacyDriveUrl, alt }: Private
   }
 
   if (objectUrl) {
-    return (
+    const image = (
       <img
         src={objectUrl}
         alt={alt}
@@ -49,6 +50,24 @@ export function PrivateRepairImage({ storagePath, legacyDriveUrl, alt }: Private
         className="aspect-[4/3] w-full rounded-2xl bg-slate-100 object-contain"
       />
     )
+
+    if (onPreview) {
+      return (
+        <button
+          type="button"
+          aria-label={`ดูรูปขนาดใหญ่ ${alt}`}
+          onClick={() => onPreview(objectUrl)}
+          className="group relative block w-full cursor-zoom-in rounded-2xl text-left outline-none transition focus-visible:ring-4 focus-visible:ring-teal-500/30"
+        >
+          {image}
+          <span className="absolute right-2 top-2 grid size-9 place-items-center rounded-xl bg-slate-950/70 text-white shadow-lg backdrop-blur-sm transition group-hover:scale-105 group-hover:bg-teal-600">
+            <Maximize2 className="size-4" aria-hidden="true" />
+          </span>
+        </button>
+      )
+    }
+
+    return image
   }
 
   return (

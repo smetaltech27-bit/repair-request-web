@@ -178,7 +178,7 @@ export function RequestsPage() {
         footer={<Button className="w-full" onClick={closeSelectedRequest}>ปิดหน้าต่าง</Button>}
       >
         {selectedRequest && (
-          <RequestDetails request={selectedRequest} />
+          <RequestDetails request={selectedRequest} enableImagePreview />
         )}
       </Modal>
     </>

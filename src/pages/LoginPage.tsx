@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff, ShieldCheck, Wrench } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Navigate, useNavigate } from 'react-router-dom'
@@ -52,38 +52,7 @@ export function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-svh min-w-0 bg-slate-950 lg:grid-cols-[minmax(22rem,28.75%)_1fr]">
-      <section className="relative hidden overflow-hidden bg-slate-950 p-8 text-white lg:flex lg:flex-col lg:justify-between xl:p-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(13,148,136,0.28),transparent_34%),radial-gradient(circle_at_80%_70%,rgba(14,165,233,0.18),transparent_34%)]" />
-        <div className="absolute -bottom-44 -left-24 size-[32rem] rounded-full border border-teal-400/10" />
-        <div className="absolute -bottom-28 -left-10 size-[24rem] rounded-full border border-teal-400/10" />
-        <div className="relative flex items-center gap-3">
-          <div className="grid size-12 place-items-center rounded-2xl bg-teal-500 shadow-lg shadow-teal-500/25">
-            <Wrench className="size-7" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold">Maintenance Request System (MRS)</h1>
-            <p className="text-sm text-slate-400">Maintenance Management System</p>
-          </div>
-        </div>
-
-        <div className="relative max-w-xl">
-          <span className="inline-flex items-center gap-2 rounded-full bg-teal-400/10 px-4 py-2 text-sm font-semibold text-teal-300 ring-1 ring-inset ring-teal-300/15">
-            <ShieldCheck className="size-4" /> ปลอดภัย · ติดตามได้ · ใช้งานง่าย
-          </span>
-          <h2 className="mt-6 text-5xl font-bold leading-[1.15] tracking-tight">
-            ดูแลงานซ่อม
-            <br />
-            ให้เป็นเรื่องง่าย
-          </h2>
-          <p className="mt-5 max-w-lg text-lg leading-8 text-slate-300">
-            แจ้งปัญหา อนุมัติ ติดตามสถานะ และตรวจสอบประวัติงานซ่อมได้จากทุกอุปกรณ์
-          </p>
-        </div>
-
-        <p className="relative text-xs text-slate-500">Industrial Clarity · Responsive for every screen</p>
-      </section>
-
+    <main className="min-h-svh min-w-0 bg-slate-50">
       <section className="flex min-h-svh min-w-0 items-center justify-center bg-slate-50 px-4 py-8 sm:px-8 sm:py-10">
         <div className="min-w-0 w-full max-w-lg">
           <div className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/10 sm:p-8 lg:p-9">

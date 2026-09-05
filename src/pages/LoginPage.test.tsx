@@ -43,6 +43,8 @@ describe('LoginPage', () => {
     expect(screen.queryByText('Welcome back')).not.toBeInTheDocument()
     expect(screen.queryByText('ใช้บัญชีพนักงานเดิมเพื่อเข้าสู่ระบบ')).not.toBeInTheDocument()
     expect(screen.getByText('Create by S Metal Tech Co., Ltd.')).toBeInTheDocument()
+    expect(screen.queryByText('ดูแลงานซ่อม')).not.toBeInTheDocument()
+    expect(screen.queryByText('Industrial Clarity · Responsive for every screen')).not.toBeInTheDocument()
   })
 
   it('asks the employee to contact HR when password is forgotten', () => {

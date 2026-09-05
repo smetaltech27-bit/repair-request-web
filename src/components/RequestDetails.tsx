@@ -1,31 +1,36 @@
 import { ImageIcon } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNotificationRead } from '../lib/NotificationReadContext'
 import { cn, formatCurrency, formatThaiDate } from '../lib/utils'
 import { repairActionLabels } from '../lib/repairService'
 import type { RepairRequest } from '../types/repair'
+import { ImageLightbox } from './ImageLightbox'
 import { PrivateRepairImage } from './PrivateRepairImage'
 import { StatusBadge } from './ui/StatusBadge'
 
 export function RequestDetails({
   request,
   desktopReadable = false,
+  enableImagePreview = false,
 }: {
   request: RepairRequest
   desktopReadable?: boolean
+  enableImagePreview?: boolean
 }) {
   const markRequestRead = useNotificationRead()
+  const [previewImage, setPreviewImage] = useState<{ src: string; alt: string } | null>(null)
 
   useEffect(() => {
     markRequestRead(request.id)
   }, [markRequestRead, request.id])
 
   return (
-    <div className={cn('space-y-5 text-sm', desktopReadable && 'lg:space-y-6 lg:text-base')}>
-      <StatusBadge
-        status={request.status}
-        className={desktopReadable ? 'lg:px-3 lg:py-1.5 lg:text-sm' : undefined}
-      />
+    <>
+      <div className={cn('space-y-5 text-sm', desktopReadable && 'lg:space-y-6 lg:text-base')}>
+        <StatusBadge
+          status={request.status}
+          className={desktopReadable ? 'lg:px-3 lg:py-1.5 lg:text-sm' : undefined}
+        />
 
       <div className={cn('grid gap-4 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2', desktopReadable && 'lg:gap-5 lg:p-5')}>
         <div><p className={cn('text-xs font-semibold text-slate-500', desktopReadable && 'lg:text-sm')}>ผู้แจ้ง</p><p className="mt-1 font-bold text-slate-900">{request.requesterName}</p></div>
@@ -43,18 +48,22 @@ export function RequestDetails({
         <div>
           <p className={cn('flex items-center gap-2 font-semibold text-slate-500', desktopReadable && 'lg:text-base')}><ImageIcon className={cn('size-4', desktopReadable && 'lg:size-5')} /> รูปภาพประกอบ</p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            {request.attachments.map((attachment) => (
-              <figure key={attachment.id}>
-                <PrivateRepairImage
-                  storagePath={attachment.storagePath}
-                  legacyDriveUrl={attachment.legacyDriveUrl}
-                  alt={`${attachment.kind === 'before' ? 'รูปก่อนซ่อม' : 'รูปหลังซ่อม'} ${request.jobId}`}
-                />
-                <figcaption className={cn('mt-1.5 text-center text-xs font-semibold text-slate-500', desktopReadable && 'lg:text-sm')}>
-                  {attachment.kind === 'before' ? 'ก่อนซ่อม' : 'หลังซ่อม'}
-                </figcaption>
-              </figure>
-            ))}
+            {request.attachments.map((attachment) => {
+              const alt = `${attachment.kind === 'before' ? 'รูปก่อนซ่อม' : 'รูปหลังซ่อม'} ${request.jobId}`
+              return (
+                <figure key={attachment.id}>
+                  <PrivateRepairImage
+                    storagePath={attachment.storagePath}
+                    legacyDriveUrl={attachment.legacyDriveUrl}
+                    alt={alt}
+                    onPreview={enableImagePreview ? (src) => setPreviewImage({ src, alt }) : undefined}
+                  />
+                  <figcaption className={cn('mt-1.5 text-center text-xs font-semibold text-slate-500', desktopReadable && 'lg:text-sm')}>
+                    {attachment.kind === 'before' ? 'ก่อนซ่อม' : 'หลังซ่อม'}
+                  </figcaption>
+                </figure>
+              )
+            })}
           </div>
         </div>
       )}
@@ -71,7 +80,16 @@ export function RequestDetails({
           ))}
           {request.actions.length === 0 && <p className={cn('text-xs text-slate-500', desktopReadable && 'lg:text-sm')}>ยังไม่มีประวัติการดำเนินการ</p>}
         </div>
+        </div>
       </div>
-    </div>
+      {previewImage && (
+        <ImageLightbox
+          open
+          onOpenChange={(open) => !open && setPreviewImage(null)}
+          src={previewImage.src}
+          alt={previewImage.alt}
+        />
+      )}
+    </>
   )
 }

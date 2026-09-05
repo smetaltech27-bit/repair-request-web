@@ -155,7 +155,7 @@ export function CompletionPage() {
       >
         {selectedRequest && (
           <div className="space-y-6">
-            <RequestDetails request={selectedRequest} />
+            <RequestDetails request={selectedRequest} enableImagePreview />
             <div className="grid gap-4 rounded-2xl border border-teal-100 bg-teal-50/50 p-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="completion-total-cost" className="mb-2 block text-sm font-bold text-slate-700">ค่าใช้จ่ายทั้งหมด <span className="text-red-500">*</span></label>
