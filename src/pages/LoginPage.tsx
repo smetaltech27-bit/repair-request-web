@@ -49,7 +49,7 @@ export function LoginPage() {
             <Wrench className="size-7" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Repair Request</h1>
+            <h1 className="text-xl font-bold">Maintenance Request System (MRS)</h1>
             <p className="text-sm text-slate-400">Maintenance Management System</p>
           </div>
         </div>
@@ -78,7 +78,7 @@ export function LoginPage() {
               <Wrench className="size-6" />
             </div>
             <div>
-              <p className="font-bold text-slate-950">Repair Request</p>
+              <p className="text-sm font-bold leading-tight text-slate-950">Maintenance Request System (MRS)</p>
               <p className="text-xs text-slate-500">Maintenance Management System</p>
             </div>
           </div>

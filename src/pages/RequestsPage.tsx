@@ -65,7 +65,7 @@ export function RequestsPage() {
     <>
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="text-sm font-semibold text-teal-600">Repair requests</p>
+          <p className="text-sm font-semibold text-teal-600">Maintenance requests</p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">รายการซ่อม/ปรับปรุง</h1>
           <p className="mt-1 text-sm text-slate-500">ค้นหา กรอง และติดตามรายการแจ้งซ่อม</p>
         </div>

@@ -1,4 +1,4 @@
-# Repair Request Architecture
+# Maintenance Request System (MRS) Architecture
 
 ## เป้าหมาย
 

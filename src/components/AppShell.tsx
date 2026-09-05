@@ -114,7 +114,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Wrench className="size-6" />
             </div>
             <div>
-              <p className="text-base font-bold leading-tight">Repair Request</p>
+              <p className="text-sm font-bold leading-tight">Maintenance Request System (MRS)</p>
               <p className="text-xs text-slate-400">Maintenance Center</p>
             </div>
           </div>

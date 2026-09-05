@@ -151,7 +151,7 @@ function getStageContent(input: RepairEmailTemplateInput): StageContent {
     accent: '#0f766e', accentSoft: '#f0fdfa', badge: 'อัปเดตสถานะ',
     subject: `อัปเดตงานซ่อม ${input.jobId}`,
     greeting: 'เรียน ผู้เกี่ยวข้อง', intro: input.notificationBody,
-    ctaLabel: 'เปิดระบบ Repair Request', route: 'requests',
+    ctaLabel: 'เปิดระบบ Maintenance Request System (MRS)', route: 'requests',
   };
 }
 
@@ -210,61 +210,148 @@ export function buildRepairEmail(input: RepairEmailTemplateInput) {
   plainLines.push(`สถานะปัจจุบัน: ${statusLabel}`);
   plainLines.push(`เปิดระบบ: ${actionUrl}`);
 
+  const emailFont = 'Tahoma,Arial,sans-serif';
+  const cellTextStyle = `font-family:${emailFont};font-size:14px;line-height:22px;color:#0f172a;mso-line-height-rule:exactly`;
+
   const historyHtml = actions.map((action) => `
-    <div style="padding:11px 0;border-top:1px solid #e2e8f0">
-      <div style="font-size:14px;color:#0f172a"><strong>${action.actorRole === 'purchasing' ? '📦' : '👤'} ${escapeEmailHtml(roleLabels[action.actorRole ?? ''] ?? 'ผู้ดำเนินการ')}:</strong> ${escapeEmailHtml(action.actorName)} (${escapeEmailHtml(actionStateLabel(action.action))})</div>
-      <div style="margin-top:3px;font-size:13px;color:#475569"><strong>รายละเอียด:</strong> ${escapeEmailHtml(action.note?.trim() || '-')}</div>
-    </div>`).join('');
+    <tr>
+      <td style="${cellTextStyle};padding:11px 0 0;border-top:1px solid #e2e8f0">
+        <strong>${escapeEmailHtml(roleLabels[action.actorRole ?? ''] ?? 'ผู้ดำเนินการ')}:</strong> ${escapeEmailHtml(action.actorName)} (${escapeEmailHtml(actionStateLabel(action.action))})
+      </td>
+    </tr>
+    <tr>
+      <td style="font-family:${emailFont};font-size:13px;line-height:20px;color:#475569;padding:3px 0 11px;mso-line-height-rule:exactly">
+        <strong>รายละเอียด:</strong> ${escapeEmailHtml(action.note?.trim() || '-')}
+      </td>
+    </tr>`).join('');
 
   const rejectHtml = input.repairStatus === 'rejected' ? `
-    <div style="margin-top:14px;padding:12px 14px;background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;color:#991b1b">
-      <strong>เหตุผลที่ไม่อนุมัติ:</strong> ${escapeEmailHtml(input.actionNote?.trim() || '-')}
-    </div>` : '';
+    <tr>
+      <td style="padding:14px 0 0">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:collapse">
+          <tr>
+            <td bgcolor="#fff1f2" style="font-family:${emailFont};font-size:14px;line-height:22px;color:#991b1b;padding:12px 14px;border:1px solid #fecdd3;mso-line-height-rule:exactly">
+              <strong>เหตุผลที่ไม่อนุมัติ:</strong> ${escapeEmailHtml(input.actionNote?.trim() || '-')}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>` : '';
 
   const completionHtml = input.repairStatus === 'completed' ? `
-    <div style="margin-top:14px;padding-top:14px;border-top:1px solid #bbf7d0">
-      <div style="font-size:14px;font-weight:700;color:#166534">🏁 หมายเหตุปิดงาน</div>
-      <div style="margin-top:7px;font-size:14px;color:#334155"><strong>ปิดงานโดย:</strong> ${escapeEmailHtml(input.actorName || '-')}</div>
-      <div style="margin-top:4px;font-size:14px;color:#334155"><strong>รายละเอียด:</strong> ${escapeEmailHtml(input.actionNote?.trim() || '-')}</div>
-      <div style="margin-top:4px;font-size:14px;color:#334155"><strong>วันที่/เวลา:</strong> ${escapeEmailHtml(displayDateTime(input.actionCreatedAt))}</div>
-      <div style="margin-top:12px;font-size:16px;color:#0f172a"><strong>💰 ค่าใช้จ่ายในการซ่อม:</strong> ${escapeEmailHtml(cost || '0')} บาท</div>
-    </div>` : '';
+    <tr>
+      <td style="font-family:${emailFont};font-size:14px;line-height:22px;font-weight:700;color:#166534;padding:14px 0 0;border-top:1px solid #bbf7d0;mso-line-height-rule:exactly">
+        หมายเหตุปิดงาน
+      </td>
+    </tr>
+    <tr><td style="${cellTextStyle};padding:7px 0 0"><strong>ปิดงานโดย:</strong> ${escapeEmailHtml(input.actorName || '-')}</td></tr>
+    <tr><td style="${cellTextStyle};padding:4px 0 0"><strong>รายละเอียด:</strong> ${escapeEmailHtml(input.actionNote?.trim() || '-')}</td></tr>
+    <tr><td style="${cellTextStyle};padding:4px 0 0"><strong>วันที่/เวลา:</strong> ${escapeEmailHtml(displayDateTime(input.actionCreatedAt))}</td></tr>
+    <tr><td style="font-family:${emailFont};font-size:16px;line-height:24px;color:#0f172a;padding:12px 0 0;mso-line-height-rule:exactly"><strong>ค่าใช้จ่ายในการซ่อม:</strong> ${escapeEmailHtml(cost || '0')} บาท</td></tr>` : '';
 
   const imageLinks = [
-    input.beforeImageUrl ? `<div style="margin-top:10px"><strong>📷 ${input.repairStatus === 'completed' ? 'รูปภาพตอนแจ้ง (Before)' : 'รูปภาพประกอบ'}:</strong> <a href="${escapeEmailHtml(input.beforeImageUrl)}" style="color:#2563eb;font-weight:700">${input.repairStatus === 'completed' ? 'คลิกรูป' : 'คลิกเพื่อดูรูปภาพ'}</a></div>` : '',
-    input.repairStatus === 'completed' && input.afterImageUrl ? `<div style="margin-top:10px"><strong>✅ รูปภาพหลังซ่อม (After):</strong> <a href="${escapeEmailHtml(input.afterImageUrl)}" style="color:#16a34a;font-weight:700">คลิกเพื่อดูรูปภาพงานที่เสร็จแล้ว</a></div>` : '',
+    input.beforeImageUrl ? `<tr><td style="${cellTextStyle};padding:10px 0 0"><strong>${input.repairStatus === 'completed' ? 'รูปภาพตอนแจ้ง (Before)' : 'รูปภาพประกอบ'}:</strong> <a href="${escapeEmailHtml(input.beforeImageUrl)}" style="font-family:${emailFont};color:#2563eb;font-weight:700;text-decoration:underline">${input.repairStatus === 'completed' ? 'คลิกรูป' : 'คลิกเพื่อดูรูปภาพ'}</a></td></tr>` : '',
+    input.repairStatus === 'completed' && input.afterImageUrl ? `<tr><td style="${cellTextStyle};padding:10px 0 0"><strong>รูปภาพหลังซ่อม (After):</strong> <a href="${escapeEmailHtml(input.afterImageUrl)}" style="font-family:${emailFont};color:#16a34a;font-weight:700;text-decoration:underline">คลิกเพื่อดูรูปภาพงานที่เสร็จแล้ว</a></td></tr>` : '',
   ].join('');
 
-  const htmlBody = `
-    <div style="margin:0;background:#f1f5f9;padding:22px 10px;font-family:Arial,'Noto Sans Thai',Tahoma,sans-serif;color:#0f172a;line-height:1.65">
-      <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(15,23,42,.08)">
-        <div style="background:${stage.accent};color:#ffffff;padding:20px 24px">
-          <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;opacity:.85">SMETALTECH · REPAIR REQUEST</div>
-          <div style="margin-top:5px;font-size:23px;font-weight:700">${escapeEmailHtml(input.jobId)}</div>
-          <div style="margin-top:8px;display:inline-block;border:1px solid rgba(255,255,255,.45);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700">${escapeEmailHtml(stage.badge)}</div>
-        </div>
-        <div style="padding:24px">
-          <div style="font-size:17px;font-weight:700">${escapeEmailHtml(stage.greeting)}</div>
-          <p style="margin:14px 0 18px;color:#334155">${escapeEmailHtml(stage.intro)}</p>
-          <div style="background:${stage.accentSoft};border-left:5px solid ${stage.accent};padding:16px 18px;border-radius:4px 12px 12px 4px">
-            <div style="font-size:20px;font-weight:700;color:#0f172a">รหัสแจ้งซ่อม: ${escapeEmailHtml(input.jobId)}</div>
-            <div style="margin-top:13px;font-size:14px"><strong>แผนกที่แจ้ง:</strong> ${escapeEmailHtml(input.departmentName)}</div>
-            <div style="margin-top:3px;font-size:14px;color:#475569"><strong>ผู้แจ้ง:</strong> ${escapeEmailHtml(input.requesterName)}</div>
-            <div style="margin-top:13px;font-size:14px"><strong>เครื่องจักร/สถานที่:</strong> ${escapeEmailHtml(input.machineId)}</div>
-            <div style="margin-top:13px;font-size:14px"><strong>อาการเสีย:</strong> ${escapeEmailHtml(input.issueDetails)}</div>
-            ${historyHtml}
-            ${rejectHtml}
-            ${completionHtml}
-            ${imageLinks}
-          </div>
-          <div style="margin-top:20px">
-            <a href="${escapeEmailHtml(actionUrl)}" style="display:inline-block;background:${stage.accent};color:#ffffff;text-decoration:none;padding:11px 17px;border-radius:9px;font-size:14px;font-weight:700">👉 ${escapeEmailHtml(stage.ctaLabel)}</a>
-          </div>
-          <div style="margin-top:18px;padding-top:15px;border-top:1px solid #e2e8f0;font-size:13px;font-weight:700;color:${stage.accent}">สถานะปัจจุบัน: ${escapeEmailHtml(statusLabel)}</div>
-          <p style="margin:8px 0 0;color:#64748b;font-size:11px">ลิงก์รูปภาพเปิดดูได้โดยไม่ต้องเข้าสู่ระบบและจะหมดอายุภายใน 30 วัน ส่วนรายละเอียดงานยังต้องเข้าสู่ระบบ</p>
-        </div>
-      </div>
-    </div>`;
+  const htmlBody = `<!doctype html>
+<html lang="th">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>${escapeEmailHtml(stage.subject)}</title>
+    <style type="text/css">
+      body, table, td, a { -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+      table, td { mso-table-lspace:0pt; mso-table-rspace:0pt; }
+      table { border-collapse:collapse; }
+      @media only screen and (max-width:700px) {
+        .email-shell { width:100% !important; }
+        .email-pad { padding-left:18px !important; padding-right:18px !important; }
+      }
+    </style>
+    <!--[if mso]>
+      <style type="text/css">body, table, td, a { font-family:Tahoma,Arial,sans-serif !important; }</style>
+    <![endif]-->
+  </head>
+  <body bgcolor="#f1f5f9" style="margin:0;padding:0;width:100%;background-color:#f1f5f9">
+    <center style="width:100%;background-color:#f1f5f9">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f1f5f9" style="width:100%;background-color:#f1f5f9">
+        <tr>
+          <td align="center" valign="top" style="padding:22px 10px">
+            <!--[if mso]>
+            <table role="presentation" width="680" cellspacing="0" cellpadding="0" border="0"><tr><td>
+            <![endif]-->
+            <table class="email-shell" role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:680px;background-color:#ffffff;border:1px solid #e2e8f0;border-collapse:separate;border-spacing:0;border-radius:12px;overflow:hidden">
+              <tr>
+                <td bgcolor="${stage.accent}" class="email-pad" style="font-family:${emailFont};color:#ffffff;background-color:${stage.accent};padding:20px 24px">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr><td style="font-family:${emailFont};font-size:11px;line-height:16px;font-weight:700;letter-spacing:1px;color:#ffffff;mso-line-height-rule:exactly">SMETALTECH &middot; MAINTENANCE REQUEST SYSTEM (MRS)</td></tr>
+                    <tr><td style="font-family:${emailFont};font-size:23px;line-height:30px;font-weight:700;color:#ffffff;padding:5px 0 0;mso-line-height-rule:exactly">${escapeEmailHtml(input.jobId)}</td></tr>
+                    <tr>
+                      <td style="padding:8px 0 0">
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                          <tr><td bgcolor="${stage.accent}" style="font-family:${emailFont};font-size:12px;line-height:18px;font-weight:700;color:#ffffff;padding:3px 10px;border:1px solid #ffffff;border-radius:12px;mso-line-height-rule:exactly">${escapeEmailHtml(stage.badge)}</td></tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td bgcolor="#ffffff" class="email-pad" style="font-family:${emailFont};background-color:#ffffff;padding:24px">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr><td style="font-family:${emailFont};font-size:17px;line-height:26px;font-weight:700;color:#0f172a;mso-line-height-rule:exactly">${escapeEmailHtml(stage.greeting)}</td></tr>
+                    <tr><td style="font-family:${emailFont};font-size:14px;line-height:23px;color:#334155;padding:14px 0 18px;mso-line-height-rule:exactly">${escapeEmailHtml(stage.intro)}</td></tr>
+                    <tr>
+                      <td>
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:collapse">
+                          <tr>
+                            <td width="5" bgcolor="${stage.accent}" style="width:5px;background-color:${stage.accent};font-size:0;line-height:0">&nbsp;</td>
+                            <td bgcolor="${stage.accentSoft}" style="background-color:${stage.accentSoft};padding:16px 18px">
+                              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                <tr><td style="font-family:${emailFont};font-size:20px;line-height:28px;font-weight:700;color:#0f172a;mso-line-height-rule:exactly">รหัสแจ้งซ่อม: ${escapeEmailHtml(input.jobId)}</td></tr>
+                                <tr><td style="${cellTextStyle};padding:13px 0 0"><strong>แผนกที่แจ้ง:</strong> ${escapeEmailHtml(input.departmentName)}</td></tr>
+                                <tr><td style="font-family:${emailFont};font-size:14px;line-height:22px;color:#475569;padding:3px 0 0;mso-line-height-rule:exactly"><strong>ผู้แจ้ง:</strong> ${escapeEmailHtml(input.requesterName)}</td></tr>
+                                <tr><td style="${cellTextStyle};padding:13px 0 0"><strong>เครื่องจักร/สถานที่:</strong> ${escapeEmailHtml(input.machineId)}</td></tr>
+                                <tr><td style="${cellTextStyle};padding:13px 0 11px"><strong>อาการเสีย:</strong> ${escapeEmailHtml(input.issueDetails)}</td></tr>
+                                ${historyHtml}
+                                ${rejectHtml}
+                                ${completionHtml}
+                                ${imageLinks}
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:20px 0 0">
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                          <tr>
+                            <td align="center" bgcolor="${stage.accent}" style="background-color:${stage.accent};padding:11px 17px;border-radius:7px;mso-padding-alt:11px 17px">
+                              <a href="${escapeEmailHtml(actionUrl)}" style="font-family:${emailFont};font-size:14px;line-height:20px;font-weight:700;color:#ffffff;text-decoration:none;display:inline-block;mso-line-height-rule:exactly">${escapeEmailHtml(stage.ctaLabel)}</a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr><td height="18" style="height:18px;font-size:0;line-height:0">&nbsp;</td></tr>
+                    <tr><td style="font-family:${emailFont};font-size:13px;line-height:21px;font-weight:700;color:${stage.accent};padding:15px 0 0;border-top:1px solid #e2e8f0;mso-line-height-rule:exactly">สถานะปัจจุบัน: ${escapeEmailHtml(statusLabel)}</td></tr>
+                    <tr><td style="font-family:${emailFont};font-size:11px;line-height:18px;color:#64748b;padding:8px 0 0;mso-line-height-rule:exactly">ลิงก์รูปภาพเปิดดูได้โดยไม่ต้องเข้าสู่ระบบและจะหมดอายุภายใน 30 วัน ส่วนรายละเอียดงานยังต้องเข้าสู่ระบบ</td></tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            <!--[if mso]>
+            </td></tr></table>
+            <![endif]-->
+          </td>
+        </tr>
+      </table>
+    </center>
+  </body>
+</html>`;
 
   return { subject: stage.subject, htmlBody, textBody: plainLines.join('\n') };
 }

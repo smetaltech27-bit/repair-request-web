@@ -1,6 +1,6 @@
-# Repair Request Web
+# Maintenance Request System (MRS)
 
-แอป Repair Request รุ่นใหม่สำหรับ Desktop, Tablet และ Mobile ใช้ React + Vite + TypeScript, Supabase และ GitHub Pages
+แอป Maintenance Request System (MRS) สำหรับ Desktop, Tablet และ Mobile ใช้ React + Vite + TypeScript, Supabase และ GitHub Pages
 
 ## สถานะปัจจุบัน
 

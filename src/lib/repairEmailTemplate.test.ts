@@ -86,6 +86,39 @@ describe('repair email template', () => {
     expect(email.textBody).toContain('อาการเสีย: เครื่องจักรคีบขณะรับงาน')
   })
 
+  it.each([
+    ['requester receipt', 'pending_supervisor', true],
+    ['supervisor approval', 'pending_supervisor', false],
+    ['department manager approval', 'pending_department_manager', false],
+    ['factory manager approval', 'pending_factory_manager', false],
+    ['purchasing queue', 'pending_purchasing', false],
+    ['purchasing acknowledgement', 'purchasing_in_progress', false],
+    ['completion', 'completed', false],
+    ['rejection', 'rejected', false],
+  ])('uses the shared Outlook-compatible layout for %s', (_process, repairStatus, isRequesterReceipt) => {
+    const email = buildRepairEmail({
+      appUrl: 'https://example.com/repair',
+      notificationBody: 'อัปเดตงานซ่อม',
+      jobId: 'REQ-260904-009',
+      requesterName: 'ผู้แจ้งทดสอบ',
+      departmentName: 'Machine',
+      machineId: 'CNC-09',
+      issueDetails: 'ทดสอบ Outlook',
+      repairStatus,
+      isRequesterReceipt,
+    })
+
+    expect(email.htmlBody).toContain('<!doctype html>')
+    expect(email.htmlBody).toContain('<!--[if mso]>')
+    expect(email.htmlBody).toContain('role="presentation" width="680"')
+    expect(email.htmlBody).toContain('font-family:Tahoma,Arial,sans-serif')
+    expect(email.htmlBody).toContain('mso-line-height-rule:exactly')
+    expect(email.htmlBody).toContain('mso-padding-alt:11px 17px')
+    expect(email.htmlBody).toContain('SMETALTECH &middot; MAINTENANCE REQUEST SYSTEM (MRS)')
+    expect(email.htmlBody).not.toContain('SMETALTECH &middot; REPAIR REQUEST')
+    expect(email.htmlBody).not.toContain('box-shadow')
+  })
+
   it('asks purchasing to proceed only after the factory manager approval', () => {
     const email = buildRepairEmail({
       appUrl: 'https://example.com/repair',
