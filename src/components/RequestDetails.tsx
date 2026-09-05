@@ -1,13 +1,19 @@
 import { ImageIcon } from 'lucide-react'
 import { useEffect } from 'react'
 import { useNotificationRead } from '../lib/NotificationReadContext'
-import { formatCurrency, formatThaiDate } from '../lib/utils'
+import { cn, formatCurrency, formatThaiDate } from '../lib/utils'
 import { repairActionLabels } from '../lib/repairService'
 import type { RepairRequest } from '../types/repair'
 import { PrivateRepairImage } from './PrivateRepairImage'
 import { StatusBadge } from './ui/StatusBadge'
 
-export function RequestDetails({ request }: { request: RepairRequest }) {
+export function RequestDetails({
+  request,
+  desktopReadable = false,
+}: {
+  request: RepairRequest
+  desktopReadable?: boolean
+}) {
   const markRequestRead = useNotificationRead()
 
   useEffect(() => {
@@ -15,24 +21,27 @@ export function RequestDetails({ request }: { request: RepairRequest }) {
   }, [markRequestRead, request.id])
 
   return (
-    <div className="space-y-5 text-sm">
-      <StatusBadge status={request.status} />
+    <div className={cn('space-y-5 text-sm', desktopReadable && 'lg:space-y-6 lg:text-base')}>
+      <StatusBadge
+        status={request.status}
+        className={desktopReadable ? 'lg:px-3 lg:py-1.5 lg:text-sm' : undefined}
+      />
 
-      <div className="grid gap-4 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2">
-        <div><p className="text-xs font-semibold text-slate-500">ผู้แจ้ง</p><p className="mt-1 font-bold text-slate-900">{request.requesterName}</p></div>
-        <div><p className="text-xs font-semibold text-slate-500">แผนก</p><p className="mt-1 font-bold text-slate-900">{request.department}</p></div>
-        <div><p className="text-xs font-semibold text-slate-500">วันที่แจ้ง</p><p className="mt-1 text-slate-700">{formatThaiDate(request.createdAt)}</p></div>
-        <div><p className="text-xs font-semibold text-slate-500">ค่าใช้จ่าย</p><p className="mt-1 text-slate-700">{formatCurrency(request.totalCost)}</p></div>
+      <div className={cn('grid gap-4 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2', desktopReadable && 'lg:gap-5 lg:p-5')}>
+        <div><p className={cn('text-xs font-semibold text-slate-500', desktopReadable && 'lg:text-sm')}>ผู้แจ้ง</p><p className="mt-1 font-bold text-slate-900">{request.requesterName}</p></div>
+        <div><p className={cn('text-xs font-semibold text-slate-500', desktopReadable && 'lg:text-sm')}>แผนก</p><p className="mt-1 font-bold text-slate-900">{request.department}</p></div>
+        <div><p className={cn('text-xs font-semibold text-slate-500', desktopReadable && 'lg:text-sm')}>วันที่แจ้ง</p><p className="mt-1 text-slate-700">{formatThaiDate(request.createdAt)}</p></div>
+        <div><p className={cn('text-xs font-semibold text-slate-500', desktopReadable && 'lg:text-sm')}>ค่าใช้จ่าย</p><p className="mt-1 text-slate-700">{formatCurrency(request.totalCost)}</p></div>
       </div>
 
       <div>
-        <p className="font-semibold text-slate-500">รายละเอียดปัญหา</p>
-        <p className="mt-2 whitespace-pre-wrap leading-7 text-slate-700">{request.issueDetails}</p>
+        <p className={cn('font-semibold text-slate-500', desktopReadable && 'lg:text-base')}>รายละเอียดปัญหา</p>
+        <p className={cn('mt-2 whitespace-pre-wrap leading-7 text-slate-700', desktopReadable && 'lg:text-base lg:leading-8')}>{request.issueDetails}</p>
       </div>
 
       {request.attachments.length > 0 && (
         <div>
-          <p className="flex items-center gap-2 font-semibold text-slate-500"><ImageIcon className="size-4" /> รูปภาพประกอบ</p>
+          <p className={cn('flex items-center gap-2 font-semibold text-slate-500', desktopReadable && 'lg:text-base')}><ImageIcon className={cn('size-4', desktopReadable && 'lg:size-5')} /> รูปภาพประกอบ</p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {request.attachments.map((attachment) => (
               <figure key={attachment.id}>
@@ -41,7 +50,7 @@ export function RequestDetails({ request }: { request: RepairRequest }) {
                   legacyDriveUrl={attachment.legacyDriveUrl}
                   alt={`${attachment.kind === 'before' ? 'รูปก่อนซ่อม' : 'รูปหลังซ่อม'} ${request.jobId}`}
                 />
-                <figcaption className="mt-1.5 text-center text-xs font-semibold text-slate-500">
+                <figcaption className={cn('mt-1.5 text-center text-xs font-semibold text-slate-500', desktopReadable && 'lg:text-sm')}>
                   {attachment.kind === 'before' ? 'ก่อนซ่อม' : 'หลังซ่อม'}
                 </figcaption>
               </figure>
@@ -51,16 +60,16 @@ export function RequestDetails({ request }: { request: RepairRequest }) {
       )}
 
       <div>
-        <p className="font-semibold text-slate-500">ลำดับการดำเนินการ</p>
+        <p className={cn('font-semibold text-slate-500', desktopReadable && 'lg:text-base')}>ลำดับการดำเนินการ</p>
         <div className="mt-3 space-y-4 border-l-2 border-teal-200 pl-4">
           {request.actions.map((action) => (
             <div key={action.id}>
-              <p className="font-semibold text-slate-800">{repairActionLabels[action.action]}</p>
-              <p className="mt-0.5 text-xs text-slate-500">{action.actorName} · {formatThaiDate(action.createdAt)}</p>
-              {action.note && <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600">{action.note}</p>}
+              <p className={cn('font-semibold text-slate-800', desktopReadable && 'lg:text-base')}>{repairActionLabels[action.action]}</p>
+              <p className={cn('mt-0.5 text-xs text-slate-500', desktopReadable && 'lg:text-sm')}>{action.actorName} · {formatThaiDate(action.createdAt)}</p>
+              {action.note && <p className={cn('mt-1 whitespace-pre-wrap text-sm text-slate-600', desktopReadable && 'lg:text-base')}>{action.note}</p>}
             </div>
           ))}
-          {request.actions.length === 0 && <p className="text-xs text-slate-500">ยังไม่มีประวัติการดำเนินการ</p>}
+          {request.actions.length === 0 && <p className={cn('text-xs text-slate-500', desktopReadable && 'lg:text-sm')}>ยังไม่มีประวัติการดำเนินการ</p>}
         </div>
       </div>
     </div>

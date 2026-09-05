@@ -113,16 +113,19 @@ export function ApprovalsPage() {
         onOpenChange={(open) => !open && closeModal()}
         title="พิจารณารายการ"
         description={selectedRequest ? `${selectedRequest.jobId} · ${selectedRequest.machineId}` : undefined}
+        titleClassName="lg:text-2xl"
+        descriptionClassName="lg:text-base"
         footer={
           <div className={`grid gap-3 ${selectedActions.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
             {selectedActions.map((action) => (
               <Button
                 key={action}
                 variant={action === 'reject' ? 'danger' : 'success'}
+                className="lg:h-12 lg:text-base"
                 disabled={isSubmitting}
                 onClick={() => void submitAction(action)}
               >
-                {action === 'reject' ? <RotateCcw className="size-4" /> : <Check className="size-4" />}
+                {action === 'reject' ? <RotateCcw className="size-4 lg:size-5" /> : <Check className="size-4 lg:size-5" />}
                 {action === 'reject' ? 'ตีกลับ' : action === 'acknowledge' ? 'รับดำเนินการ' : 'อนุมัติ'}
               </Button>
             ))}
@@ -131,10 +134,10 @@ export function ApprovalsPage() {
       >
         {selectedRequest && (
           <div className="space-y-6">
-            <RequestDetails request={selectedRequest} />
+            <RequestDetails request={selectedRequest} desktopReadable />
             <div>
-              <label htmlFor="approval-note" className="mb-2 block text-sm font-bold text-slate-700">หมายเหตุการพิจารณา <span className="text-red-500">*</span></label>
-              <textarea id="approval-note" rows={5} value={note} onChange={(event) => setNote(event.target.value)} placeholder="ระบุเหตุผลหรือรายละเอียดประกอบการอนุมัติ" className="form-control min-h-32 resize-y py-3" />
+              <label htmlFor="approval-note" className="mb-2 block text-sm font-bold text-slate-700 lg:text-base">หมายเหตุการพิจารณา <span className="text-red-500">*</span></label>
+              <textarea id="approval-note" rows={5} value={note} onChange={(event) => setNote(event.target.value)} placeholder="ระบุเหตุผลหรือรายละเอียดประกอบการอนุมัติ" className="form-control min-h-32 resize-y py-3 lg:!text-base" />
             </div>
           </div>
         )}
