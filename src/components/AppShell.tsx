@@ -281,8 +281,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 fallbackClassName="bg-gradient-to-br from-teal-500 to-cyan-600 text-base font-bold text-white"
               />
               <div className="hidden text-left sm:block">
-                <p className="max-w-36 truncate text-sm font-bold text-slate-900">{user?.fullName}</p>
-                <p className="text-xs text-slate-500">{user?.role}</p>
+                <p className="max-w-36 truncate text-sm font-bold text-slate-900 lg:text-base">{user?.fullName}</p>
+                <p className="text-xs text-slate-500 lg:text-sm">{user?.role}</p>
               </div>
               <ChevronDown className="hidden size-4 text-slate-400 sm:block" />
             </button>

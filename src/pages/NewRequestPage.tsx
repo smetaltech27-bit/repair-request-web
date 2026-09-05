@@ -76,52 +76,52 @@ export function NewRequestPage() {
   return (
     <div className="mx-auto max-w-4xl">
       <div>
-        <p className="text-sm font-semibold text-teal-600">Create request</p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">แจ้งซ่อมใหม่</h1>
-        <p className="mt-1 text-sm text-slate-500">กรอกข้อมูลปัญหาให้ครบเพื่อส่งเข้าสู่ขั้นตอนอนุมัติ</p>
+        <p className="text-sm font-semibold text-teal-600 lg:text-base">Create request</p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl lg:text-[34px]">แจ้งซ่อมใหม่</h1>
+        <p className="mt-1 text-sm text-slate-500 lg:text-base">กรอกข้อมูลปัญหาให้ครบเพื่อส่งเข้าสู่ขั้นตอนอนุมัติ</p>
       </div>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_280px]">
         <Card className="p-5 sm:p-7">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
             <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">ข้อมูลผู้แจ้ง</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 lg:text-sm">ข้อมูลผู้แจ้ง</p>
               <div className="mt-3 grid gap-4 sm:grid-cols-2">
-                <div><p className="text-xs text-slate-500">ชื่อผู้แจ้ง</p><p className="mt-1 font-bold text-slate-900">{user?.fullName}</p></div>
-                <div><p className="text-xs text-slate-500">ตำแหน่ง</p><p className="mt-1 font-bold text-slate-900">{user?.role}</p></div>
+                <div><p className="text-xs text-slate-500 lg:text-sm">ชื่อผู้แจ้ง</p><p className="mt-1 font-bold text-slate-900 lg:text-lg">{user?.fullName}</p></div>
+                <div><p className="text-xs text-slate-500 lg:text-sm">ตำแหน่ง</p><p className="mt-1 font-bold text-slate-900 lg:text-lg">{user?.role}</p></div>
               </div>
             </div>
 
             <div>
-              <label htmlFor="machineId" className="mb-2 block text-sm font-bold text-slate-700">เครื่องจักร / รหัสเครื่อง <span className="text-red-500">*</span></label>
-              <input id="machineId" placeholder="เช่น CNC YAMASAKI 2" className="form-control" {...register('machineId')} />
-              {errors.machineId && <p className="form-error">{errors.machineId.message}</p>}
+              <label htmlFor="machineId" className="mb-2 block text-sm font-bold text-slate-700 lg:text-base">เครื่องจักร / รหัสเครื่อง <span className="text-red-500">*</span></label>
+              <input id="machineId" placeholder="เช่น CNC YAMASAKI 2" className="form-control lg:text-base" {...register('machineId')} />
+              {errors.machineId && <p className="form-error lg:text-sm">{errors.machineId.message}</p>}
             </div>
 
             <div>
               <div className="mb-2 flex items-center justify-between gap-3">
-                <label htmlFor="issueDetails" className="text-sm font-bold text-slate-700">รายละเอียดปัญหา <span className="text-red-500">*</span></label>
-                <span className="text-xs text-slate-400">{detailsLength}/1,000</span>
+                <label htmlFor="issueDetails" className="text-sm font-bold text-slate-700 lg:text-base">รายละเอียดปัญหา <span className="text-red-500">*</span></label>
+                <span className="text-xs text-slate-400 lg:text-sm">{detailsLength}/1,000</span>
               </div>
-              <textarea id="issueDetails" rows={6} placeholder="อธิบายอาการผิดปกติ ตำแหน่งที่พบ และผลกระทบต่อการทำงาน" className="form-control min-h-36 resize-y py-3" {...register('issueDetails')} />
-              {errors.issueDetails && <p className="form-error">{errors.issueDetails.message}</p>}
+              <textarea id="issueDetails" rows={6} placeholder="อธิบายอาการผิดปกติ ตำแหน่งที่พบ และผลกระทบต่อการทำงาน" className="form-control min-h-36 resize-y py-3 lg:text-base" {...register('issueDetails')} />
+              {errors.issueDetails && <p className="form-error lg:text-sm">{errors.issueDetails.message}</p>}
             </div>
 
             <div>
-              <label htmlFor="image" className="mb-2 block text-sm font-bold text-slate-700">รูปภาพประกอบ</label>
+              <label htmlFor="image" className="mb-2 block text-sm font-bold text-slate-700 lg:text-base">รูปภาพประกอบ</label>
               <label htmlFor="image" className="flex min-h-36 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 text-center transition hover:border-teal-400 hover:bg-teal-50/40">
                 {imagePreviewUrl ? (
                   <div className="relative w-full">
                     <img src={imagePreviewUrl} alt="ตัวอย่างรูปภาพประกอบ" className="h-56 w-full bg-slate-100 object-contain" />
-                    <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-slate-950/70 px-4 py-3 text-sm font-bold text-white">
+                    <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-slate-950/70 px-4 py-3 text-sm font-bold text-white lg:text-base">
                       <Camera className="size-4" /> แตะเพื่อเปลี่ยนรูป
                     </span>
                   </div>
                 ) : (
                   <span className="flex flex-col items-center px-4">
                     <Camera className="size-8 text-teal-600" />
-                    <span className="mt-2 text-sm font-bold text-slate-700">ถ่ายรูปหรือเลือกรูปภาพ</span>
-                    <span className="mt-1 text-xs text-slate-500">JPG, PNG หรือ WebP · ระบบย่อรูปใหญ่ให้อัตโนมัติ</span>
+                    <span className="mt-2 text-sm font-bold text-slate-700 lg:text-base">ถ่ายรูปหรือเลือกรูปภาพ</span>
+                    <span className="mt-1 text-xs text-slate-500 lg:text-sm">JPG, PNG หรือ WebP · ระบบย่อรูปใหญ่ให้อัตโนมัติ</span>
                   </span>
                 )}
               </label>
@@ -133,23 +133,23 @@ export function NewRequestPage() {
                 {...imageRegistration}
                 onChange={selectImage}
               />
-              {errors.image && <p className="form-error">{errors.image.message}</p>}
-              {selectedImage && <p className="mt-2 truncate text-xs font-semibold text-teal-700">เลือกแล้ว: {selectedImage.name}</p>}
+              {errors.image && <p className="form-error lg:text-sm">{errors.image.message}</p>}
+              {selectedImage && <p className="mt-2 truncate text-xs font-semibold text-teal-700 lg:text-sm">เลือกแล้ว: {selectedImage.name}</p>}
             </div>
 
             <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
-              <Button type="button" variant="secondary" onClick={() => navigate(-1)}>ยกเลิก</Button>
-              <Button type="submit" disabled={isSubmitting}><Send className="size-4" /> {isSubmitting ? 'กำลังบีบอัดและบันทึก…' : 'ส่งใบแจ้งซ่อม'}</Button>
+              <Button type="button" variant="secondary" className="lg:text-base" onClick={() => navigate(-1)}>ยกเลิก</Button>
+              <Button type="submit" className="lg:text-base" disabled={isSubmitting}><Send className="size-4" /> {isSubmitting ? 'กำลังบีบอัดและบันทึก…' : 'ส่งใบแจ้งซ่อม'}</Button>
             </div>
           </form>
         </Card>
 
         <aside className="space-y-4">
           <Card className="border-teal-200 bg-teal-50/70 p-4">
-            <div className="flex gap-3"><Info className="mt-0.5 size-5 shrink-0 text-teal-700" /><div><h2 className="font-bold text-teal-900">ก่อนส่งรายการ</h2><p className="mt-1 text-sm leading-6 text-teal-800">ตรวจชื่อเครื่องและอธิบายอาการให้ชัดเจน เพื่อช่วยให้ผู้อนุมัติพิจารณาได้เร็วขึ้น</p></div></div>
+            <div className="flex gap-3"><Info className="mt-0.5 size-5 shrink-0 text-teal-700" /><div><h2 className="font-bold text-teal-900 lg:text-lg">ก่อนส่งรายการ</h2><p className="mt-1 text-sm leading-6 text-teal-800 lg:text-base">ตรวจชื่อเครื่องและอธิบายอาการให้ชัดเจน เพื่อช่วยให้ผู้อนุมัติพิจารณาได้เร็วขึ้น</p></div></div>
           </Card>
           <Card className="p-4">
-            <div className="flex gap-3"><FileCheck2 className="mt-0.5 size-5 shrink-0 text-slate-500" /><div><h2 className="font-bold text-slate-900">ขั้นตอนถัดไป</h2><p className="mt-1 text-sm leading-6 text-slate-500">ระบบจะส่งรายการไปยังผู้อนุมัติตามตำแหน่งและแผนกของผู้แจ้งโดยอัตโนมัติ</p></div></div>
+            <div className="flex gap-3"><FileCheck2 className="mt-0.5 size-5 shrink-0 text-slate-500" /><div><h2 className="font-bold text-slate-900 lg:text-lg">ขั้นตอนถัดไป</h2><p className="mt-1 text-sm leading-6 text-slate-500 lg:text-base">ระบบจะส่งรายการไปยังผู้อนุมัติตามตำแหน่งและแผนกของผู้แจ้งโดยอัตโนมัติ</p></div></div>
           </Card>
         </aside>
       </div>

@@ -101,7 +101,7 @@ function renderPieValueLabel({ cx, cy, midAngle, innerRadius, outerRadius, value
   const y = Number(cy) + radius * Math.sin(-Number(midAngle) * RADIAN)
 
   return (
-    <text x={x} y={y} fill="#ffffff" textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight={700}>
+    <text x={x} y={y} fill="#ffffff" textAnchor="middle" dominantBaseline="central" className="text-xs lg:text-sm" fontWeight={700}>
       {count}
     </text>
   )
@@ -141,9 +141,9 @@ export function DashboardPage() {
     <>
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="text-sm font-semibold text-teal-600">Maintenance overview</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">ภาพรวมงานซ่อม</h1>
-          <p className="mt-1 text-sm text-slate-500">ติดตามสถานะและภาพรวมงานซ่อมทั้งบริษัทในที่เดียว</p>
+          <p className="text-sm font-semibold text-teal-600 lg:text-base">Maintenance overview</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl lg:text-[34px]">ภาพรวมงานซ่อม</h1>
+          <p className="mt-1 text-sm text-slate-500 lg:text-base">ติดตามสถานะและภาพรวมงานซ่อมทั้งบริษัทในที่เดียว</p>
         </div>
         <Button asChild size="lg" className="hidden sm:inline-flex">
           <Link to="/requests/new"><Plus className="size-5" /> แจ้งซ่อมใหม่</Link>
@@ -155,7 +155,7 @@ export function DashboardPage() {
           <Card key={label} className="p-4 sm:p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold text-slate-500 sm:text-sm">{label}</p>
+                <p className="text-xs font-semibold text-slate-500 sm:text-sm lg:text-base">{label}</p>
                 <p className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{stats[key as keyof typeof stats]}</p>
               </div>
               <span className={`grid size-10 place-items-center rounded-xl ring-1 ring-inset sm:size-11 ${statColorClasses[color]}`}>
@@ -167,7 +167,7 @@ export function DashboardPage() {
         <Card className="p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-500 sm:text-sm">ค่าใช้จ่ายรวม (บาท)</p>
+              <p className="text-xs font-semibold text-slate-500 sm:text-sm lg:text-base">ค่าใช้จ่ายรวม (บาท)</p>
               <p className="mt-2 whitespace-nowrap text-2xl font-bold tracking-tight text-slate-950 2xl:text-3xl">
                 {new Intl.NumberFormat('th-TH', { maximumFractionDigits: 2 }).format(totalCost)}
               </p>
@@ -181,7 +181,7 @@ export function DashboardPage() {
             <select
               value={costMonth}
               onChange={(event) => setCostMonth(event.target.value)}
-              className="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs font-semibold text-slate-600 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-500/10"
+              className="h-8 w-full rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs font-semibold text-slate-600 outline-none transition focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-500/10 lg:text-sm"
             >
               <option value="all">ทุกเดือน</option>
               {costMonths.map((month) => <option key={month.value} value={month.value}>{month.label}</option>)}
@@ -193,8 +193,8 @@ export function DashboardPage() {
       <section className="mt-5 grid gap-5 xl:grid-cols-2">
         <Card className="min-w-0 overflow-hidden p-4 sm:p-5">
           <div>
-            <h2 className="font-bold text-slate-950">สัดส่วนสถานะงาน</h2>
-            <p className="mt-1 text-xs text-slate-500">ข้อมูลใบแจ้งซ่อมทั้งบริษัททั้งหมด {requests.length} งาน</p>
+            <h2 className="font-bold text-slate-950 lg:text-lg">สัดส่วนสถานะงาน</h2>
+            <p className="mt-1 text-xs text-slate-500 lg:text-sm">ข้อมูลใบแจ้งซ่อมทั้งบริษัททั้งหมด {requests.length} งาน</p>
           </div>
           <div className="mt-3 min-w-0 items-center gap-2 sm:grid sm:grid-cols-[minmax(0,1fr)_auto]">
             <div className="mx-auto h-56 w-full min-w-0 max-w-72 overflow-hidden sm:h-64 sm:max-w-none">
@@ -218,7 +218,7 @@ export function DashboardPage() {
             </div>
             <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:mt-0 sm:min-w-40 sm:grid-cols-1 sm:gap-2">
               {pieData.map((entry) => (
-                <div key={entry.name} className="flex items-center gap-2 text-xs text-slate-600">
+                <div key={entry.name} className="flex items-center gap-2 text-xs text-slate-600 lg:text-sm">
                   <span className="h-2.5 w-5 shrink-0 rounded-sm" style={{ backgroundColor: entry.color }} />
                   <span>{entry.name}</span>
                 </div>
@@ -229,12 +229,12 @@ export function DashboardPage() {
 
         <Card className="min-w-0 overflow-hidden p-4 sm:p-5">
           <div>
-            <h2 className="font-bold text-slate-950">สถิติแจ้งซ่อมแยกตามแผนก</h2>
-            <p className="mt-1 text-xs text-slate-500">จำนวนรายการใบแจ้งซ่อมทั้งบริษัทในแต่ละแผนก</p>
+            <h2 className="font-bold text-slate-950 lg:text-lg">สถิติแจ้งซ่อมแยกตามแผนก</h2>
+            <p className="mt-1 text-xs text-slate-500 lg:text-sm">จำนวนรายการใบแจ้งซ่อมทั้งบริษัทในแต่ละแผนก</p>
           </div>
           <div className="mt-4 min-w-0 overflow-hidden pb-1 sm:overflow-x-auto">
             <div
-              className="h-64 w-full min-w-0"
+              className="h-64 w-full min-w-0 lg:[&_.recharts-cartesian-axis-tick-value]:text-[13px] lg:[&_.recharts-label]:text-sm"
               style={{ minWidth: isMobileChartLayout ? 0 : `${Math.max(520, departmentData.length * 120)}px` }}
             >
               <ResponsiveContainer width="100%" height="100%" debounce={80}>
@@ -270,8 +270,8 @@ export function DashboardPage() {
       <Card className="mt-5 overflow-hidden">
         <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:px-5">
           <div className="min-w-0">
-            <h2 className="font-bold text-slate-950">รายการแจ้งซ่อมทั้งหมด</h2>
-            <p className="mt-0.5 text-xs text-slate-500">พบ {filteredRequests.length} จากทั้งหมด {requests.length} รายการ</p>
+            <h2 className="font-bold text-slate-950 lg:text-lg">รายการแจ้งซ่อมทั้งหมด</h2>
+            <p className="mt-0.5 text-xs text-slate-500 lg:text-sm">พบ {filteredRequests.length} จากทั้งหมด {requests.length} รายการ</p>
           </div>
           <Button asChild size="sm" className="shrink-0 px-3 text-xs sm:hidden">
             <Link to="/requests/new"><Plus className="size-4" /> แจ้งซ่อม</Link>
@@ -290,7 +290,7 @@ export function DashboardPage() {
                   setRequestedPage(1)
                 }}
                 placeholder="ค้นหารหัสงาน ผู้แจ้ง แผนก หรือเครื่องจักร"
-                className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-2.5 text-[11px] outline-none transition placeholder:text-[10px] focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10 sm:h-11 sm:rounded-xl sm:pl-11 sm:pr-4 sm:text-sm sm:placeholder:text-sm"
+                className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-2.5 text-[11px] outline-none transition placeholder:text-[10px] focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10 sm:h-11 sm:rounded-xl sm:pl-11 sm:pr-4 sm:text-sm sm:placeholder:text-sm lg:text-base lg:placeholder:text-base"
               />
             </label>
             <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:gap-2 lg:pb-0">
@@ -303,7 +303,7 @@ export function DashboardPage() {
                     setStatusFilter(option.value)
                     setRequestedPage(1)
                   }}
-                  className={`shrink-0 rounded-lg px-2 py-1.5 text-[10px] font-bold transition sm:rounded-xl sm:px-3.5 sm:py-2 sm:text-xs ${
+                  className={`shrink-0 rounded-lg px-2 py-1.5 text-[10px] font-bold transition sm:rounded-xl sm:px-3.5 sm:py-2 sm:text-xs lg:text-sm ${
                     statusFilter === option.value
                       ? 'bg-slate-900 text-white shadow-sm'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -317,8 +317,8 @@ export function DashboardPage() {
         </div>
 
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[820px] text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-bold text-slate-500">
+          <table className="w-full min-w-[820px] text-left text-sm lg:text-base">
+            <thead className="bg-slate-50 text-xs font-bold text-slate-500 lg:text-sm">
               <tr>
                 <th className="px-5 py-3">รหัสงาน</th>
                 <th className="px-5 py-3">แผนก</th>
@@ -334,10 +334,10 @@ export function DashboardPage() {
                   <td className="px-5 py-3.5 font-bold text-slate-900">{request.jobId}</td>
                   <td className="px-5 py-3.5 text-slate-600">{request.department}</td>
                   <td className="px-5 py-3.5 text-slate-600">{request.machineId}</td>
-                  <td className="px-5 py-3.5"><StatusBadge status={request.status} /></td>
+                  <td className="px-5 py-3.5"><StatusBadge status={request.status} className="lg:text-sm" /></td>
                   <td className="px-5 py-3.5 text-slate-500">{formatThaiDate(request.createdAt)}</td>
                   <td className="px-5 py-3.5 text-right">
-                    <Button variant="secondary" size="sm" onClick={() => setSelectedRequest(request)}>ดูรายละเอียด</Button>
+                    <Button variant="secondary" size="sm" className="lg:text-base" onClick={() => setSelectedRequest(request)}>ดูรายละเอียด</Button>
                   </td>
                 </tr>
               ))}
@@ -365,7 +365,7 @@ export function DashboardPage() {
           <div className="border-t border-slate-100 p-10 text-center">
             <Search className="mx-auto size-10 text-slate-300" />
             <h3 className="mt-3 font-bold text-slate-900">ไม่พบรายการ</h3>
-            <p className="mt-1 text-sm text-slate-500">ลองเปลี่ยนคำค้นหาหรือตัวกรองสถานะ</p>
+            <p className="mt-1 text-sm text-slate-500 lg:text-base">ลองเปลี่ยนคำค้นหาหรือตัวกรองสถานะ</p>
           </div>
         ) : (
           <div className="flex items-center justify-center gap-3 border-t border-slate-100 px-4 py-4">
@@ -373,18 +373,20 @@ export function DashboardPage() {
               type="button"
               variant="secondary"
               size="sm"
+              className="lg:text-base"
               disabled={paginatedRequests.page <= 1}
               onClick={() => setRequestedPage(paginatedRequests.page - 1)}
             >
               <ChevronLeft className="size-4" /> ย้อนกลับ
             </Button>
-            <span className="min-w-20 text-center text-xs font-semibold text-slate-500">
+            <span className="min-w-20 text-center text-xs font-semibold text-slate-500 lg:text-sm">
               หน้า {paginatedRequests.page} / {paginatedRequests.totalPages}
             </span>
             <Button
               type="button"
               variant="secondary"
               size="sm"
+              className="lg:text-base"
               disabled={paginatedRequests.page >= paginatedRequests.totalPages}
               onClick={() => setRequestedPage(paginatedRequests.page + 1)}
             >

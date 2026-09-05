@@ -69,9 +69,9 @@ export function RequestsPage() {
     <>
       <div>
         <div>
-          <p className="text-sm font-semibold text-teal-600">Maintenance requests</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">รายการซ่อม/ปรับปรุง</h1>
-          <p className="mt-1 text-sm text-slate-500">ค้นหา กรอง และติดตามรายการแจ้งซ่อม</p>
+          <p className="text-sm font-semibold text-teal-600 lg:text-base">Maintenance requests</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl lg:text-[34px]">รายการซ่อม/ปรับปรุง</h1>
+          <p className="mt-1 text-sm text-slate-500 lg:text-base">ค้นหา กรอง และติดตามรายการแจ้งซ่อม</p>
         </div>
       </div>
 
@@ -84,7 +84,7 @@ export function RequestsPage() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="ค้นหารหัสงาน ผู้แจ้ง แผนก หรือเครื่องจักร"
-              className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-2.5 text-[11px] outline-none transition placeholder:text-[10px] focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10 sm:h-11 sm:rounded-xl sm:pl-11 sm:pr-4 sm:text-sm sm:placeholder:text-sm"
+              className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-2.5 text-[11px] outline-none transition placeholder:text-[10px] focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10 sm:h-11 sm:rounded-xl sm:pl-11 sm:pr-4 sm:text-sm sm:placeholder:text-sm lg:text-base lg:placeholder:text-base"
             />
           </label>
           <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:gap-2 lg:pb-0">
@@ -93,7 +93,7 @@ export function RequestsPage() {
               <button
                 key={option.value}
                 onClick={() => setSearchParams(option.value === 'all' ? {} : { status: option.value })}
-                className={`shrink-0 rounded-lg px-2 py-1.5 text-[10px] font-bold transition sm:rounded-xl sm:px-3.5 sm:py-2 sm:text-xs ${
+                className={`shrink-0 rounded-lg px-2 py-1.5 text-[10px] font-bold transition sm:rounded-xl sm:px-3.5 sm:py-2 sm:text-xs lg:text-sm ${
                   activeStatus === option.value
                     ? 'bg-slate-900 text-white shadow-sm'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -108,8 +108,8 @@ export function RequestsPage() {
 
       <Card className="mt-5 overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-5">
-          <p className="text-sm font-bold text-slate-800">รายการทั้งหมด</p>
-          <p className="text-xs font-semibold text-slate-500">พบ {filteredRequests.length} จาก {requests.length} รายการ</p>
+          <p className="text-sm font-bold text-slate-800 lg:text-base">รายการทั้งหมด</p>
+          <p className="text-xs font-semibold text-slate-500 lg:text-sm">พบ {filteredRequests.length} จาก {requests.length} รายการ</p>
         </div>
 
         {filteredRequests.length > 0 ? (
@@ -118,8 +118,8 @@ export function RequestsPage() {
               เลื่อนซ้าย–ขวาเพื่อดูข้อมูลทุกคอลัมน์
             </p>
             <div className="overflow-x-auto overscroll-x-contain">
-              <table className="w-full min-w-[1280px] table-fixed text-left text-sm">
-                <thead className="bg-slate-50 text-xs font-bold text-slate-500">
+              <table className="w-full min-w-[1280px] table-fixed text-left text-sm lg:text-base">
+                <thead className="bg-slate-50 text-xs font-bold text-slate-500 lg:text-sm">
                   <tr>
                     <th scope="col" className="w-16 px-4 py-3 text-center">ลำดับ</th>
                     <th scope="col" className="w-40 px-4 py-3">รหัสแจ้งซ่อม</th>
@@ -142,12 +142,13 @@ export function RequestsPage() {
                       <td className="px-4 py-3.5"><p className="truncate font-semibold text-slate-700" title={request.machineId}>{request.machineId}</p></td>
                       <td className="px-4 py-3.5"><p className="truncate text-slate-600" title={request.issueDetails}>{request.issueDetails}</p></td>
                       <td className="px-4 py-3.5"><p className="truncate text-slate-600" title={request.requesterName}>{request.requesterName}</p></td>
-                      <td className="px-4 py-3.5"><StatusBadge status={request.status} className="whitespace-nowrap" /></td>
+                      <td className="px-4 py-3.5"><StatusBadge status={request.status} className="whitespace-nowrap lg:text-sm" /></td>
                       <td className="px-4 py-3.5 text-center">
                         <Button
                           type="button"
                           variant="secondary"
                           size="sm"
+                          className="lg:text-base"
                           onClick={() => setSelectedRequest(request)}
                           aria-label={`ดูรายละเอียด ${request.jobId}`}
                         >
@@ -164,7 +165,7 @@ export function RequestsPage() {
           <div className="p-10 text-center">
             <Search className="mx-auto size-10 text-slate-300" />
             <h2 className="mt-3 font-bold text-slate-900">ไม่พบรายการ</h2>
-            <p className="mt-1 text-sm text-slate-500">ลองเปลี่ยนคำค้นหาหรือตัวกรองสถานะ</p>
+            <p className="mt-1 text-sm text-slate-500 lg:text-base">ลองเปลี่ยนคำค้นหาหรือตัวกรองสถานะ</p>
           </div>
         )}
       </Card>
