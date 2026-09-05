@@ -1,4 +1,4 @@
-name: Deploy Repair Request to GitHub Pages
+name: Deploy Maintenance Request System (MRS) to GitHub Pages
 
 on:
   push:
