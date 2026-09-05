@@ -100,4 +100,13 @@ describe('AppShell notifications', () => {
     expect(screen.getByTestId('location')).toHaveTextContent('/requests?request=request-1')
     expect(serviceMocks.markRequestNotificationsRead).toHaveBeenCalledWith('request-1')
   })
+
+  it('does not render the removed mobile bottom navigation', async () => {
+    renderShell()
+
+    await screen.findByRole('button', { name: 'การแจ้งเตือนที่ยังไม่อ่าน 2 รายการ' })
+    expect(screen.getAllByRole('navigation')).toHaveLength(1)
+    expect(screen.queryByRole('link', { name: 'งานของฉัน' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'โปรไฟล์' })).toBeInTheDocument()
+  })
 })

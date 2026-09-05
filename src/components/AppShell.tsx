@@ -32,15 +32,7 @@ const desktopNavigation = [
   { label: 'รอปิดงาน', to: '/completion', icon: Flag },
   { label: 'รายการซ่อม/ปรับปรุง', to: '/requests', icon: ClipboardList },
   { label: 'ตั้งค่า', to: '/settings', icon: Settings2 },
-]
-
-const mobileNavigation = [
-  { label: 'หน้าหลัก', to: '/', icon: Gauge },
-  { label: 'งานของฉัน', to: '/requests', icon: ClipboardList },
-  { label: 'แจ้งซ่อม', to: '/requests/new', icon: Plus, primary: true },
-  { label: 'อนุมัติ', to: '/approvals', icon: ClipboardCheck },
-  { label: 'รอปิดงาน', to: '/completion', icon: Flag },
-  { label: 'โปรไฟล์', to: '/profile', icon: UserRound },
+  { label: 'โปรไฟล์', to: '/profile', icon: UserRound, mobileOnly: true },
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -55,7 +47,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [notificationsLoading, setNotificationsLoading] = useState(false)
   const canAccessCompletion = Boolean(user && user.roleCode !== 'employee')
   const visibleDesktopNavigation = desktopNavigation.filter(({ to }) => to !== '/completion' || canAccessCompletion)
-  const visibleMobileNavigation = mobileNavigation.filter(({ to }) => to !== '/completion' || canAccessCompletion)
 
   useEffect(() => {
     if (!user || isDemoMode) return
@@ -170,7 +161,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6">
           <p className="mb-3 px-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">เมนูหลัก</p>
-          {visibleDesktopNavigation.map(({ label, to, icon: Icon }) => (
+          {visibleDesktopNavigation.map(({ label, to, icon: Icon, mobileOnly }) => (
             <NavLink
               key={label}
               to={to}
@@ -178,6 +169,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               className={({ isActive }) =>
                 cn(
                   'group flex items-center gap-3 rounded-xl px-3 py-3.5 text-base font-semibold text-slate-300 transition',
+                  mobileOnly && 'lg:hidden',
                   isActive
                     ? 'bg-teal-500/15 text-teal-300 ring-1 ring-inset ring-teal-400/10'
                     : 'hover:bg-white/5 hover:text-white',
@@ -296,39 +288,13 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1600px] px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-8">
+        <main className="mx-auto w-full max-w-[1600px] px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:pt-8">
           <NotificationReadContext.Provider value={handleRequestRead}>
             {children}
           </NotificationReadContext.Provider>
         </main>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl lg:hidden">
-        <div className={cn('grid h-16 items-center px-1', canAccessCompletion ? 'grid-cols-6' : 'grid-cols-5')}>
-          {visibleMobileNavigation.map(({ label, to, icon: Icon, primary }) => (
-            <NavLink
-              key={label}
-              to={to}
-              className={({ isActive }) =>
-                cn(
-                  'relative flex h-full flex-col items-center justify-center gap-1 text-[10px] font-semibold transition',
-                  isActive ? 'text-teal-600' : 'text-slate-500',
-                )
-              }
-            >
-              <span
-                className={cn(
-                  'grid place-items-center',
-                  primary && '-mt-5 size-12 rounded-2xl bg-teal-600 text-white shadow-lg shadow-teal-600/30',
-                )}
-              >
-                <Icon className={cn('size-5', primary && 'size-6')} />
-              </span>
-              <span>{label}</span>
-            </NavLink>
-          ))}
-        </div>
-      </nav>
     </div>
   )
 }

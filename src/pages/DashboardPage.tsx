@@ -10,7 +10,7 @@ import {
   Search,
   Wrench,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Bar,
@@ -68,6 +68,30 @@ const statColorClasses: Record<string, string> = {
 const RADIAN = Math.PI / 180
 const DASHBOARD_PAGE_SIZE = 20
 
+function useMobileChartLayout() {
+  const [isMobile, setIsMobile] = useState(() => (
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia('(max-width: 639px)').matches
+      : false
+  ))
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return
+    const mediaQuery = window.matchMedia('(max-width: 639px)')
+    const updateLayout = () => setIsMobile(mediaQuery.matches)
+    updateLayout()
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', updateLayout)
+      return () => mediaQuery.removeEventListener('change', updateLayout)
+    }
+
+    mediaQuery.addListener(updateLayout)
+    return () => mediaQuery.removeListener(updateLayout)
+  }, [])
+
+  return isMobile
+}
+
 function renderPieValueLabel({ cx, cy, midAngle, innerRadius, outerRadius, value }: PieLabelRenderProps) {
   const count = Number(value)
   if (!count) return null
@@ -84,6 +108,7 @@ function renderPieValueLabel({ cx, cy, midAngle, innerRadius, outerRadius, value
 }
 
 export function DashboardPage() {
+  const isMobileChartLayout = useMobileChartLayout()
   const [selectedRequest, setSelectedRequest] = useState<RepairRequest | null>(null)
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<RepairStatusFilter>('all')
@@ -166,21 +191,21 @@ export function DashboardPage() {
       </section>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-2">
-        <Card className="p-5">
+        <Card className="min-w-0 overflow-hidden p-4 sm:p-5">
           <div>
             <h2 className="font-bold text-slate-950">สัดส่วนสถานะงาน</h2>
             <p className="mt-1 text-xs text-slate-500">ข้อมูลใบแจ้งซ่อมทั้งบริษัททั้งหมด {requests.length} งาน</p>
           </div>
-          <div className="mt-3 grid items-center gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-            <div className="h-64 min-w-0">
-              <ResponsiveContainer width="100%" height="100%">
+          <div className="mt-3 min-w-0 items-center gap-2 sm:grid sm:grid-cols-[minmax(0,1fr)_auto]">
+            <div className="mx-auto h-56 w-full min-w-0 max-w-72 overflow-hidden sm:h-64 sm:max-w-none">
+              <ResponsiveContainer width="100%" height="100%" debounce={80}>
                 <PieChart>
                   <Pie
                     data={pieData}
                     dataKey="value"
                     nameKey="name"
-                    innerRadius={58}
-                    outerRadius={94}
+                    innerRadius={isMobileChartLayout ? 48 : 58}
+                    outerRadius={isMobileChartLayout ? 80 : 94}
                     paddingAngle={2}
                     labelLine={false}
                     label={renderPieValueLabel}
@@ -191,7 +216,7 @@ export function DashboardPage() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 sm:grid sm:min-w-40 sm:justify-stretch sm:gap-2">
+            <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:mt-0 sm:min-w-40 sm:grid-cols-1 sm:gap-2">
               {pieData.map((entry) => (
                 <div key={entry.name} className="flex items-center gap-2 text-xs text-slate-600">
                   <span className="h-2.5 w-5 shrink-0 rounded-sm" style={{ backgroundColor: entry.color }} />
@@ -202,18 +227,35 @@ export function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="min-w-0 overflow-hidden p-4 sm:p-5">
           <div>
             <h2 className="font-bold text-slate-950">สถิติแจ้งซ่อมแยกตามแผนก</h2>
             <p className="mt-1 text-xs text-slate-500">จำนวนรายการใบแจ้งซ่อมทั้งบริษัทในแต่ละแผนก</p>
           </div>
-          <div className="mt-4 overflow-x-auto pb-1">
-            <div className="h-64" style={{ minWidth: `${Math.max(520, departmentData.length * 120)}px` }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={departmentData} margin={{ top: 22, right: 8, left: -24, bottom: 8 }}>
+          <div className="mt-4 min-w-0 overflow-hidden pb-1 sm:overflow-x-auto">
+            <div
+              className="h-64 w-full min-w-0"
+              style={{ minWidth: isMobileChartLayout ? 0 : `${Math.max(520, departmentData.length * 120)}px` }}
+            >
+              <ResponsiveContainer width="100%" height="100%" debounce={80}>
+                <BarChart
+                  data={departmentData}
+                  margin={isMobileChartLayout
+                    ? { top: 22, right: 0, left: -34, bottom: 38 }
+                    : { top: 22, right: 8, left: -24, bottom: 8 }}
+                >
                   <CartesianGrid stroke="#e2e8f0" vertical={false} />
-                  <XAxis dataKey="department" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} interval={0} />
-                  <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <XAxis
+                    dataKey="department"
+                    tick={{ fontSize: isMobileChartLayout ? 9 : 11, fill: '#64748b' }}
+                    axisLine={{ stroke: '#cbd5e1' }}
+                    tickLine={false}
+                    interval={0}
+                    angle={isMobileChartLayout ? -22 : 0}
+                    textAnchor={isMobileChartLayout ? 'end' : 'middle'}
+                    height={isMobileChartLayout ? 54 : 30}
+                  />
+                  <YAxis tick={{ fontSize: isMobileChartLayout ? 9 : 11, fill: '#64748b' }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip formatter={(value) => [`${value} งาน`, 'จำนวนงาน']} />
                   <Bar dataKey="total" name="จำนวนงาน" fill="#0ea5a4" radius={[5, 5, 0, 0]} maxBarSize={84}>
                     <LabelList dataKey="total" position="top" fill="#0f766e" fontSize={12} fontWeight={700} />
@@ -348,10 +390,6 @@ export function DashboardPage() {
           </div>
         )}
       </Card>
-
-      <Button asChild size="lg" className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-20 rounded-2xl shadow-xl sm:hidden">
-        <Link to="/requests/new"><Plus className="size-5" /> แจ้งซ่อม</Link>
-      </Button>
 
       <Modal
         open={Boolean(selectedRequest)}
