@@ -268,18 +268,21 @@ export function DashboardPage() {
       </section>
 
       <Card className="mt-5 overflow-hidden">
-        <div className="border-b border-slate-100 px-5 py-4">
-          <div>
+        <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:px-5">
+          <div className="min-w-0">
             <h2 className="font-bold text-slate-950">รายการแจ้งซ่อมทั้งหมด</h2>
             <p className="mt-0.5 text-xs text-slate-500">พบ {filteredRequests.length} จากทั้งหมด {requests.length} รายการ</p>
           </div>
+          <Button asChild size="sm" className="shrink-0 px-3 text-xs sm:hidden">
+            <Link to="/requests/new"><Plus className="size-4" /> แจ้งซ่อม</Link>
+          </Button>
         </div>
 
-        <div className="border-b border-slate-100 p-4">
-          <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
+        <div className="border-b border-slate-100 p-3 sm:p-4">
+          <div className="grid gap-2.5 sm:gap-3 lg:grid-cols-[1fr_auto]">
             <label className="relative block">
               <span className="sr-only">ค้นหารายการ</span>
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 sm:left-3.5 sm:size-5" />
               <input
                 value={query}
                 onChange={(event) => {
@@ -287,11 +290,11 @@ export function DashboardPage() {
                   setRequestedPage(1)
                 }}
                 placeholder="ค้นหารหัสงาน ผู้แจ้ง แผนก หรือเครื่องจักร"
-                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
+                className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-xs outline-none transition placeholder:text-[11px] focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10 sm:h-11 sm:pl-11 sm:pr-4 sm:text-sm sm:placeholder:text-sm"
               />
             </label>
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
-              <Filter className="size-4 shrink-0 text-slate-400" />
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:gap-2 lg:pb-0">
+              <Filter className="hidden size-4 shrink-0 text-slate-400 sm:block" />
               {repairStatusFilters.map((option) => (
                 <button
                   key={option.value}
@@ -300,7 +303,7 @@ export function DashboardPage() {
                     setStatusFilter(option.value)
                     setRequestedPage(1)
                   }}
-                  className={`shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition ${
+                  className={`shrink-0 rounded-lg px-2.5 py-2 text-[11px] font-bold transition sm:rounded-xl sm:px-3.5 sm:text-xs ${
                     statusFilter === option.value
                       ? 'bg-slate-900 text-white shadow-sm'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
