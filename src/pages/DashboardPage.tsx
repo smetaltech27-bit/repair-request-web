@@ -404,7 +404,7 @@ export function DashboardPage() {
         footer={<Button className="w-full" onClick={() => setSelectedRequest(null)}>ปิดหน้าต่าง</Button>}
       >
         {selectedRequest && (
-          <RequestDetails request={selectedRequest} />
+          <RequestDetails request={selectedRequest} enableImagePreview />
         )}
       </Modal>
     </>
