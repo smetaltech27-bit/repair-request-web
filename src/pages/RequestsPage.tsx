@@ -104,7 +104,7 @@ export function RequestsPage() {
               <button
                 key={option.value}
                 onClick={() => setSearchParams(option.value === 'all' ? {} : { status: option.value })}
-                className={`shrink-0 rounded-md px-1.5 py-1 text-[9px] font-bold transition sm:rounded-xl sm:px-3.5 sm:py-2 sm:text-xs lg:text-sm ${
+                className={`mobile-status-filter-button shrink-0 font-bold transition sm:h-auto sm:rounded-xl sm:px-3.5 sm:py-2 sm:text-xs sm:leading-normal lg:text-sm ${
                   activeStatus === option.value
                     ? 'bg-slate-900 text-white shadow-sm'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'

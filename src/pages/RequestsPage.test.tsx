@@ -63,6 +63,7 @@ describe('RequestsPage', () => {
 
     expect(screen.getByRole('heading', { name: 'รายการซ่อม/ปรับปรุง' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'แจ้งซ่อมใหม่' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'ทุกสถานะ' })).toHaveClass('mobile-status-filter-button')
     expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
       'ลำดับ',
       'รหัสแจ้งซ่อม',
