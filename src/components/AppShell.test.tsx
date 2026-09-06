@@ -122,6 +122,7 @@ describe('AppShell notifications', () => {
 
     await screen.findByRole('button', { name: 'การแจ้งเตือนที่ยังไม่อ่าน 2 รายการ' })
     expect(screen.getAllByRole('navigation')).toHaveLength(1)
+    expect(screen.getByRole('navigation')).toHaveClass('lg:overflow-y-hidden')
     expect(screen.getByRole('link', { name: 'หน้าแรก' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'รายงานการซ่อม / ปรับปรุง' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'แดชบอร์ด' })).not.toBeInTheDocument()

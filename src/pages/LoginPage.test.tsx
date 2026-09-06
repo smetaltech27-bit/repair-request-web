@@ -34,10 +34,10 @@ describe('LoginPage', () => {
   it('shows the SMT brand inside the login card', () => {
     renderPage()
     const brand = screen.getByRole('group', { name: 'แบรนด์ SMT' })
-    expect(within(brand).getByRole('img', { name: 'SMT' })).toBeInTheDocument()
+    expect(within(brand).getByRole('img', { name: 'SMT' })).toHaveClass('lg:size-16')
     expect(within(brand).getByText('Maintenance Request System (MRS)')).toBeInTheDocument()
-    expect(screen.getByLabelText('อีเมลหรือชื่อผู้ใช้')).toBeInTheDocument()
-    expect(screen.getByLabelText('รหัสผ่าน')).toBeInTheDocument()
+    expect(screen.getByLabelText('อีเมลหรือชื่อผู้ใช้')).toHaveClass('lg:h-10')
+    expect(screen.getByLabelText('รหัสผ่าน')).toHaveClass('lg:h-10')
     expect(screen.getByLabelText('จดจำรหัสผ่าน')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'ลืมรหัสผ่าน?' })).toBeInTheDocument()
     expect(screen.queryByText('Welcome back')).not.toBeInTheDocument()

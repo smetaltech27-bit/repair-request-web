@@ -54,21 +54,21 @@ export function LoginPage() {
   return (
     <main className="min-h-svh min-w-0 bg-slate-50">
       <section className="flex min-h-svh min-w-0 items-center justify-center bg-slate-50 px-4 py-8 sm:px-8 sm:py-10">
-        <div className="min-w-0 w-full max-w-lg">
-          <div className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/10 sm:p-8 lg:p-9">
-            <div role="group" aria-label="แบรนด์ SMT" className="flex min-w-0 items-center justify-center gap-3 sm:gap-4">
+        <div className="min-w-0 w-full max-w-lg lg:max-w-md">
+          <div className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/10 sm:p-8 lg:p-7">
+            <div role="group" aria-label="แบรนด์ SMT" className="flex min-w-0 items-center justify-center gap-3 sm:gap-4 lg:gap-3">
               <img
                 src={smtLogo}
                 alt="SMT"
-                className="size-16 shrink-0 object-contain sm:size-20"
+                className="size-16 shrink-0 object-contain sm:size-20 lg:size-16"
               />
-              <p className="min-w-0 max-w-xs text-sm font-bold leading-snug text-slate-950 min-[360px]:text-base sm:text-xl">
+              <p className="min-w-0 max-w-xs text-sm font-bold leading-snug text-slate-950 min-[360px]:text-base sm:text-xl lg:text-lg">
                 Maintenance Request System (MRS)
               </p>
             </div>
 
-            <div className="mt-7 text-center sm:mt-8">
-              <h2 className="text-3xl font-bold tracking-tight text-slate-950">เข้าสู่ระบบ</h2>
+            <div className="mt-7 text-center sm:mt-8 lg:mt-5">
+              <h2 className="text-3xl font-bold tracking-tight text-slate-950 lg:text-2xl">เข้าสู่ระบบ</h2>
             </div>
 
             {isDemoMode && (
@@ -77,7 +77,7 @@ export function LoginPage() {
               </div>
             )}
 
-            <form className="mt-7 space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
+            <form className="mt-7 space-y-5 lg:mt-5 lg:space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
               <div>
                 <label htmlFor="username" className="mb-2 block text-sm font-semibold text-slate-700">
                   อีเมลหรือชื่อผู้ใช้
@@ -86,7 +86,7 @@ export function LoginPage() {
                   id="username"
                   autoComplete="username"
                   placeholder="กรอกอีเมลหรือชื่อผู้ใช้"
-                  className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
+                  className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10 lg:h-10"
                   {...register('username')}
                 />
                 {errors.username && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.username.message}</p>}
@@ -102,7 +102,7 @@ export function LoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
                     placeholder="กรอกรหัสผ่าน"
-                    className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-4 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
+                    className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-4 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10 lg:h-10"
                     {...register('password')}
                   />
                   <button
@@ -150,17 +150,17 @@ export function LoginPage() {
 
               {submitError && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-700">{submitError}</p>}
 
-              <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" size="lg" className="w-full lg:h-10 lg:text-sm" disabled={isSubmitting}>
                 {isSubmitting ? 'กำลังเข้าสู่ระบบ…' : 'เข้าสู่ระบบ'}
               </Button>
             </form>
 
-            <p className="mt-7 border-t border-slate-100 pt-5 text-center text-xs font-semibold text-teal-600">
+            <p className="mt-7 border-t border-slate-100 pt-5 text-center text-xs font-semibold text-teal-600 lg:mt-5 lg:pt-4">
               Create by S Metal Tech Co., Ltd.
             </p>
           </div>
 
-          <p className="mt-6 text-center text-xs text-slate-400">กรุณาติดต่อผู้ดูแลระบบหากไม่สามารถเข้าสู่ระบบได้</p>
+          <p className="mt-6 text-center text-xs text-slate-400 lg:mt-4">กรุณาติดต่อผู้ดูแลระบบหากไม่สามารถเข้าสู่ระบบได้</p>
         </div>
       </section>
     </main>

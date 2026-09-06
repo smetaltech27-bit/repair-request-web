@@ -142,14 +142,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
-        <div className="flex h-24 shrink-0 items-center justify-between border-b border-white/10 px-6">
+        <div className="flex h-24 shrink-0 items-center justify-between border-b border-white/10 px-6 lg:h-20 lg:px-4">
           <div className="flex items-center gap-3">
-            <div className="grid size-11 place-items-center rounded-2xl bg-teal-500 text-white shadow-lg shadow-teal-500/25">
-              <Wrench className="size-6" />
+            <div className="grid size-11 place-items-center rounded-2xl bg-teal-500 text-white shadow-lg shadow-teal-500/25 lg:size-10 lg:rounded-xl">
+              <Wrench className="size-6 lg:size-5" />
             </div>
             <div>
-              <p className="text-base font-bold leading-tight">Maintenance Request System (MRS)</p>
-              <p className="mt-1 text-sm text-slate-400">Maintenance Center</p>
+              <p className="text-base font-bold leading-tight lg:text-sm">Maintenance Request System (MRS)</p>
+              <p className="mt-1 text-sm text-slate-400 lg:mt-0.5 lg:text-xs">Maintenance Center</p>
             </div>
           </div>
           <button
@@ -161,8 +161,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6">
-          <p className="mb-3 px-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">เมนูหลัก</p>
+        <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6 lg:space-y-0.5 lg:overflow-y-hidden lg:px-3 lg:py-3">
+          <p className="mb-3 px-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-500 lg:mb-1">เมนูหลัก</p>
           {visibleDesktopNavigation.map(({ label, to, icon: Icon }) => (
             <NavLink
               key={label}
@@ -170,28 +170,28 @@ export function AppShell({ children }: { children: ReactNode }) {
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
                 cn(
-                  'group flex items-center gap-3 rounded-xl px-3 py-3.5 text-base font-semibold text-slate-300 transition',
+                  'group flex items-center gap-3 rounded-xl px-3 py-3.5 text-base font-semibold text-slate-300 transition lg:py-2 lg:text-sm',
                   isActive
                     ? 'bg-teal-500/15 text-teal-300 ring-1 ring-inset ring-teal-400/10'
                     : 'hover:bg-white/5 hover:text-white',
                 )
               }
             >
-              <Icon className="size-[22px] shrink-0" />
+              <Icon className="size-[22px] shrink-0 lg:size-5" />
               <span className="flex-1">{label}</span>
             </NavLink>
           ))}
         </nav>
 
-        <div className="border-t border-white/10 p-4">
-          <div className="rounded-2xl bg-white/5 p-3">
-            <p className="truncate text-base font-semibold">{user?.fullName}</p>
-            <p className="mt-0.5 truncate text-sm text-slate-400">
+        <div className="border-t border-white/10 p-4 lg:p-3">
+          <div className="rounded-2xl bg-white/5 p-3 lg:p-2.5">
+            <p className="truncate text-base font-semibold lg:text-sm">{user?.fullName}</p>
+            <p className="mt-0.5 truncate text-sm text-slate-400 lg:text-xs">
               {user?.role} · {user?.department}
             </p>
             <button
               onClick={handleLogout}
-              className="mt-3 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-slate-400 transition hover:bg-white/5 hover:text-white"
+              className="mt-3 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-slate-400 transition hover:bg-white/5 hover:text-white lg:mt-2 lg:py-1.5 lg:text-xs"
             >
               <LogOut className="size-4" /> ออกจากระบบ
             </button>
