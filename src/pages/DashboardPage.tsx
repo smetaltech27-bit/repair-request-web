@@ -293,7 +293,7 @@ export function DashboardPage() {
                 className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-2.5 text-[11px] outline-none transition placeholder:text-[10px] focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10 sm:h-11 sm:rounded-xl sm:pl-11 sm:pr-4 sm:text-sm sm:placeholder:text-sm lg:text-base lg:placeholder:text-base"
               />
             </label>
-            <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:gap-2 lg:pb-0">
+            <div className="flex items-center gap-0.5 overflow-x-auto pb-1 sm:gap-2 lg:pb-0">
               <Filter className="hidden size-4 shrink-0 text-slate-400 sm:block" />
               {repairStatusFilters.map((option) => (
                 <button
@@ -303,7 +303,7 @@ export function DashboardPage() {
                     setStatusFilter(option.value)
                     setRequestedPage(1)
                   }}
-                  className={`shrink-0 rounded-lg px-2 py-1.5 text-[10px] font-bold transition sm:rounded-xl sm:px-3.5 sm:py-2 sm:text-xs lg:text-sm ${
+                  className={`shrink-0 rounded-md px-1.5 py-1 text-[9px] font-bold transition sm:rounded-xl sm:px-3.5 sm:py-2 sm:text-xs lg:text-sm ${
                     statusFilter === option.value
                       ? 'bg-slate-900 text-white shadow-sm'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'

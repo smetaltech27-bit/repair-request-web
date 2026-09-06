@@ -29,7 +29,7 @@ const desktopNavigation = [
   { label: 'แจ้งซ่อมใหม่', to: '/requests/new', icon: Plus },
   { label: 'รออนุมัติ', to: '/approvals', icon: ClipboardCheck },
   { label: 'รอปิดงาน', to: '/completion', icon: Flag },
-  { label: 'รายการซ่อม/ปรับปรุง', to: '/requests', icon: ClipboardList },
+  { label: 'รายงานการซ่อม / ปรับปรุง', to: '/requests', icon: ClipboardList },
   { label: 'ตั้งค่า', to: '/settings', icon: Settings2 },
 ]
 

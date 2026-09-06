@@ -9,11 +9,15 @@ import { RequestsPage } from './RequestsPage'
 const { useRepairRequests } = vi.hoisted(() => ({
   useRepairRequests: vi.fn(),
 }))
+const { exportRepairRequestsToExcel } = vi.hoisted(() => ({
+  exportRepairRequestsToExcel: vi.fn(),
+}))
 const markRequestRead = vi.fn()
 
 vi.mock('../hooks/useRepairData', () => ({ useRepairRequests }))
+vi.mock('../lib/repairExport', () => ({ exportRepairRequestsToExcel }))
 
-function request(id: string, department: string): RepairRequest {
+function request(id: string, department: string, statusCode: 'pending_supervisor' | 'completed' = 'pending_supervisor'): RepairRequest {
   return {
     id,
     jobId: `REQ-${id}`,
@@ -23,8 +27,8 @@ function request(id: string, department: string): RepairRequest {
     department,
     machineId: `Machine ${id}`,
     issueDetails: `รายละเอียดอาการเสีย ${id}`,
-    statusCode: 'pending_supervisor',
-    status: 'รอหัวหน้างานอนุมัติ',
+    statusCode,
+    status: statusCode === 'completed' ? 'ซ่อมเสร็จเรียบร้อย (ปิดงาน)' : 'รอหัวหน้างานอนุมัติ',
     createdAt: '2026-09-04T02:00:00.000Z',
     updatedAt: '2026-09-04T02:00:00.000Z',
     actions: [],
@@ -45,8 +49,9 @@ function renderPage(entry = '/requests') {
 describe('RequestsPage', () => {
   beforeEach(() => {
     markRequestRead.mockReset()
+    exportRepairRequestsToExcel.mockReset()
     useRepairRequests.mockReturnValue({
-      requests: [request('001', 'Machine'), request('002', 'Accounting')],
+      requests: [request('001', 'Machine'), request('002', 'Accounting', 'completed')],
       isLoading: false,
       error: null,
       refresh: vi.fn(),
@@ -74,6 +79,19 @@ describe('RequestsPage', () => {
     expect(rows).toHaveLength(3)
     expect(within(rows[1]).getByText('REQ-001')).toBeInTheDocument()
     expect(within(rows[2]).getByText('REQ-002')).toBeInTheDocument()
+  })
+
+  it('exports every row remaining after the current search filter', async () => {
+    const user = userEvent.setup()
+    renderPage('/requests?status=pending')
+
+    await user.type(screen.getByRole('textbox', { name: 'ค้นหารายการ' }), '001')
+    await user.click(screen.getByRole('button', { name: 'Export Excel' }))
+
+    expect(exportRepairRequestsToExcel).toHaveBeenCalledTimes(1)
+    expect(exportRepairRequestsToExcel).toHaveBeenCalledWith([
+      expect.objectContaining({ jobId: 'REQ-001' }),
+    ])
   })
 
   it('opens the existing details modal from the row action', async () => {

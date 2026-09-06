@@ -93,8 +93,8 @@ export function NewRequestPage() {
             </div>
 
             <div>
-              <label htmlFor="machineId" className="mb-2 block text-sm font-bold text-slate-700 lg:text-base">เครื่องจักร / รหัสเครื่อง <span className="text-red-500">*</span></label>
-              <input id="machineId" placeholder="เช่น CNC YAMASAKI 2" className="form-control lg:text-base" {...register('machineId')} />
+              <label htmlFor="machineId" className="mb-2 block text-sm font-bold text-slate-700 lg:text-base">เครื่องจักร / รหัสเครื่อง / สถานที่ <span className="text-red-500">*</span></label>
+              <input id="machineId" placeholder="เช่น CNC YMZ, ตู้เชื่อม 01" className="form-control lg:text-base" {...register('machineId')} />
               {errors.machineId && <p className="form-error lg:text-sm">{errors.machineId.message}</p>}
             </div>
 
