@@ -170,7 +170,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
                 cn(
-                  'group flex items-center gap-3 rounded-xl px-3 py-3.5 text-base font-semibold text-slate-300 transition lg:py-2.5 lg:text-sm',
+                  'group flex items-center gap-3 rounded-xl px-3 py-3.5 text-base font-semibold text-slate-300 transition lg:py-2.5 lg:text-base',
                   isActive
                     ? 'bg-teal-500/15 text-teal-300 ring-1 ring-inset ring-teal-400/10'
                     : 'hover:bg-white/5 hover:text-white',
