@@ -129,8 +129,8 @@ export function RequestsPage() {
               เลื่อนซ้าย–ขวาเพื่อดูข้อมูลทุกคอลัมน์
             </p>
             <div className="overflow-x-auto overscroll-x-contain">
-              <table className="w-full min-w-[1280px] table-fixed text-left text-sm lg:text-base">
-                <thead className="bg-slate-50 text-xs font-bold text-slate-500 lg:text-sm">
+              <table className="w-full min-w-[1280px] table-fixed text-left text-sm">
+                <thead className="bg-slate-50 text-xs font-bold text-slate-500">
                   <tr>
                     <th scope="col" className="w-16 px-4 py-3 text-center">ลำดับ</th>
                     <th scope="col" className="w-40 px-4 py-3">รหัสแจ้งซ่อม</th>
@@ -153,13 +153,12 @@ export function RequestsPage() {
                       <td className="px-4 py-3.5"><p className="truncate font-semibold text-slate-700" title={request.machineId}>{request.machineId}</p></td>
                       <td className="px-4 py-3.5"><p className="truncate text-slate-600" title={request.issueDetails}>{request.issueDetails}</p></td>
                       <td className="px-4 py-3.5"><p className="truncate text-slate-600" title={request.requesterName}>{request.requesterName}</p></td>
-                      <td className="px-4 py-3.5"><StatusBadge status={request.status} className="whitespace-nowrap lg:text-sm" /></td>
+                      <td className="px-4 py-3.5"><StatusBadge status={request.status} className="whitespace-nowrap" /></td>
                       <td className="px-4 py-3.5 text-center">
                         <Button
                           type="button"
                           variant="secondary"
                           size="sm"
-                          className="lg:text-base"
                           onClick={() => setSelectedRequest(request)}
                           aria-label={`ดูรายละเอียด ${request.jobId}`}
                         >

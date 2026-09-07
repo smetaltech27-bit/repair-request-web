@@ -317,8 +317,8 @@ export function DashboardPage() {
         </div>
 
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[820px] text-left text-sm lg:text-base">
-            <thead className="bg-slate-50 text-xs font-bold text-slate-500 lg:text-sm">
+          <table className="w-full min-w-[820px] text-left text-sm">
+            <thead className="bg-slate-50 text-xs font-bold text-slate-500">
               <tr>
                 <th className="px-5 py-3">รหัสงาน</th>
                 <th className="px-5 py-3">แผนก</th>
@@ -334,10 +334,10 @@ export function DashboardPage() {
                   <td className="px-5 py-3.5 font-bold text-slate-900">{request.jobId}</td>
                   <td className="px-5 py-3.5 text-slate-600">{request.department}</td>
                   <td className="px-5 py-3.5 text-slate-600">{request.machineId}</td>
-                  <td className="px-5 py-3.5"><StatusBadge status={request.status} className="lg:text-sm" /></td>
+                  <td className="px-5 py-3.5"><StatusBadge status={request.status} /></td>
                   <td className="px-5 py-3.5 text-slate-500">{formatThaiDate(request.createdAt)}</td>
                   <td className="px-5 py-3.5 text-right">
-                    <Button variant="secondary" size="sm" className="lg:text-base" onClick={() => setSelectedRequest(request)}>ดูรายละเอียด</Button>
+                    <Button variant="secondary" size="sm" onClick={() => setSelectedRequest(request)}>ดูรายละเอียด</Button>
                   </td>
                 </tr>
               ))}
