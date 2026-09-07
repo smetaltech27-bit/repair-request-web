@@ -161,8 +161,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6 lg:space-y-0.5 lg:overflow-y-hidden lg:px-3 lg:py-3">
-          <p className="mb-3 px-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-500 lg:mb-1">เมนูหลัก</p>
+        <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6 lg:space-y-1 lg:overflow-y-hidden lg:px-3 lg:py-3">
+          <p className="mb-3 px-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-500 lg:mb-2">เมนูหลัก</p>
           {visibleDesktopNavigation.map(({ label, to, icon: Icon }) => (
             <NavLink
               key={label}
@@ -170,7 +170,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
                 cn(
-                  'group flex items-center gap-3 rounded-xl px-3 py-3.5 text-base font-semibold text-slate-300 transition lg:py-2 lg:text-sm',
+                  'group flex items-center gap-3 rounded-xl px-3 py-3.5 text-base font-semibold text-slate-300 transition lg:py-2.5 lg:text-sm',
                   isActive
                     ? 'bg-teal-500/15 text-teal-300 ring-1 ring-inset ring-teal-400/10'
                     : 'hover:bg-white/5 hover:text-white',
