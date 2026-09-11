@@ -72,6 +72,7 @@ interface RawRequestRow {
   total_cost: number | string | null
   created_at: string
   updated_at: string
+  approved_at: string | null
   closed_at: string | null
   actions: RawActionRow[] | null
   attachments: RawAttachmentRow[] | null
@@ -145,6 +146,7 @@ function mapRequest(row: RawRequestRow): RepairRequest {
     totalCost: row.total_cost === null ? undefined : Number(row.total_cost),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    approvedAt: row.approved_at ?? undefined,
     closedAt: row.closed_at ?? undefined,
     actions: (row.actions ?? []).map(mapAction).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
     attachments: (row.attachments ?? []).map(mapAttachment).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
@@ -158,7 +160,7 @@ export async function listRepairRequests() {
     .select(`
       id, job_id, requester_id, requester_name_snapshot, department_id,
       department_name_snapshot, machine_id, issue_details, status, total_cost,
-      created_at, updated_at, closed_at,
+      created_at, updated_at, approved_at, closed_at,
       actions:repair_request_actions (
         id, action, from_status, to_status, actor_name_snapshot, note, metadata, created_at
       ),

@@ -43,6 +43,7 @@ export interface RepairRequest {
   statusCode: RepairStatusCode
   createdAt: string
   updatedAt: string
+  approvedAt?: string
   closedAt?: string
   requesterId: string
   departmentId: string

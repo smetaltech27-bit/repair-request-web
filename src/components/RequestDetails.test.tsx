@@ -66,11 +66,12 @@ describe('RequestDetails image preview', () => {
 })
 
 describe('RequestDetails legacy approval history', () => {
-  it('shows every available imported comment with its workflow role', () => {
+  it('shows the real requester and available legacy timestamps without import-system text', () => {
     render(
       <RequestDetails
         request={{
           ...repairRequest,
+          approvedAt: '2026-08-25T03:29:00.000Z',
           actions: [{
             id: 'import-1',
             action: 'import',
@@ -92,11 +93,17 @@ describe('RequestDetails legacy approval history', () => {
       />,
     )
 
+    expect(screen.getAllByText('ผู้แจ้ง')).not.toHaveLength(0)
+    expect(screen.getByText(/^ผู้แจ้งทดสอบ · /)).toHaveTextContent('5/9/2026 09:00')
+    expect(screen.queryByText('นำเข้าข้อมูลเดิม')).not.toBeInTheDocument()
+    expect(screen.queryByText('ระบบนำเข้าข้อมูลเดิม')).not.toBeInTheDocument()
+    expect(screen.queryByText('ซิงก์ข้อมูลจริงล่าสุดจาก Sheet1')).not.toBeInTheDocument()
     expect(screen.getByText('ความคิดเห็นจากประวัติเดิม')).toBeInTheDocument()
     expect(screen.getByText('หัวหน้างาน')).toBeInTheDocument()
     expect(screen.getByText('ตรวจสอบแล้ว อนุมัติให้ซ่อม')).toBeInTheDocument()
     expect(screen.queryByText('ผู้จัดการฝ่าย')).not.toBeInTheDocument()
     expect(screen.getByText('ผู้จัดการโรงงาน')).toBeInTheDocument()
+    expect(screen.getByText(/^ผู้จัดการโรงงาน ก \(อนุมัติ\) · /)).toHaveTextContent('25/8/2026 10:29')
     expect(screen.getByText('อนุมัติงบซ่อม')).toBeInTheDocument()
     expect(screen.getByText('จัดซื้อ')).toBeInTheDocument()
     expect(screen.getByText('รับทราบและสั่งซื้อแล้ว')).toBeInTheDocument()

@@ -8,11 +8,11 @@ import { ImageLightbox } from './ImageLightbox'
 import { PrivateRepairImage } from './PrivateRepairImage'
 import { StatusBadge } from './ui/StatusBadge'
 
-function legacyHistoryItems(metadata: LegacyRepairActionMetadata) {
+function legacyHistoryItems(metadata: LegacyRepairActionMetadata, factoryManagerAt?: string) {
   return [
     { label: 'หัวหน้างาน', actor: metadata.supervisorInfo, note: metadata.supervisorNote },
     { label: 'ผู้จัดการฝ่าย', actor: metadata.departmentManagerInfo, note: metadata.departmentManagerNote },
-    { label: 'ผู้จัดการโรงงาน', actor: metadata.factoryManagerInfo, note: metadata.factoryManagerNote },
+    { label: 'ผู้จัดการโรงงาน', actor: metadata.factoryManagerInfo, note: metadata.factoryManagerNote, createdAt: factoryManagerAt },
     { label: 'จัดซื้อ', actor: metadata.purchasingInfo, note: metadata.purchasingNote },
     { label: 'ปิดงาน', actor: undefined, note: metadata.completionDetail },
   ].filter((item) => item.actor || item.note)
@@ -82,20 +82,31 @@ export function RequestDetails({
         <p className={cn('font-semibold text-slate-500', desktopReadable && 'lg:text-base')}>ลำดับการดำเนินการ</p>
         <div className="mt-3 space-y-4 border-l-2 border-teal-200 pl-4">
           {request.actions.map((action) => {
-            const importedHistory = action.legacyMetadata ? legacyHistoryItems(action.legacyMetadata) : []
+            const importedHistory = action.legacyMetadata
+              ? legacyHistoryItems(action.legacyMetadata, request.approvedAt)
+              : []
+            const isLegacyImport = action.action === 'import'
 
             return (
               <div key={action.id}>
-                <p className={cn('font-semibold text-slate-800', desktopReadable && 'lg:text-base')}>{repairActionLabels[action.action]}</p>
-                <p className={cn('mt-0.5 text-xs text-slate-500', desktopReadable && 'lg:text-sm')}>{action.actorName} · {formatThaiDate(action.createdAt)}</p>
-                {action.note && <p className={cn('mt-1 whitespace-pre-wrap text-sm text-slate-600', desktopReadable && 'lg:text-base')}>{action.note}</p>}
+                <p className={cn('font-semibold text-slate-800', desktopReadable && 'lg:text-base')}>
+                  {isLegacyImport ? 'ผู้แจ้ง' : repairActionLabels[action.action]}
+                </p>
+                <p className={cn('mt-0.5 text-xs text-slate-500', desktopReadable && 'lg:text-sm')}>
+                  {isLegacyImport ? request.requesterName : action.actorName} · {formatThaiDate(isLegacyImport ? request.createdAt : action.createdAt)}
+                </p>
+                {!isLegacyImport && action.note && <p className={cn('mt-1 whitespace-pre-wrap text-sm text-slate-600', desktopReadable && 'lg:text-base')}>{action.note}</p>}
                 {importedHistory.length > 0 && (
                   <div className={cn('mt-3 space-y-3 rounded-xl bg-slate-50 p-3', desktopReadable && 'lg:p-4')}>
                     <p className={cn('text-xs font-bold text-teal-700', desktopReadable && 'lg:text-sm')}>ความคิดเห็นจากประวัติเดิม</p>
                     {importedHistory.map((item) => (
                       <div key={item.label}>
                         <p className={cn('text-xs font-bold text-slate-700', desktopReadable && 'lg:text-sm')}>{item.label}</p>
-                        {item.actor && <p className={cn('mt-0.5 text-xs text-slate-500', desktopReadable && 'lg:text-sm')}>{item.actor}</p>}
+                        {item.actor && (
+                          <p className={cn('mt-0.5 text-xs text-slate-500', desktopReadable && 'lg:text-sm')}>
+                            {item.actor}{item.createdAt ? ` · ${formatThaiDate(item.createdAt)}` : ''}
+                          </p>
+                        )}
                         {item.note && <p className={cn('mt-1 whitespace-pre-wrap text-sm text-slate-700', desktopReadable && 'lg:text-base')}>{item.note}</p>}
                       </div>
                     ))}
