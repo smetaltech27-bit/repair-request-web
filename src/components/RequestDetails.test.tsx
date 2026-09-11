@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { formatThaiDate } from '../lib/utils'
 import type { RepairRequest } from '../types/repair'
 import { RequestDetails } from './RequestDetails'
 
@@ -94,7 +95,7 @@ describe('RequestDetails legacy approval history', () => {
     )
 
     expect(screen.getAllByText('ผู้แจ้ง')).not.toHaveLength(0)
-    expect(screen.getByText(/^ผู้แจ้งทดสอบ · /)).toHaveTextContent('5/9/2026 09:00')
+    expect(screen.getByText(`ผู้แจ้งทดสอบ · ${formatThaiDate(repairRequest.createdAt)}`)).toBeInTheDocument()
     expect(screen.queryByText('นำเข้าข้อมูลเดิม')).not.toBeInTheDocument()
     expect(screen.queryByText('ระบบนำเข้าข้อมูลเดิม')).not.toBeInTheDocument()
     expect(screen.queryByText('ซิงก์ข้อมูลจริงล่าสุดจาก Sheet1')).not.toBeInTheDocument()
@@ -103,7 +104,7 @@ describe('RequestDetails legacy approval history', () => {
     expect(screen.getByText('ตรวจสอบแล้ว อนุมัติให้ซ่อม')).toBeInTheDocument()
     expect(screen.queryByText('ผู้จัดการฝ่าย')).not.toBeInTheDocument()
     expect(screen.getByText('ผู้จัดการโรงงาน')).toBeInTheDocument()
-    expect(screen.getByText(/^ผู้จัดการโรงงาน ก \(อนุมัติ\) · /)).toHaveTextContent('25/8/2026 10:29')
+    expect(screen.getByText(`ผู้จัดการโรงงาน ก (อนุมัติ) · ${formatThaiDate('2026-08-25T03:29:00.000Z')}`)).toBeInTheDocument()
     expect(screen.getByText('อนุมัติงบซ่อม')).toBeInTheDocument()
     expect(screen.getByText('จัดซื้อ')).toBeInTheDocument()
     expect(screen.getByText('รับทราบและสั่งซื้อแล้ว')).toBeInTheDocument()
