@@ -3,6 +3,7 @@ import type {
   RepairActionCode,
   RepairAttachment,
   RepairDepartment,
+  LegacyRepairActionMetadata,
   RepairNotification,
   RepairRequest,
   RepairRequestAction,
@@ -43,6 +44,7 @@ interface RawActionRow {
   to_status: RepairStatusCode
   actor_name_snapshot: string
   note: string | null
+  metadata: Record<string, unknown> | null
   created_at: string
 }
 
@@ -80,6 +82,28 @@ function requireSupabase() {
   return supabase
 }
 
+function mapLegacyActionMetadata(metadata: Record<string, unknown> | null): LegacyRepairActionMetadata | undefined {
+  if (!metadata) return undefined
+
+  const readText = (key: string) => {
+    const value = metadata[key]
+    return typeof value === 'string' && value.trim() ? value.trim() : undefined
+  }
+  const mapped = {
+    supervisorInfo: readText('supervisor_info'),
+    supervisorNote: readText('supervisor_note'),
+    departmentManagerInfo: readText('department_manager_info'),
+    departmentManagerNote: readText('department_manager_note'),
+    factoryManagerInfo: readText('factory_manager_info'),
+    factoryManagerNote: readText('factory_manager_note'),
+    purchasingInfo: readText('purchasing_info'),
+    purchasingNote: readText('purchasing_note'),
+    completionDetail: readText('completion_detail'),
+  }
+
+  return Object.values(mapped).some(Boolean) ? mapped : undefined
+}
+
 function mapAction(row: RawActionRow): RepairRequestAction {
   return {
     id: row.id,
@@ -89,6 +113,7 @@ function mapAction(row: RawActionRow): RepairRequestAction {
     actorName: row.actor_name_snapshot,
     note: row.note ?? '',
     createdAt: row.created_at,
+    legacyMetadata: row.action === 'import' ? mapLegacyActionMetadata(row.metadata) : undefined,
   }
 }
 
@@ -135,7 +160,7 @@ export async function listRepairRequests() {
       department_name_snapshot, machine_id, issue_details, status, total_cost,
       created_at, updated_at, closed_at,
       actions:repair_request_actions (
-        id, action, from_status, to_status, actor_name_snapshot, note, created_at
+        id, action, from_status, to_status, actor_name_snapshot, note, metadata, created_at
       ),
       attachments:repair_request_attachments (
         id, kind, storage_path, legacy_drive_url, original_file_name,

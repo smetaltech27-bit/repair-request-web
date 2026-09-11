@@ -59,6 +59,19 @@ export interface RepairRequestAction {
   actorName: string
   note: string
   createdAt: string
+  legacyMetadata?: LegacyRepairActionMetadata
+}
+
+export interface LegacyRepairActionMetadata {
+  supervisorInfo?: string
+  supervisorNote?: string
+  departmentManagerInfo?: string
+  departmentManagerNote?: string
+  factoryManagerInfo?: string
+  factoryManagerNote?: string
+  purchasingInfo?: string
+  purchasingNote?: string
+  completionDetail?: string
 }
 
 export interface RepairAttachment {

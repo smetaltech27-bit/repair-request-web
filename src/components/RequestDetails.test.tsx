@@ -64,3 +64,43 @@ describe('RequestDetails image preview', () => {
     expect(screen.queryByRole('button', { name: /ดูรูปขนาดใหญ่/ })).not.toBeInTheDocument()
   })
 })
+
+describe('RequestDetails legacy approval history', () => {
+  it('shows every available imported comment with its workflow role', () => {
+    render(
+      <RequestDetails
+        request={{
+          ...repairRequest,
+          actions: [{
+            id: 'import-1',
+            action: 'import',
+            toStatus: 'completed',
+            actorName: 'ระบบนำเข้าข้อมูลเดิม',
+            note: 'ซิงก์ข้อมูลจริงล่าสุดจาก Sheet1',
+            createdAt: '2026-08-21T07:00:58.000Z',
+            legacyMetadata: {
+              supervisorInfo: 'หัวหน้า ก (อนุมัติ)',
+              supervisorNote: 'ตรวจสอบแล้ว อนุมัติให้ซ่อม',
+              factoryManagerInfo: 'ผู้จัดการโรงงาน ก (อนุมัติ)',
+              factoryManagerNote: 'อนุมัติงบซ่อม',
+              purchasingInfo: 'จัดซื้อ ก (รับทราบรายการ)',
+              purchasingNote: 'รับทราบและสั่งซื้อแล้ว',
+              completionDetail: 'ปิดงานโดย หัวหน้า ก: ซ่อมเรียบร้อยแล้ว',
+            },
+          }],
+        }}
+      />,
+    )
+
+    expect(screen.getByText('ความคิดเห็นจากประวัติเดิม')).toBeInTheDocument()
+    expect(screen.getByText('หัวหน้างาน')).toBeInTheDocument()
+    expect(screen.getByText('ตรวจสอบแล้ว อนุมัติให้ซ่อม')).toBeInTheDocument()
+    expect(screen.queryByText('ผู้จัดการฝ่าย')).not.toBeInTheDocument()
+    expect(screen.getByText('ผู้จัดการโรงงาน')).toBeInTheDocument()
+    expect(screen.getByText('อนุมัติงบซ่อม')).toBeInTheDocument()
+    expect(screen.getByText('จัดซื้อ')).toBeInTheDocument()
+    expect(screen.getByText('รับทราบและสั่งซื้อแล้ว')).toBeInTheDocument()
+    expect(screen.getByText('ปิดงาน')).toBeInTheDocument()
+    expect(screen.getByText('ปิดงานโดย หัวหน้า ก: ซ่อมเรียบร้อยแล้ว')).toBeInTheDocument()
+  })
+})
