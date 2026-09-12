@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HashRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -80,5 +80,24 @@ describe('CompletionPage', () => {
 
     expect(screen.getByAltText('ตัวอย่างรูปหลังซ่อม')).toHaveAttribute('src', 'blob:after-image-preview')
     expect(screen.getByText('เลือกแล้ว: after-repair.jpg')).toBeInTheDocument()
+  })
+
+  it('keeps the close form open when an outside interaction follows file selection', async () => {
+    const user = userEvent.setup()
+    render(<HashRouter><CompletionPage /></HashRouter>)
+    await user.click(screen.getByText('REQ-READY'))
+
+    const file = new File(['after repair'], 'android-after-repair.jpg', { type: 'image/jpeg' })
+    await user.upload(screen.getByLabelText('รูปหลังซ่อม'), file)
+
+    const overlay = document.querySelector('.modal-overlay')
+    expect(overlay).not.toBeNull()
+    expect(overlay).toHaveClass('modal-file-picker-overlay')
+    expect(screen.getByRole('dialog')).toHaveClass('modal-file-picker-panel')
+    fireEvent.pointerDown(overlay as Element)
+    fireEvent.click(overlay as Element)
+
+    expect(screen.getByRole('heading', { name: 'ปิดงานซ่อม' })).toBeInTheDocument()
+    expect(screen.getByAltText('ตัวอย่างรูปหลังซ่อม')).toBeInTheDocument()
   })
 })

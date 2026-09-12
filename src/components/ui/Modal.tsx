@@ -10,6 +10,8 @@ interface ModalProps {
   description?: string
   titleClassName?: string
   descriptionClassName?: string
+  preventOutsideDismiss?: boolean
+  mobileFilePickerSafe?: boolean
   children: ReactNode
   footer?: ReactNode
 }
@@ -21,15 +23,33 @@ export function Modal({
   description,
   titleClassName,
   descriptionClassName,
+  preventOutsideDismiss = false,
+  mobileFilePickerSafe = false,
   children,
   footer,
 }: ModalProps) {
+  const preventOutsideInteraction = preventOutsideDismiss
+    ? (event: Event) => event.preventDefault()
+    : undefined
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="modal-overlay fixed inset-0 z-50 bg-slate-950/55 backdrop-blur-sm" />
-        <div className="modal-positioner fixed inset-0 z-50 flex items-start justify-center overflow-hidden px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:items-center sm:p-6">
-          <Dialog.Content className="modal-panel flex max-h-[calc(100svh-2rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-white/60 bg-white shadow-2xl shadow-slate-950/25 focus:outline-none sm:max-h-[calc(100svh-3rem)]">
+        <Dialog.Overlay
+          className={cn(
+            'modal-overlay fixed inset-0 z-50 bg-slate-950/55 backdrop-blur-sm',
+            mobileFilePickerSafe && 'modal-file-picker-overlay',
+          )}
+        />
+        <div className="modal-positioner fixed inset-0 z-[51] flex items-start justify-center overflow-hidden px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:items-center sm:p-6">
+          <Dialog.Content
+            onPointerDownOutside={preventOutsideInteraction}
+            onInteractOutside={preventOutsideInteraction}
+            className={cn(
+              'modal-panel flex max-h-[calc(100svh-2rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-white/60 bg-white shadow-2xl shadow-slate-950/25 focus:outline-none sm:max-h-[calc(100svh-3rem)]',
+              mobileFilePickerSafe && 'modal-file-picker-panel',
+            )}
+          >
             <header className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
               <div>
                 <Dialog.Title className={cn('text-lg font-bold text-slate-950', titleClassName)}>{title}</Dialog.Title>

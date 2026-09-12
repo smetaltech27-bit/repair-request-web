@@ -147,6 +147,8 @@ export function CompletionPage() {
         onOpenChange={(open) => !open && closeModal()}
         title="ปิดงานซ่อม"
         description={selectedRequest ? `${selectedRequest.jobId} · ${selectedRequest.machineId}` : undefined}
+        preventOutsideDismiss
+        mobileFilePickerSafe
         footer={
           <Button className="w-full" variant="success" disabled={isSubmitting} onClick={() => void completeRequest()}>
             <Flag className="size-4" /> ยืนยันปิดงาน
