@@ -36,27 +36,27 @@ export function RequestDetails({
 
   return (
     <>
-      <div className={cn('space-y-5 text-sm', desktopReadable && 'lg:space-y-6 lg:text-base')}>
+      <div className={cn('space-y-6 text-base', desktopReadable && 'lg:space-y-7')}>
         <StatusBadge
           status={request.status}
-          className={desktopReadable ? 'lg:px-3 lg:py-1.5 lg:text-sm' : undefined}
+          className="px-3 py-1.5 text-sm"
         />
 
-      <div className={cn('grid gap-4 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2', desktopReadable && 'lg:gap-5 lg:p-5')}>
-        <div><p className={cn('text-xs font-semibold text-slate-500', desktopReadable && 'lg:text-sm')}>ผู้แจ้ง</p><p className="mt-1 font-bold text-slate-900">{request.requesterName}</p></div>
-        <div><p className={cn('text-xs font-semibold text-slate-500', desktopReadable && 'lg:text-sm')}>แผนก</p><p className="mt-1 font-bold text-slate-900">{request.department}</p></div>
-        <div><p className={cn('text-xs font-semibold text-slate-500', desktopReadable && 'lg:text-sm')}>วันที่แจ้ง</p><p className="mt-1 text-slate-700">{formatThaiDate(request.createdAt)}</p></div>
-        <div><p className={cn('text-xs font-semibold text-slate-500', desktopReadable && 'lg:text-sm')}>ค่าใช้จ่าย</p><p className="mt-1 text-slate-700">{formatCurrency(request.totalCost)}</p></div>
+      <div className={cn('grid gap-5 rounded-2xl bg-slate-50 p-5 sm:grid-cols-2', desktopReadable && 'lg:p-6')}>
+        <div><p className="text-sm font-bold text-slate-600">ผู้แจ้ง</p><p className="mt-1 text-base font-bold text-slate-950">{request.requesterName}</p></div>
+        <div><p className="text-sm font-bold text-slate-600">แผนก</p><p className="mt-1 text-base font-bold text-slate-950">{request.department}</p></div>
+        <div><p className="text-sm font-bold text-slate-600">วันที่แจ้ง</p><p className="mt-1 text-base text-slate-800">{formatThaiDate(request.createdAt)}</p></div>
+        <div><p className="text-sm font-bold text-slate-600">ค่าใช้จ่าย</p><p className="mt-1 text-base text-slate-800">{formatCurrency(request.totalCost)}</p></div>
       </div>
 
       <div>
-        <p className={cn('font-semibold text-slate-500', desktopReadable && 'lg:text-base')}>รายละเอียดปัญหา</p>
-        <p className={cn('mt-2 whitespace-pre-wrap leading-7 text-slate-700', desktopReadable && 'lg:text-base lg:leading-8')}>{request.issueDetails}</p>
+        <p className="text-base font-bold text-slate-600">รายละเอียดปัญหา</p>
+        <p className="mt-2 whitespace-pre-wrap text-base leading-7 text-slate-800">{request.issueDetails}</p>
       </div>
 
       {request.attachments.length > 0 && (
         <div>
-          <p className={cn('flex items-center gap-2 font-semibold text-slate-500', desktopReadable && 'lg:text-base')}><ImageIcon className={cn('size-4', desktopReadable && 'lg:size-5')} /> รูปภาพประกอบ</p>
+          <p className="flex items-center gap-2 text-base font-bold text-slate-600"><ImageIcon className="size-5" /> รูปภาพประกอบ</p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {request.attachments.map((attachment) => {
               const alt = `${attachment.kind === 'before' ? 'รูปก่อนซ่อม' : 'รูปหลังซ่อม'} ${request.jobId}`
@@ -68,7 +68,7 @@ export function RequestDetails({
                     alt={alt}
                     onPreview={enableImagePreview ? (src) => setPreviewImage({ src, alt }) : undefined}
                   />
-                  <figcaption className={cn('mt-1.5 text-center text-xs font-semibold text-slate-500', desktopReadable && 'lg:text-sm')}>
+                  <figcaption className="mt-2 text-center text-sm font-semibold text-slate-600">
                     {attachment.kind === 'before' ? 'ก่อนซ่อม' : 'หลังซ่อม'}
                   </figcaption>
                 </figure>
@@ -79,8 +79,8 @@ export function RequestDetails({
       )}
 
       <div>
-        <p className={cn('font-semibold text-slate-500', desktopReadable && 'lg:text-base')}>ลำดับการดำเนินการ</p>
-        <div className="mt-3 space-y-4 border-l-2 border-teal-200 pl-4">
+        <p className="text-base font-bold text-slate-600">ลำดับการดำเนินการ</p>
+        <div className="mt-3 space-y-5 border-l-2 border-teal-200 pl-4">
           {request.actions.map((action) => {
             const importedHistory = action.legacyMetadata
               ? legacyHistoryItems(action.legacyMetadata, request.approvedAt)
@@ -89,25 +89,25 @@ export function RequestDetails({
 
             return (
               <div key={action.id}>
-                <p className={cn('font-semibold text-slate-800', desktopReadable && 'lg:text-base')}>
+                <p className="text-base font-bold text-slate-900">
                   {isLegacyImport ? 'ผู้แจ้ง' : repairActionLabels[action.action]}
                 </p>
-                <p className={cn('mt-0.5 text-xs text-slate-500', desktopReadable && 'lg:text-sm')}>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
                   {isLegacyImport ? request.requesterName : action.actorName} · {formatThaiDate(isLegacyImport ? request.createdAt : action.createdAt)}
                 </p>
-                {!isLegacyImport && action.note && <p className={cn('mt-1 whitespace-pre-wrap text-sm text-slate-600', desktopReadable && 'lg:text-base')}>{action.note}</p>}
+                {!isLegacyImport && action.note && <p className="mt-1 whitespace-pre-wrap text-base leading-7 text-slate-700">{action.note}</p>}
                 {importedHistory.length > 0 && (
-                  <div className={cn('mt-3 space-y-3 rounded-xl bg-slate-50 p-3', desktopReadable && 'lg:p-4')}>
-                    <p className={cn('text-xs font-bold text-teal-700', desktopReadable && 'lg:text-sm')}>ความคิดเห็นจากประวัติเดิม</p>
+                  <div className="mt-3 space-y-4 rounded-xl bg-slate-50 p-4">
+                    <p className="text-sm font-bold text-teal-700">ความคิดเห็นจากประวัติเดิม</p>
                     {importedHistory.map((item) => (
                       <div key={item.label}>
-                        <p className={cn('text-xs font-bold text-slate-700', desktopReadable && 'lg:text-sm')}>{item.label}</p>
+                        <p className="text-sm font-bold text-slate-800">{item.label}</p>
                         {item.actor && (
-                          <p className={cn('mt-0.5 text-xs text-slate-500', desktopReadable && 'lg:text-sm')}>
+                          <p className="mt-1 text-sm leading-6 text-slate-600">
                             {item.actor}{item.createdAt ? ` · ${formatThaiDate(item.createdAt)}` : ''}
                           </p>
                         )}
-                        {item.note && <p className={cn('mt-1 whitespace-pre-wrap text-sm text-slate-700', desktopReadable && 'lg:text-base')}>{item.note}</p>}
+                        {item.note && <p className="mt-1 whitespace-pre-wrap text-base leading-7 text-slate-800">{item.note}</p>}
                       </div>
                     ))}
                   </div>
@@ -115,7 +115,7 @@ export function RequestDetails({
               </div>
             )
           })}
-          {request.actions.length === 0 && <p className={cn('text-xs text-slate-500', desktopReadable && 'lg:text-sm')}>ยังไม่มีประวัติการดำเนินการ</p>}
+          {request.actions.length === 0 && <p className="text-sm text-slate-600">ยังไม่มีประวัติการดำเนินการ</p>}
         </div>
         </div>
       </div>

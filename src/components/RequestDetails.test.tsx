@@ -64,6 +64,17 @@ describe('RequestDetails image preview', () => {
     expect(await screen.findByAltText('รูปก่อนซ่อม REQ-001')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /ดูรูปขนาดใหญ่/ })).not.toBeInTheDocument()
   })
+
+  it('uses readable typography for the detail content on every viewport', () => {
+    render(<RequestDetails request={repairRequest} />)
+
+    expect(screen.getByText('รอหัวหน้างาน')).toHaveClass('text-sm')
+    expect(screen.getByText('ผู้แจ้งทดสอบ')).toHaveClass('text-base')
+    expect(screen.getByText('วันที่แจ้ง')).toHaveClass('text-sm', 'font-bold')
+    expect(screen.getAllByText('รายละเอียดปัญหา')[0]).toHaveClass('text-base', 'font-bold')
+    expect(screen.getByText('ยังไม่มีประวัติการดำเนินการ')).toHaveClass('text-sm')
+    expect(screen.getByText('ก่อนซ่อม')).toHaveClass('text-sm')
+  })
 })
 
 describe('RequestDetails legacy approval history', () => {
@@ -100,8 +111,10 @@ describe('RequestDetails legacy approval history', () => {
     expect(screen.queryByText('ระบบนำเข้าข้อมูลเดิม')).not.toBeInTheDocument()
     expect(screen.queryByText('ซิงก์ข้อมูลจริงล่าสุดจาก Sheet1')).not.toBeInTheDocument()
     expect(screen.getByText('ความคิดเห็นจากประวัติเดิม')).toBeInTheDocument()
+    expect(screen.getByText('ความคิดเห็นจากประวัติเดิม')).toHaveClass('text-sm')
     expect(screen.getByText('หัวหน้างาน')).toBeInTheDocument()
     expect(screen.getByText('ตรวจสอบแล้ว อนุมัติให้ซ่อม')).toBeInTheDocument()
+    expect(screen.getByText('ตรวจสอบแล้ว อนุมัติให้ซ่อม')).toHaveClass('text-base', 'leading-7')
     expect(screen.queryByText('ผู้จัดการฝ่าย')).not.toBeInTheDocument()
     expect(screen.getByText('ผู้จัดการโรงงาน')).toBeInTheDocument()
     expect(screen.getByText(`ผู้จัดการโรงงาน ก (อนุมัติ) · ${formatThaiDate('2026-08-25T03:29:00.000Z')}`)).toBeInTheDocument()
