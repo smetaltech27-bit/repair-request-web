@@ -11,6 +11,16 @@ const statusStyles: Record<RepairStatus, string> = {
   'ไม่อนุมัติ (ตีกลับ)': 'bg-red-50 text-red-700 ring-red-600/15',
 }
 
+const solidStatusStyles: Record<RepairStatus, string> = {
+  'รอหัวหน้างานอนุมัติ': 'bg-amber-400 text-amber-950 ring-amber-500/30',
+  'รอผู้จัดการฝ่ายอนุมัติ': 'bg-orange-600 text-white ring-orange-700/30',
+  'รอผู้จัดการโรงงานอนุมัติ': 'bg-violet-600 text-white ring-violet-700/30',
+  'รอจัดซื้อดำเนินการ': 'bg-sky-600 text-white ring-sky-700/30',
+  'กำลังดำเนินการจัดซื้อ': 'bg-emerald-600 text-white ring-emerald-700/30',
+  'ซ่อมเสร็จเรียบร้อย (ปิดงาน)': 'bg-teal-600 text-white ring-teal-700/30',
+  'ไม่อนุมัติ (ตีกลับ)': 'bg-red-600 text-white ring-red-700/30',
+}
+
 const shortLabels: Record<RepairStatus, string> = {
   'รอหัวหน้างานอนุมัติ': 'รอหัวหน้างาน',
   'รอผู้จัดการฝ่ายอนุมัติ': 'รอผู้จัดการฝ่าย',
@@ -21,12 +31,20 @@ const shortLabels: Record<RepairStatus, string> = {
   'ไม่อนุมัติ (ตีกลับ)': 'ตีกลับ',
 }
 
-export function StatusBadge({ status, className }: { status: RepairStatus; className?: string }) {
+export function StatusBadge({
+  status,
+  className,
+  variant = 'soft',
+}: {
+  status: RepairStatus
+  className?: string
+  variant?: 'soft' | 'solid'
+}) {
   return (
     <span
       className={cn(
         'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset',
-        statusStyles[status],
+        variant === 'solid' ? solidStatusStyles[status] : statusStyles[status],
         className,
       )}
     >

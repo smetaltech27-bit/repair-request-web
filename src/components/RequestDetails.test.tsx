@@ -68,10 +68,10 @@ describe('RequestDetails image preview', () => {
   it('uses readable typography for the detail content on every viewport', () => {
     render(<RequestDetails request={repairRequest} />)
 
-    expect(screen.getByText('รอหัวหน้างาน')).toHaveClass('text-sm')
+    expect(screen.getByText('รอหัวหน้างาน')).toHaveClass('w-full', 'bg-amber-400', 'text-base')
     expect(screen.getByText('ผู้แจ้งทดสอบ')).toHaveClass('text-base')
     expect(screen.getByText('วันที่แจ้ง')).toHaveClass('text-sm', 'font-bold')
-    expect(screen.getAllByText('รายละเอียดปัญหา')[0]).toHaveClass('text-base', 'font-bold')
+    expect(screen.getAllByText('รายละเอียดปัญหา')[0]).toHaveClass('bg-teal-600', 'text-base', 'font-bold', 'text-white')
     expect(screen.getByText('ยังไม่มีประวัติการดำเนินการ')).toHaveClass('text-sm')
     expect(screen.getByText('ก่อนซ่อม')).toHaveClass('text-sm')
   })
@@ -123,5 +123,9 @@ describe('RequestDetails legacy approval history', () => {
     expect(screen.getByText('รับทราบและสั่งซื้อแล้ว')).toBeInTheDocument()
     expect(screen.getByText('ปิดงาน')).toBeInTheDocument()
     expect(screen.getByText('ปิดงานโดย หัวหน้า ก: ซ่อมเรียบร้อยแล้ว')).toBeInTheDocument()
+    expect(document.querySelector('[data-history-role="หัวหน้างาน"]')).toHaveClass('border-l-amber-400', 'bg-amber-50/80')
+    expect(document.querySelector('[data-history-role="ผู้จัดการโรงงาน"]')).toHaveClass('border-l-violet-500', 'bg-violet-50/80')
+    expect(document.querySelector('[data-history-role="จัดซื้อ"]')).toHaveClass('border-l-sky-500', 'bg-sky-50/80')
+    expect(document.querySelector('[data-history-role="ปิดงาน"]')).toHaveClass('border-l-teal-500', 'bg-teal-50/80')
   })
 })
