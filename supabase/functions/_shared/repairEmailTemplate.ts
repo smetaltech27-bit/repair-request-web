@@ -4,6 +4,7 @@ export interface RepairEmailAction {
   actorRole?: 'employee' | 'supervisor' | 'department_manager' | 'factory_manager' | 'purchasing' | null;
   note?: string | null;
   createdAt?: string | null;
+  legacyMetadata?: Record<string, unknown> | null;
 }
 
 export interface RepairEmailTemplateInput {
@@ -155,8 +156,49 @@ function getStageContent(input: RepairEmailTemplateInput): StageContent {
   };
 }
 
+function legacyMetadataText(metadata: Record<string, unknown>, key: string) {
+  const value = metadata[key];
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function legacyActorName(value: string) {
+  return value.replace(/\s*\((?:อนุมัติ|รับทราบ(?:รายการ)?)\)\s*$/u, '').trim();
+}
+
 function relevantHistory(actions: RepairEmailAction[]) {
-  return actions.filter((item) => item.action === 'approve' || item.action === 'acknowledge');
+  const currentHistory = actions.filter(
+    (item) => item.action === 'approve' || item.action === 'acknowledge',
+  );
+  const rolesWithCurrentHistory = new Set(
+    currentHistory.map((item) => item.actorRole).filter(Boolean),
+  );
+  const legacyHistory: RepairEmailAction[] = [];
+  const legacyRoles = [
+    { role: 'supervisor', actorKey: 'supervisor_info', noteKey: 'supervisor_note', action: 'approve' },
+    { role: 'department_manager', actorKey: 'department_manager_info', noteKey: 'department_manager_note', action: 'approve' },
+    { role: 'factory_manager', actorKey: 'factory_manager_info', noteKey: 'factory_manager_note', action: 'approve' },
+    { role: 'purchasing', actorKey: 'purchasing_info', noteKey: 'purchasing_note', action: 'acknowledge' },
+  ] as const;
+
+  for (const importedAction of actions) {
+    if (importedAction.action !== 'import' || !importedAction.legacyMetadata) continue;
+    for (const legacyRole of legacyRoles) {
+      if (rolesWithCurrentHistory.has(legacyRole.role)) continue;
+      const actor = legacyMetadataText(importedAction.legacyMetadata, legacyRole.actorKey);
+      const note = legacyMetadataText(importedAction.legacyMetadata, legacyRole.noteKey);
+      if (!actor && !note) continue;
+      legacyHistory.push({
+        action: legacyRole.action,
+        actorName: legacyActorName(actor) || '-',
+        actorRole: legacyRole.role,
+        note,
+        createdAt: importedAction.createdAt,
+      });
+      rolesWithCurrentHistory.add(legacyRole.role);
+    }
+  }
+
+  return [...legacyHistory, ...currentHistory];
 }
 
 function actionStateLabel(action: RepairEmailAction['action']) {

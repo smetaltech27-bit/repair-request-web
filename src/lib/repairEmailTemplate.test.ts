@@ -56,6 +56,62 @@ describe('repair email template', () => {
     expect(email.htmlBody).toContain('ทดสอบแล้ว')
   })
 
+  it('includes missing legacy supervisor history without duplicating current workflow roles', () => {
+    const email = buildRepairEmail({
+      appUrl: 'https://example.com/repair',
+      notificationBody: 'ปิดงานแล้ว',
+      jobId: 'REQ-260826-031',
+      requesterName: 'สถาพร แก้วสา',
+      departmentName: 'Machine',
+      machineId: 'MA1806001',
+      issueDetails: 'มอเตอร์ปั๊มเศษลูกปืนแตก',
+      repairStatus: 'completed',
+      actorName: 'พงษ์ศักดิ์ บุนนาค',
+      actionNote: 'ดำเนินการเปลี่ยนแล้วเรียบร้อย ใช้งานได้ตามปกติ',
+      actions: [
+        {
+          action: 'import',
+          actorName: 'ระบบนำเข้าข้อมูลเดิม',
+          createdAt: '2026-08-26T03:37:00.000Z',
+          legacyMetadata: {
+            supervisor_info: 'สุริโย พุ่มจำปา (อนุมัติ)',
+            supervisor_note: 'อนุมัติ',
+            department_manager_info: 'ผู้จัดการฝ่ายเดิม (อนุมัติ)',
+            department_manager_note: 'ข้อมูลเดิมที่ต้องไม่แสดงซ้ำ',
+          },
+        },
+        {
+          action: 'approve',
+          actorName: 'พงษ์ศักดิ์ บุนนาค',
+          actorRole: 'department_manager',
+          note: 'Vendor เสนอราคาซ่อมและเปลี่ยนอุปกรณ์ทั้งชุดตามใบเสนอราคา 19,600 บาท',
+        },
+        {
+          action: 'approve',
+          actorName: 'ธีรยุทธ ฤชุภูมิรัตน์',
+          actorRole: 'factory_manager',
+          note: 'OK',
+        },
+        {
+          action: 'acknowledge',
+          actorName: 'ศิวพร อนันตะสุข',
+          actorRole: 'purchasing',
+          note: 'รับทราบค่ะ',
+        },
+      ],
+    })
+
+    expect(email.textBody).toContain('หัวหน้างาน: สุริโย พุ่มจำปา (อนุมัติ)')
+    expect(email.textBody).toContain('รายละเอียด: อนุมัติ')
+    expect(email.htmlBody).toContain('<strong>หัวหน้างาน:</strong> สุริโย พุ่มจำปา (อนุมัติ)')
+    expect(email.textBody).toContain('ผู้จัดการฝ่าย: พงษ์ศักดิ์ บุนนาค (อนุมัติ)')
+    expect(email.textBody).toContain('Vendor เสนอราคาซ่อมและเปลี่ยนอุปกรณ์ทั้งชุดตามใบเสนอราคา 19,600 บาท')
+    expect(email.textBody).not.toContain('ผู้จัดการฝ่ายเดิม')
+    expect(email.textBody).not.toContain('ข้อมูลเดิมที่ต้องไม่แสดงซ้ำ')
+    expect(email.textBody.match(/หัวหน้างาน:/g)).toHaveLength(1)
+    expect(email.textBody.match(/ผู้จัดการฝ่าย:/g)).toHaveLength(1)
+  })
+
   it.each([
     ['pending_supervisor', '🔔 มีรายการแจ้งซ่อมใหม่รอดำเนินการ:', 'เรียน หัวหน้างานแผนก Machine'],
     ['pending_department_manager', '🔔 รออนุมัติ (ผู้จัดการฝ่าย):', 'เรียน ผู้จัดการฝ่าย MA'],

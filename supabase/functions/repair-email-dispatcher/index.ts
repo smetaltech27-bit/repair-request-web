@@ -25,6 +25,7 @@ interface RepairActionRow {
   actor_name_snapshot: string;
   actor_role_snapshot: RepairEmailAction['actorRole'];
   note: string | null;
+  metadata: Record<string, unknown> | null;
   created_at: string;
 }
 
@@ -177,7 +178,7 @@ Deno.serve(async (request) => {
     const [actionsResult, attachmentsResult, recipientsResult] = await Promise.all([
       admin
         .from('repair_request_actions')
-        .select('request_id,action,actor_name_snapshot,actor_role_snapshot,note,created_at')
+        .select('request_id,action,actor_name_snapshot,actor_role_snapshot,note,metadata,created_at')
         .in('request_id', requestIds)
         .order('created_at', { ascending: true }),
       admin
@@ -203,6 +204,7 @@ Deno.serve(async (request) => {
         actorRole: row.actor_role_snapshot,
         note: row.note,
         createdAt: row.created_at,
+        legacyMetadata: row.action === 'import' ? row.metadata : undefined,
       });
       actionsByRequest.set(row.request_id, actions);
     }
