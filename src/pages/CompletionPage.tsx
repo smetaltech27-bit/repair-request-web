@@ -43,9 +43,11 @@ export function CompletionPage() {
   }, [afterImagePreviewUrl])
 
   function selectAfterImage(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0] ?? null
+    const input = event.currentTarget
+    const file = input.files?.[0] ?? null
     setAfterImage(file)
     setAfterImagePreviewUrl(file ? URL.createObjectURL(file) : '')
+    window.requestAnimationFrame(() => input.blur())
   }
 
   function closeModal() {
@@ -165,7 +167,7 @@ export function CompletionPage() {
               </div>
               <div>
                 <p className="mb-2 text-sm font-bold text-slate-700">รูปหลังซ่อม</p>
-                <label htmlFor="completion-after-image" className="flex min-h-32 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-teal-200 bg-white text-center transition hover:border-teal-400 hover:bg-teal-50/50">
+                <label htmlFor="completion-after-image" className="relative flex min-h-32 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-teal-200 bg-white text-center transition hover:border-teal-400 hover:bg-teal-50/50 focus-within:border-teal-400 focus-within:ring-4 focus-within:ring-teal-100">
                   {afterImagePreviewUrl ? (
                     <div className="relative w-full">
                       <img src={afterImagePreviewUrl} alt="ตัวอย่างรูปหลังซ่อม" className="h-44 w-full bg-slate-100 object-contain" />
@@ -180,8 +182,15 @@ export function CompletionPage() {
                       <span className="mt-1 text-xs text-slate-500">JPG, PNG หรือ WebP</span>
                     </span>
                   )}
+                  <input
+                    id="completion-after-image"
+                    aria-label="รูปหลังซ่อม"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={selectAfterImage}
+                    className="absolute inset-0 size-full cursor-pointer opacity-0"
+                  />
                 </label>
-                <input id="completion-after-image" aria-label="รูปหลังซ่อม" type="file" accept="image/jpeg,image/png,image/webp" onChange={selectAfterImage} className="sr-only" />
                 {afterImage && <p className="mt-2 truncate text-xs font-semibold text-teal-700">เลือกแล้ว: {afterImage.name}</p>}
               </div>
             </div>

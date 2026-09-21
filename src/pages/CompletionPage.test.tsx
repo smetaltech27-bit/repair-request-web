@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HashRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -75,11 +75,16 @@ describe('CompletionPage', () => {
     render(<HashRouter><CompletionPage /></HashRouter>)
     await user.click(screen.getByText('REQ-READY'))
 
+    const input = screen.getByLabelText('รูปหลังซ่อม')
     const file = new File(['after repair'], 'after-repair.jpg', { type: 'image/jpeg' })
-    await user.upload(screen.getByLabelText('รูปหลังซ่อม'), file)
+    await user.upload(input, file)
 
     expect(screen.getByAltText('ตัวอย่างรูปหลังซ่อม')).toHaveAttribute('src', 'blob:after-image-preview')
     expect(screen.getByText('เลือกแล้ว: after-repair.jpg')).toBeInTheDocument()
+    expect(input).toHaveClass('absolute', 'inset-0', 'size-full', 'opacity-0')
+    expect(input).not.toHaveClass('sr-only')
+    expect(input.closest('label')).toHaveClass('relative', 'focus-within:ring-4')
+    await waitFor(() => expect(input).not.toHaveFocus())
   })
 
   it('keeps the close form open when an outside interaction follows file selection', async () => {
