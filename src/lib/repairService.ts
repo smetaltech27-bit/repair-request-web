@@ -9,6 +9,8 @@ import type {
   RepairRequestAction,
   RepairStatus,
   RepairStatusCode,
+  SettingsApprovalComment,
+  SettingsApprovalCommentUpdate,
   SettingsRepairRequest,
   SettingsEmployee,
   SettingsEmployeeInput,
@@ -336,6 +338,17 @@ interface RawSettingsUnlockResult {
   retry_after_seconds?: number
 }
 
+interface RawSettingsApprovalCommentRow {
+  source: SettingsApprovalComment['source']
+  action_id: string
+  step_code: SettingsApprovalComment['stepCode']
+  step_label: string
+  actor_name: string | null
+  decision: SettingsApprovalComment['decision']
+  note: string | null
+  created_at: string
+}
+
 function throwSettingsError(error: { message?: string } | null) {
   if (!error) return
   if (error.message?.includes('SETTINGS_SESSION_EXPIRED')) {
@@ -384,6 +397,26 @@ export async function listSettingsRepairRequests(sessionToken: string) {
   }))
 }
 
+export async function listSettingsApprovalComments(sessionToken: string, requestId: string) {
+  const client = requireSupabase()
+  const { data, error } = await client.rpc('list_repair_settings_approval_comments', {
+    p_session_token: sessionToken,
+    p_request_id: requestId,
+  })
+  throwSettingsError(error)
+  return (data as RawSettingsApprovalCommentRow[]).map((row): SettingsApprovalComment => ({
+    key: `${row.source}:${row.action_id}:${row.step_code}`,
+    source: row.source,
+    actionId: row.action_id,
+    stepCode: row.step_code,
+    stepLabel: row.step_label,
+    actorName: row.actor_name ?? undefined,
+    decision: row.decision,
+    note: row.note ?? '',
+    createdAt: row.created_at,
+  }))
+}
+
 export async function updateSettingsRepairRequest(input: {
   sessionToken: string
   requestId: string
@@ -392,9 +425,10 @@ export async function updateSettingsRepairRequest(input: {
   issueDetails: string
   statusCode: RepairStatusCode
   totalCost?: number
+  approvalComments: SettingsApprovalCommentUpdate[]
 }) {
   const client = requireSupabase()
-  const { error } = await client.rpc('update_repair_settings_request', {
+  const { error } = await client.rpc('update_repair_settings_request_with_comments', {
     p_session_token: input.sessionToken,
     p_request_id: input.requestId,
     p_department_id: input.departmentId,
@@ -402,6 +436,12 @@ export async function updateSettingsRepairRequest(input: {
     p_issue_details: input.issueDetails,
     p_status: input.statusCode,
     p_total_cost: input.totalCost ?? null,
+    p_approval_comments: input.approvalComments.map((comment) => ({
+      source: comment.source,
+      action_id: comment.actionId,
+      step_code: comment.stepCode,
+      note: comment.note,
+    })),
   })
   throwSettingsError(error)
 }

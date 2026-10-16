@@ -128,6 +128,28 @@ export interface SettingsRepairRequest {
   deletedByName?: string
 }
 
+export type SettingsApprovalCommentSource = 'action' | 'legacy'
+export type SettingsApprovalStepCode = 'supervisor' | 'department_manager' | 'factory_manager'
+
+export interface SettingsApprovalComment {
+  key: string
+  source: SettingsApprovalCommentSource
+  actionId: string
+  stepCode: SettingsApprovalStepCode
+  stepLabel: string
+  actorName?: string
+  decision: 'approve' | 'reject' | 'import'
+  note: string
+  createdAt: string
+}
+
+export interface SettingsApprovalCommentUpdate {
+  source: SettingsApprovalCommentSource
+  actionId: string
+  stepCode: SettingsApprovalStepCode
+  note: string
+}
+
 export interface SettingsEmployee {
   id: string
   legacyUid?: string

@@ -28,6 +28,7 @@ import { StatusBadge } from '../components/ui/StatusBadge'
 import {
   changeRepairSettingsPassword,
   listDepartments,
+  listSettingsApprovalComments,
   listSettingsRepairRequests,
   repairStatusLabels,
   restoreSettingsRepairRequest,
@@ -45,7 +46,7 @@ import {
   type SettingsUnlockForm,
 } from '../lib/settingsValidation'
 import { formatThaiDate } from '../lib/utils'
-import type { RepairDepartment, SettingsRepairRequest } from '../types/repair'
+import type { RepairDepartment, SettingsApprovalComment, SettingsRepairRequest } from '../types/repair'
 
 function isExpiredSettingsError(error: unknown) {
   return error instanceof Error && error.message.includes('Session หมดอายุ')
@@ -199,12 +200,22 @@ function EditRequestModal({
   onSaved: () => Promise<void>
   onSessionExpired: () => void
 }) {
+  const [commentsState, setCommentsState] = useState<{
+    requestId: string
+    comments: SettingsApprovalComment[]
+    error: string
+  }>({ requestId: '', comments: [], error: '' })
+  const [commentsReloadKey, setCommentsReloadKey] = useState(0)
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<SettingsRequestForm>({ resolver: zodResolver(settingsRequestSchema) })
+  const commentsMatchRequest = Boolean(request) && commentsState.requestId === request?.id
+  const approvalComments = commentsMatchRequest ? commentsState.comments : []
+  const commentsError = commentsMatchRequest ? commentsState.error : ''
+  const commentsLoading = Boolean(request) && !commentsMatchRequest
 
   useEffect(() => {
     if (request) {
@@ -218,6 +229,40 @@ function EditRequestModal({
     }
   }, [request, reset])
 
+  useEffect(() => {
+    if (!request) return
+
+    let active = true
+    listSettingsApprovalComments(sessionToken, request.id)
+      .then((comments) => {
+        if (active) setCommentsState({ requestId: request.id, comments, error: '' })
+      })
+      .catch((error) => {
+        if (!active) return
+        if (isExpiredSettingsError(error)) onSessionExpired()
+        setCommentsState({ requestId: request.id, comments: [], error: errorText(error) })
+      })
+
+    return () => {
+      active = false
+    }
+  }, [commentsReloadKey, onSessionExpired, request, sessionToken])
+
+  function changeApprovalComment(key: string, note: string) {
+    if (!request) return
+    setCommentsState((state) => ({
+      ...state,
+      comments: state.comments.map((comment) => (
+        comment.key === key ? { ...comment, note } : comment
+      )),
+    }))
+  }
+
+  function reloadApprovalComments() {
+    setCommentsState({ requestId: '', comments: [], error: '' })
+    setCommentsReloadKey((value) => value + 1)
+  }
+
   async function submit(values: SettingsRequestForm) {
     if (!request) return
     try {
@@ -229,6 +274,12 @@ function EditRequestModal({
         issueDetails: values.issueDetails,
         statusCode: values.statusCode,
         totalCost: values.totalCost.trim() === '' ? undefined : Number(values.totalCost),
+        approvalComments: approvalComments.map((comment) => ({
+          source: comment.source,
+          actionId: comment.actionId,
+          stepCode: comment.stepCode,
+          note: comment.note,
+        })),
       })
       toast.success(`บันทึก ${request.jobId} เรียบร้อยแล้ว`)
       onClose()
@@ -248,7 +299,7 @@ function EditRequestModal({
       footer={
         <div className="grid grid-cols-2 gap-3">
           <Button type="button" variant="secondary" onClick={onClose}>ยกเลิก</Button>
-          <Button type="submit" form="settings-edit-request-form" disabled={isSubmitting}>
+          <Button type="submit" form="settings-edit-request-form" disabled={isSubmitting || commentsLoading || Boolean(commentsError)}>
             {isSubmitting ? 'กำลังบันทึก…' : 'บันทึกการแก้ไข'}
           </Button>
         </div>
@@ -291,8 +342,61 @@ function EditRequestModal({
               {errors.totalCost && <p className="form-error">{errors.totalCost.message}</p>}
             </div>
           </div>
+          <section className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Comment ของผู้อนุมัติแต่ละ Step</h3>
+              <p className="mt-1 text-xs leading-5 text-slate-500">แก้ได้เฉพาะข้อความ โดยชื่อผู้อนุมัติ ผลการพิจารณา และเวลาจะคงเดิม</p>
+            </div>
+
+            {commentsLoading && <p className="mt-4 text-sm text-slate-500">กำลังโหลด Comment…</p>}
+
+            {!commentsLoading && commentsError && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                <p>โหลด Comment ไม่สำเร็จ: {commentsError}</p>
+                <Button type="button" variant="secondary" className="mt-3" onClick={reloadApprovalComments}>
+                  ลองโหลดอีกครั้ง
+                </Button>
+              </div>
+            )}
+
+            {!commentsLoading && !commentsError && approvalComments.length === 0 && (
+              <p className="mt-4 rounded-xl border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-500">
+                รายการนี้ยังไม่มี Comment จากขั้นอนุมัติ
+              </p>
+            )}
+
+            {!commentsLoading && !commentsError && approvalComments.length > 0 && (
+              <div className="mt-4 space-y-4">
+                {approvalComments.map((comment) => (
+                  <div key={comment.key} className="rounded-xl border border-slate-200 bg-white p-3">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <label htmlFor={`approval-comment-${comment.key}`} className="block text-sm font-bold text-slate-800">
+                          {comment.stepLabel}
+                        </label>
+                        <p className="mt-1 text-xs leading-5 text-slate-500">
+                          {comment.actorName || 'ไม่พบชื่อผู้อนุมัติ'} · {comment.decision === 'approve' ? 'อนุมัติ' : comment.decision === 'reject' ? 'ตีกลับ' : 'ประวัติเดิม'}
+                          {comment.createdAt ? ` · ${formatThaiDate(comment.createdAt)}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <textarea
+                      id={`approval-comment-${comment.key}`}
+                      aria-label={`Comment ${comment.stepLabel}`}
+                      rows={3}
+                      maxLength={5000}
+                      value={comment.note}
+                      onChange={(event) => changeApprovalComment(comment.key, event.target.value)}
+                      className="form-control mt-3 min-h-24 resize-y py-3"
+                      placeholder="ระบุ Comment ของผู้อนุมัติ"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
           <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-sky-900">
-            Job ID, ผู้แจ้ง และประวัติการอนุมัติจะไม่ถูกเปลี่ยน เพื่อรักษาหลักฐานเดิมของรายการ
+            Job ID, ผู้แจ้ง, ชื่อผู้อนุมัติ, ผลการพิจารณา และเวลาของแต่ละ Step จะไม่ถูกเปลี่ยน เพื่อรักษาหลักฐานเดิมของรายการ
           </div>
         </form>
       )}

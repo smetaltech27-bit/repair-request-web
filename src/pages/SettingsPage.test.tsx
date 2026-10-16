@@ -3,11 +3,20 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SettingsPage } from './SettingsPage'
 
-const { unlockRepairSettings, listSettingsRepairRequests, listDepartments, listSettingsEmployees } = vi.hoisted(() => ({
+const {
+  unlockRepairSettings,
+  listSettingsRepairRequests,
+  listSettingsApprovalComments,
+  listDepartments,
+  listSettingsEmployees,
+  updateSettingsRepairRequest,
+} = vi.hoisted(() => ({
   unlockRepairSettings: vi.fn(),
   listSettingsRepairRequests: vi.fn(),
+  listSettingsApprovalComments: vi.fn(),
   listDepartments: vi.fn(),
   listSettingsEmployees: vi.fn(),
+  updateSettingsRepairRequest: vi.fn(),
 }))
 
 vi.mock('../auth/AuthContext', () => ({
@@ -26,9 +35,10 @@ vi.mock('../lib/repairService', () => ({
   },
   unlockRepairSettings,
   listSettingsRepairRequests,
+  listSettingsApprovalComments,
   listDepartments,
   changeRepairSettingsPassword: vi.fn(),
-  updateSettingsRepairRequest: vi.fn(),
+  updateSettingsRepairRequest,
   softDeleteSettingsRepairRequest: vi.fn(),
   restoreSettingsRepairRequest: vi.fn(),
   listSettingsEmployees,
@@ -56,6 +66,31 @@ describe('SettingsPage', () => {
       createdAt: '2026-09-03T00:00:00.000Z',
       updatedAt: '2026-09-03T00:00:00.000Z',
     }])
+    listSettingsApprovalComments.mockResolvedValue([
+      {
+        key: 'action:44444444-4444-4444-8444-444444444444:supervisor',
+        source: 'action',
+        actionId: '44444444-4444-4444-8444-444444444444',
+        stepCode: 'supervisor',
+        stepLabel: 'หัวหน้างาน',
+        actorName: 'หัวหน้า ทดสอบ',
+        decision: 'approve',
+        note: 'อนุมัติให้ซ่อม',
+        createdAt: '2026-09-03T01:00:00.000Z',
+      },
+      {
+        key: 'legacy:55555555-5555-4555-8555-555555555555:factory_manager',
+        source: 'legacy',
+        actionId: '55555555-5555-4555-8555-555555555555',
+        stepCode: 'factory_manager',
+        stepLabel: 'ผู้จัดการโรงงาน',
+        actorName: 'ผู้จัดการโรงงานเดิม',
+        decision: 'import',
+        note: 'อนุมัติจากข้อมูลเดิม',
+        createdAt: '2026-09-03T02:00:00.000Z',
+      },
+    ])
+    updateSettingsRepairRequest.mockResolvedValue(undefined)
     listSettingsEmployees.mockResolvedValue([{
       id: '33333333-3333-4333-8333-333333333333',
       legacyUid: 'USER-073',
@@ -100,6 +135,50 @@ describe('SettingsPage', () => {
     expect(await screen.findByText('สมพล ว่องสิริชนน์')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /เพิ่มพนักงาน/ })).toBeInTheDocument()
     expect(listSettingsEmployees).toHaveBeenCalledWith('test-session-token')
+  })
+
+  it('loads and saves editable approver comments for current and legacy approval steps', async () => {
+    const user = userEvent.setup()
+    render(<SettingsPage />)
+
+    await user.type(screen.getByLabelText('Settings Password'), '1234')
+    await user.click(screen.getByRole('button', { name: /ปลดล็อก Settings/ }))
+    await screen.findByText('REQ-TEST-001')
+    await user.click(screen.getByRole('button', { name: 'แก้ไข' }))
+
+    const supervisorComment = await screen.findByLabelText('Comment หัวหน้างาน')
+    const factoryManagerComment = screen.getByLabelText('Comment ผู้จัดการโรงงาน')
+    expect(supervisorComment).toHaveValue('อนุมัติให้ซ่อม')
+    expect(factoryManagerComment).toHaveValue('อนุมัติจากข้อมูลเดิม')
+    expect(listSettingsApprovalComments).toHaveBeenCalledWith(
+      'test-session-token',
+      '22222222-2222-4222-8222-222222222222',
+    )
+
+    await user.clear(supervisorComment)
+    await user.type(supervisorComment, 'ตรวจสอบแล้ว อนุมัติให้ดำเนินการ')
+    await user.clear(factoryManagerComment)
+    await user.type(factoryManagerComment, 'อนุมัติงบประมาณตามประวัติเดิม')
+    await user.click(screen.getByRole('button', { name: 'บันทึกการแก้ไข' }))
+
+    expect(updateSettingsRepairRequest).toHaveBeenCalledWith(expect.objectContaining({
+      sessionToken: 'test-session-token',
+      requestId: '22222222-2222-4222-8222-222222222222',
+      approvalComments: [
+        {
+          source: 'action',
+          actionId: '44444444-4444-4444-8444-444444444444',
+          stepCode: 'supervisor',
+          note: 'ตรวจสอบแล้ว อนุมัติให้ดำเนินการ',
+        },
+        {
+          source: 'legacy',
+          actionId: '55555555-5555-4555-8555-555555555555',
+          stepCode: 'factory_manager',
+          note: 'อนุมัติงบประมาณตามประวัติเดิม',
+        },
+      ],
+    }))
   })
 
   it('sorts employees by USER number and shows twenty employees per page', async () => {
