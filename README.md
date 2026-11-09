@@ -4,13 +4,15 @@
 
 ## สถานะปัจจุบัน
 
-- UI ใช้ Industrial Clarity ตามแบบที่อนุมัติ
+- หน้าภายในใช้ Industrial Clarity; หน้า Login ใช้ธีมฤดูหนาวพร้อมหิมะตกและปุ่มหยุด/เปิดหิมะ
 - เชื่อม Supabase Auth, Postgres และ Private Storage แล้ว รวมถึงรูปโปรไฟล์พนักงานแบบ Private
 - Dashboard, รายการงาน, รายละเอียด, การอนุมัติ, Settings และ In-app Notification ใช้ข้อมูลจริงตาม RLS
 - นำเข้าบัญชีผู้ใช้ 73 บัญชี, ประวัติผู้ใช้ inactive 6 แถว และใบแจ้งซ่อม 32 รายการแล้ว
 - ย้ายรูปเดิม 53 ไฟล์เข้า Private Storage โดยเก็บลิงก์ Google Drive เดิมไว้
 - รูปใหม่ถูกย่อด้านยาวไม่เกิน 1,920 px และบีบอัดก่อน Upload เมื่อจำเป็น
 - Deploy ที่ `https://smetaltech27-bit.github.io/repair-request-web/`
+
+ประวัติการแก้ไขอยู่ใน [CHANGELOG.md](CHANGELOG.md) และสถานะล่าสุดสำหรับผู้รับช่วงงานอยู่ใน [docs/project-handoff.md](docs/project-handoff.md)
 
 ## Settings administration
 
