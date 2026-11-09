@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import smtLogo from '../assets/smt-logo.jpg'
+import winterBackground from '../assets/winter-login-background.png'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/ui/Button'
 
@@ -52,14 +53,21 @@ export function LoginPage() {
   }
 
   return (
-    <main className="min-h-svh min-w-0 bg-slate-50">
-      <section className="flex min-h-svh min-w-0 items-center justify-center bg-slate-50 px-4 py-8 sm:px-8 sm:py-10">
-        <div className="min-w-0 w-full max-w-lg lg:max-w-md">
-          <div className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/10 sm:p-8 lg:p-7">
+    <main className="relative isolate min-h-svh min-w-0 overflow-hidden bg-sky-100">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-cover bg-center max-sm:bg-[position:52%_center]"
+        style={{ backgroundImage: `url(${winterBackground})` }}
+      />
+      <section className="relative flex min-h-svh min-w-0 items-center justify-center px-4 py-8 sm:px-8 sm:py-10">
+        <div className="w-full min-w-0 max-w-lg lg:max-w-[34rem]">
+          <div className="min-w-0 rounded-[2rem] border border-white/80 bg-white p-5 shadow-2xl shadow-sky-900/20 sm:p-8 lg:p-9">
             <div role="group" aria-label="แบรนด์ SMT" className="flex min-w-0 items-center justify-center gap-3 sm:gap-4 lg:gap-3">
               <img
                 src={smtLogo}
                 alt="SMT"
+                width="80"
+                height="80"
                 className="size-16 shrink-0 object-contain sm:size-20 lg:size-16"
               />
               <p className="min-w-0 max-w-xs text-sm font-bold leading-snug text-slate-950 min-[360px]:text-base sm:text-xl lg:text-lg">
@@ -68,7 +76,7 @@ export function LoginPage() {
             </div>
 
             <div className="mt-7 text-center sm:mt-8 lg:mt-5">
-              <h2 className="text-3xl font-bold tracking-tight text-slate-950 lg:text-2xl">เข้าสู่ระบบ</h2>
+              <h1 className="text-3xl font-bold tracking-tight text-slate-950 lg:text-2xl">เข้าสู่ระบบ</h1>
             </div>
 
             {isDemoMode && (
@@ -86,10 +94,12 @@ export function LoginPage() {
                   id="username"
                   autoComplete="username"
                   placeholder="กรอกอีเมลหรือชื่อผู้ใช้"
-                  className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10 lg:h-10"
+                  aria-invalid={Boolean(errors.username)}
+                  aria-describedby={errors.username ? 'username-error' : undefined}
+                  className="h-12 w-full rounded-xl border border-blue-100 bg-blue-50 px-4 text-sm outline-none transition-colors placeholder:text-slate-500 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/15 lg:h-11"
                   {...register('username')}
                 />
-                {errors.username && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.username.message}</p>}
+                {errors.username && <p id="username-error" className="mt-1.5 text-xs font-medium text-red-600">{errors.username.message}</p>}
               </div>
 
               <div>
@@ -102,19 +112,21 @@ export function LoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
                     placeholder="กรอกรหัสผ่าน"
-                    className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-4 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10 lg:h-10"
+                    aria-invalid={Boolean(errors.password)}
+                    aria-describedby={errors.password ? 'password-error' : undefined}
+                    className="h-12 w-full rounded-xl border border-blue-100 bg-blue-50 pl-4 pr-12 text-sm outline-none transition-colors placeholder:text-slate-500 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/15 lg:h-11"
                     {...register('password')}
                   />
                   <button
                     type="button"
                     aria-label={showPassword ? 'ซ่อน Password' : 'แสดง Password'}
                     onClick={() => setShowPassword((value) => !value)}
-                    className="absolute right-2 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                    className="absolute right-2 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-slate-500 hover:bg-blue-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/20"
                   >
                     {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                   </button>
                 </div>
-                {errors.password && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.password.message}</p>}
+                {errors.password && <p id="password-error" className="mt-1.5 text-xs font-medium text-red-600">{errors.password.message}</p>}
               </div>
 
               <div className="-mt-1 flex items-center justify-between gap-3">
@@ -130,12 +142,12 @@ export function LoginPage() {
                       if (!checked) localStorage.removeItem(REMEMBERED_USERNAME_KEY)
                     }}
                   />
-                  <span className="relative h-5 w-9 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-teal-600 peer-focus-visible:ring-4 peer-focus-visible:ring-teal-500/20 after:absolute after:left-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-4" />
+                  <span className="relative h-5 w-9 shrink-0 rounded-full bg-slate-300 transition-colors peer-checked:bg-blue-600 peer-focus-visible:ring-4 peer-focus-visible:ring-blue-500/20 after:absolute after:left-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-4" />
                   <span>จดจำรหัสผ่าน</span>
                 </label>
                 <button
                   type="button"
-                  className="shrink-0 text-sm font-semibold text-teal-600 transition hover:text-teal-700 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-500/20"
+                  className="shrink-0 text-sm font-semibold text-blue-700 transition-colors hover:text-blue-800 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/20"
                   onClick={() => setShowForgotPasswordMessage(true)}
                 >
                   ลืมรหัสผ่าน?
@@ -143,14 +155,14 @@ export function LoginPage() {
               </div>
 
               {showForgotPasswordMessage && (
-                <p role="status" className="rounded-xl border border-teal-200 bg-teal-50 px-3 py-2.5 text-sm font-semibold text-teal-800">
+                <p role="status" className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm font-semibold text-blue-800">
                   กรุณาติดต่อฝ่ายบุคคล
                 </p>
               )}
 
               {submitError && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-700">{submitError}</p>}
 
-              <Button type="submit" size="lg" className="w-full lg:h-10 lg:text-sm" disabled={isSubmitting}>
+              <Button type="submit" size="lg" className="w-full bg-blue-600 shadow-blue-600/25 hover:bg-blue-700 focus-visible:ring-blue-500/20 lg:h-12 lg:text-sm" disabled={isSubmitting}>
                 {isSubmitting ? 'กำลังเข้าสู่ระบบ…' : 'เข้าสู่ระบบ'}
               </Button>
             </form>
@@ -160,7 +172,7 @@ export function LoginPage() {
             </p>
           </div>
 
-          <p className="mt-6 text-center text-xs text-slate-400 lg:mt-4">กรุณาติดต่อผู้ดูแลระบบหากไม่สามารถเข้าสู่ระบบได้</p>
+          <p className="mt-6 text-center text-xs font-medium text-slate-800 lg:mt-4">กรุณาติดต่อผู้ดูแลระบบหากไม่สามารถเข้าสู่ระบบได้</p>
         </div>
       </section>
     </main>
