@@ -22,7 +22,7 @@ export function LoginPage() {
   const { user, login, isDemoMode, isLoading } = useAuth()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberPassword, setRememberPassword] = useState(() => Boolean(localStorage.getItem(REMEMBERED_USERNAME_KEY)))
+  const [rememberPassword, setRememberPassword] = useState(() => Boolean(window.localStorage.getItem(REMEMBERED_USERNAME_KEY)))
   const [showForgotPasswordMessage, setShowForgotPasswordMessage] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const {
@@ -32,7 +32,7 @@ export function LoginPage() {
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: localStorage.getItem(REMEMBERED_USERNAME_KEY) ?? '',
+      username: window.localStorage.getItem(REMEMBERED_USERNAME_KEY) ?? '',
       password: '',
     },
   })
@@ -44,8 +44,8 @@ export function LoginPage() {
     setSubmitError('')
     try {
       await login(values.username, values.password)
-      if (rememberPassword) localStorage.setItem(REMEMBERED_USERNAME_KEY, values.username.trim())
-      else localStorage.removeItem(REMEMBERED_USERNAME_KEY)
+      if (rememberPassword) window.localStorage.setItem(REMEMBERED_USERNAME_KEY, values.username.trim())
+      else window.localStorage.removeItem(REMEMBERED_USERNAME_KEY)
       navigate('/', { replace: true })
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'เข้าสู่ระบบไม่สำเร็จ')
@@ -139,7 +139,7 @@ export function LoginPage() {
                     onChange={(event) => {
                       const checked = event.target.checked
                       setRememberPassword(checked)
-                      if (!checked) localStorage.removeItem(REMEMBERED_USERNAME_KEY)
+                      if (!checked) window.localStorage.removeItem(REMEMBERED_USERNAME_KEY)
                     }}
                   />
                   <span className="relative h-5 w-9 shrink-0 rounded-full bg-slate-300 transition-colors peer-checked:bg-blue-600 peer-focus-visible:ring-4 peer-focus-visible:ring-blue-500/20 after:absolute after:left-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-4" />

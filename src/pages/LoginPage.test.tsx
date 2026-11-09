@@ -20,8 +20,8 @@ function renderPage() {
 
 describe('LoginPage', () => {
   beforeEach(() => {
-    sessionStorage.clear()
-    localStorage.clear()
+    window.sessionStorage.clear()
+    window.localStorage.clear()
   })
 
   it('shows validation errors when submitted empty', async () => {
@@ -63,7 +63,7 @@ describe('LoginPage', () => {
     fireEvent.click(screen.getByLabelText('จดจำรหัสผ่าน'))
     fireEvent.click(screen.getByRole('button', { name: 'เข้าสู่ระบบ' }))
 
-    await waitFor(() => expect(localStorage.getItem('mrs-remembered-username')).toBe('employee01'))
-    expect(localStorage.length).toBe(1)
+    await waitFor(() => expect(window.localStorage.getItem('mrs-remembered-username')).toBe('employee01'))
+    expect(window.localStorage.length).toBe(1)
   })
 })
