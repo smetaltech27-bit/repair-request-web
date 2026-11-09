@@ -20,8 +20,17 @@ function renderPage() {
 
 describe('LoginPage', () => {
   beforeEach(() => {
+    const rememberedValues = new Map<string, string>()
+    const browserStorage: Storage = {
+      clear: () => rememberedValues.clear(),
+      getItem: (key) => rememberedValues.get(key) ?? null,
+      key: (index) => [...rememberedValues.keys()][index] ?? null,
+      removeItem: (key) => { rememberedValues.delete(key) },
+      setItem: (key, value) => { rememberedValues.set(key, String(value)) },
+      get length() { return rememberedValues.size },
+    }
+    Object.defineProperty(window, 'localStorage', { configurable: true, value: browserStorage })
     window.sessionStorage.clear()
-    window.localStorage.clear()
   })
 
   it('shows validation errors when submitted empty', async () => {
