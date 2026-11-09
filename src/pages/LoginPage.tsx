@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Snowflake } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Navigate, useNavigate } from 'react-router-dom'
@@ -8,6 +8,7 @@ import smtLogo from '../assets/smt-logo.jpg'
 import winterBackground from '../assets/winter-login-background.png'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/ui/Button'
+import './login-snow.css'
 
 const loginSchema = z.object({
   username: z.string().trim().min(1, 'กรุณากรอกอีเมลหรือชื่อผู้ใช้'),
@@ -17,11 +18,24 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>
 
 const REMEMBERED_USERNAME_KEY = 'mrs-remembered-username'
+const snowflakes = Array.from({ length: 36 }, (_, index) => {
+  const size = 3 + ((index * 7) % 6)
+  const duration = 11 + ((index * 5) % 9)
+  return {
+    left: `${(index * 37 + 11) % 100}%`,
+    width: `${size}px`,
+    height: `${size}px`,
+    opacity: 0.55 + ((index * 3) % 5) * 0.09,
+    animationDuration: `${duration}s`,
+    animationDelay: `-${(index * 4.7) % duration}s`,
+  }
+})
 
 export function LoginPage() {
   const { user, login, isDemoMode, isLoading } = useAuth()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
+  const [snowEnabled, setSnowEnabled] = useState(true)
   const [rememberPassword, setRememberPassword] = useState(() => Boolean(window.localStorage.getItem(REMEMBERED_USERNAME_KEY)))
   const [showForgotPasswordMessage, setShowForgotPasswordMessage] = useState(false)
   const [submitError, setSubmitError] = useState('')
@@ -59,6 +73,20 @@ export function LoginPage() {
         className="absolute inset-0 bg-cover bg-center max-sm:bg-[position:52%_center]"
         style={{ backgroundImage: `url(${winterBackground})` }}
       />
+      {snowEnabled && (
+        <div aria-hidden="true" className="login-snowfall">
+          {snowflakes.map((style, index) => <span key={index} className="login-snowflake" style={style} />)}
+        </div>
+      )}
+      <button
+        type="button"
+        aria-label={snowEnabled ? 'หยุดหิมะตก' : 'เปิดหิมะตก'}
+        aria-pressed={snowEnabled}
+        onClick={() => setSnowEnabled((enabled) => !enabled)}
+        className="absolute right-4 top-4 z-10 grid size-10 place-items-center rounded-full border border-white/80 bg-white/90 text-sky-700 shadow-md shadow-sky-900/10 transition-colors hover:bg-white hover:text-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/30 motion-reduce:hidden sm:right-6 sm:top-6"
+      >
+        <Snowflake aria-hidden="true" className="size-5" />
+      </button>
       <section className="relative flex min-h-svh min-w-0 items-center justify-center px-4 py-8 sm:px-8 sm:py-10">
         <div className="w-full min-w-0 max-w-lg lg:max-w-[34rem]">
           <div className="min-w-0 rounded-[2rem] border border-white/80 bg-white p-5 shadow-2xl shadow-sky-900/20 sm:p-8 lg:p-9">

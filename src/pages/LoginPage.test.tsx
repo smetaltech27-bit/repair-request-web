@@ -49,6 +49,9 @@ describe('LoginPage', () => {
     expect(screen.getByLabelText('รหัสผ่าน')).toHaveClass('lg:h-11')
     expect(screen.getByRole('heading', { name: 'เข้าสู่ระบบ', level: 1 })).toBeInTheDocument()
     expect(screen.getByRole('main').firstElementChild).toHaveAttribute('aria-hidden', 'true')
+    const snowfall = screen.getByRole('main').querySelector('.login-snowfall')
+    expect(snowfall).toHaveAttribute('aria-hidden', 'true')
+    expect(snowfall?.querySelectorAll('.login-snowflake')).toHaveLength(36)
     expect(screen.getByRole('button', { name: 'เข้าสู่ระบบ' })).toHaveClass('bg-blue-600')
     expect(screen.getByLabelText('จดจำรหัสผ่าน')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'ลืมรหัสผ่าน?' })).toBeInTheDocument()
@@ -63,6 +66,15 @@ describe('LoginPage', () => {
     renderPage()
     fireEvent.click(screen.getByRole('button', { name: 'ลืมรหัสผ่าน?' }))
     expect(screen.getByRole('status')).toHaveTextContent('กรุณาติดต่อฝ่ายบุคคล')
+  })
+
+  it('lets the employee pause and resume decorative snowfall', () => {
+    renderPage()
+    const main = screen.getByRole('main')
+    fireEvent.click(screen.getByRole('button', { name: 'หยุดหิมะตก' }))
+    expect(main.querySelector('.login-snowfall')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'เปิดหิมะตก' }))
+    expect(main.querySelector('.login-snowfall')).toBeInTheDocument()
   })
 
   it('remembers only the username after a successful login', async () => {

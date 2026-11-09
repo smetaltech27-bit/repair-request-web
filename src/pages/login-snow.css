@@ -1,0 +1,30 @@
+.login-snowfall {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.login-snowflake {
+  position: absolute;
+  top: -12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 4px rgb(59 130 246 / 0.28);
+  animation-name: login-snowfall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes login-snowfall {
+  from { transform: translate3d(-8px, -8svh, 0); }
+  to { transform: translate3d(16px, 110svh, 0); }
+}
+
+@media (max-width: 639px) {
+  .login-snowflake:nth-child(n + 25) { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-snowfall { display: none; }
+}
